@@ -15,45 +15,45 @@
 
 main()
 {
-    int deck[52], hand[5], freq[10];
-    int a, b, c, d, e, i, j;
+	int deck[52], hand[5], freq[10];
+	int a, b, c, d, e, i, j;
 
-    // seed the random number generator
-    srand48( getpid() );
+	// seed the random number generator
+	srand48( getpid() );
 
-    // initialize the deck
-    init_deck( deck );
+	// initialize the deck
+	init_deck( deck );
 
-    // zero out the frequency array
-    for ( i = 0; i < 10; i++ )
-        freq[i] = 0;
+	// zero out the frequency array
+	for ( i = 0; i < 10; i++ )
+		freq[i] = 0;
 
-    // loop over every possible five-card hand
-    for(a=0;a<48;a++)
-    {
-	hand[0] = deck[a];
-	for(b=a+1;b<49;b++)
+	// loop over every possible five-card hand
+	for(a=0;a<48;a++)
 	{
-	    hand[1] = deck[b];
-	    for(c=b+1;c<50;c++)
-	    {
-		hand[2] = deck[c];
-		for(d=c+1;d<51;d++)
+		hand[0] = deck[a];
+		for(b=a+1;b<49;b++)
 		{
-		    hand[3] = deck[d];
-		    for(e=d+1;e<52;e++)
-		    {
-			hand[4] = deck[e];
+			hand[1] = deck[b];
+			for(c=b+1;c<50;c++)
+			{
+				hand[2] = deck[c];
+				for(d=c+1;d<51;d++)
+				{
+					hand[3] = deck[d];
+					for(e=d+1;e<52;e++)
+					{
+						hand[4] = deck[e];
 
-			i = eval_5hand( hand );
-			j = hand_rank(i);
-			freq[j]++;
-		    }
+						i = eval_5hand_fast( hand );
+						j = hand_rank(i);
+						freq[j]++;
+					}
+				}
+			}
 		}
-	    }
 	}
-    }
 
-    for(i=1;i<=9;i++)
-	printf( "%15s: %8d\n", value_str[i], freq[i] );
+	for(i=1;i<=9;i++)
+		printf( "%15s: %8d\n", value_str[i], freq[i] );
 }
