@@ -1,5 +1,5 @@
 June 6, 2016-- 10:32 PM
-##PlAN
+##PLAN
 - By Sunday, June 12, 2016
 	- Working hand evaluator
 
@@ -19,6 +19,3 @@ June 6, 2016-- 10:32 PM
 	- each suit given unique power of 2, all anded together => if one isn't in same suite then we get 0 == false
 - cards composed of adding the suit to the rank
 - straights of ace to 5 should have an exception coded somewhere (edgecase)
-- arrays.h contains the arrays e.g., flushes and unique5, which contain the score for each hand
-- in flushes[i] == 0 then the if condition fails, otherwise we have a flush
-- we need init deck
