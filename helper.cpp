@@ -73,6 +73,7 @@ std::string hexToCard(int hex) {
 	char first, second;
 	const int rank = hex % (1 << 6);
 	const int suit = (hex >> 12) % 16;
+	std::cout << "suit: " << suit << std::endl;
 	switch (rank) {
 		case 2:
 			first = '2';
@@ -119,15 +120,24 @@ std::string hexToCard(int hex) {
 	}
 	switch(suit) {
 		case 1:
-			second = 'S';
+			second = 's';
+			break;
 		case 2:
-			second = 'H';
+			second = 'h';
+			break;
 		case 4:
-			second = 'D';
+			second = 'd';
+			break;
 		case 8:
-			second = 'C';
+			second = 'c';
+			break;
 		default:
 			return "error suit";
 			break;
 	}
+	char s[2];
+	s[0] = first;
+	s[1] = second;
+	//s[2] = '\0';
+	return (s);
 }
