@@ -1,5 +1,7 @@
 //#include <stdio.h>
 #include <iostream>
+#include <iomanip>
+#include <cstdlib>
 #include "poker.h"
 #include "helper.h"
 
@@ -58,7 +60,12 @@ int main()
 		}
 	}
 
-	for(i=1;i<=9;i++)
-		std::cout << value_str[i] << ": " << freq[i] << '\n';
+	for(i=1;i<=9;i++) {
+		const double totalComb = 2598960.0;
+		double percent = double (freq[i]) / totalComb;
+		percent *= 100.0;
+		std::cout << std::setw(20) << value_str[i] << ": " << std::setw(10) << freq[i] << "; " <<
+			std::setprecision(4) << percent << "\n";
 		//printf( "%15s: %8d\n", value_str[i], freq[i] );
+	}
 }
