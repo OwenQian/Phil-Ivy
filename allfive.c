@@ -1,4 +1,5 @@
-#include <stdio.h>
+//#include <stdio.h>
+#include <iostream>
 #include "poker.h"
 #include "helper.h"
 
@@ -14,7 +15,7 @@
 /*                                               */
 /*************************************************/
 
-extern int eval_5hand_fast(int hand[]);
+extern int eval_5hand_fast(int c1, int c2, int c3, int c4, int c5);
 int main()
 {
 	int deck[52] = {0};
@@ -48,7 +49,7 @@ int main()
 					{
 						hand[4] = deck[e];
 
-						i = eval_5hand_fast( hand );
+						i = eval_5hand_fast( hand[0], hand[1], hand[2], hand[3], hand[4] );
 						j = hand_rank(i);
 						freq[j]++;
 					}
@@ -58,5 +59,6 @@ int main()
 	}
 
 	for(i=1;i<=9;i++)
-		printf( "%15s: %8d\n", value_str[i], freq[i] );
+		std::cout << value_str[i] << ": " << freq[i] << '\n';
+		//printf( "%15s: %8d\n", value_str[i], freq[i] );
 }

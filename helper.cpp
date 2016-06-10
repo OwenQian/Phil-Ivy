@@ -176,5 +176,5 @@ int hand_rank(int i) {
 		return 7;
 	} else if (i <= 6185){
 		return 8;
-	} else {return 9};
+	} else {return 9;}
 }

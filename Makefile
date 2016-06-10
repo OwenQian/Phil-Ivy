@@ -1,8 +1,11 @@
 CC = g++
 CFLAGS = -Wall -std=c++11 -g
-OBJECTS = helper.o arrays.o fast_eval.o
+OBJECTS = helper.o arrays.o fast_eval.o allfive.o
 
-allfive: $(OBJECTS) allfive.c poker.h
+allfive: allfive.o
+	$(CC) $(CFLAGS) $(OBJECTS) -o allfive
+
+allfive.o: helper.o arrays.o fast_eval.o allfive.c poker.h
 	$(CC) $(CFLAGS) -c allfive.c
 
 fast_eval.o: fast_eval.c
