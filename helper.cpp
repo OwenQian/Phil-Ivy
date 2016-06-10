@@ -1,3 +1,6 @@
+#include <cctype>
+#include <iostream>
+
 #include "helper.h"
 
 int cardToHex(std::string s){
@@ -73,7 +76,6 @@ std::string hexToCard(int hex) {
 	char first, second;
 	const int rank = hex % (1 << 6);
 	const int suit = (hex >> 12) % 16;
-	std::cout << "suit: " << suit << std::endl;
 	switch (rank) {
 		case 2:
 			first = '2';
@@ -135,9 +137,24 @@ std::string hexToCard(int hex) {
 			return "error suit";
 			break;
 	}
-	char s[2];
+	char s[3];
 	s[0] = first;
 	s[1] = second;
-	//s[2] = '\0';
+	s[2] = '\0';
 	return (s);
+}
+
+void init_deck(int deck[]) {
+	int counter = 0;
+	const char ranks[] = {'A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K'};
+	const char suits[] = {'s', 'h', 'd', 'c'};
+	for (char i: ranks) {
+		for (char j: suits) {
+			char s[3];
+			s[0] = i;
+			s[1] = j;
+			s[2] = '\0';
+			deck[counter++] = cardToHex(s);
+		}
+	}
 }

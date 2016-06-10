@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "poker.h"
+#include "helper.h"
 
 /*************************************************/
 /*                                               */
@@ -13,9 +14,10 @@
 /*                                               */
 /*************************************************/
 
-main()
+int main()
 {
-	int deck[52], hand[5], freq[10];
+	int deck[52] = {0};
+	int hand[5], freq[10];
 	int a, b, c, d, e, i, j;
 
 	// seed the random number generator

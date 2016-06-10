@@ -1,3 +1,4 @@
+#include "fast_eval.h"
 // Paul D. Senzee's Optimized Hand Evaluator
 //   for Cactus Kev's Poker Hand Evaluator
 //
