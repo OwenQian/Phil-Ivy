@@ -11,7 +11,6 @@
 //
 // Senzee 5
 // http://senzee.blogspot.com
-
 extern short flushes[];
 extern short unique5[];
 extern unsigned short hash_adjust[];
