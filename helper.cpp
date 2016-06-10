@@ -160,5 +160,21 @@ void init_deck(int deck[]) {
 }
 
 int hand_rank(int i) {
-
+	if (i <= 10){
+		return 1;
+	} else if (i <= 166) {
+		return 2;
+	} else if (i <= 322) {
+		return 3;
+	} else if (i <= 1599) {
+		return 4;
+	} else if (i <= 1609) {
+		return 5;
+	} else if (i <= 2467){
+		return 6;
+	} else if (i <= 3325){
+		return 7;
+	} else if (i <= 6185){
+		return 8;
+	} else {return 9};
 }
