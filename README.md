@@ -1,3 +1,7 @@
+June 10, 2016-- 2:48 AM
+##TODO
+- debug why turn eval is off
+
 June 6, 2016-- 10:32 PM
 ##PLAN
 - By Sunday, June 12, 2016
