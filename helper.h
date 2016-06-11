@@ -22,9 +22,8 @@ int potentialStrength();
 
 double preflop(int ourCards[2]);
 float flop(int outCards[], int boardCards[]);
-float turn(int outCards[], int boardCards[]);
+double turn(int outCards[], int boardCards[]);
 float river(int outCards[], int boardCards[]);
-
 
 void init_pairs(std::map<int, int>& pairs);
 #endif

@@ -6,6 +6,9 @@
 
 #include "helper.h"
 
+extern int comb6[6][5];
+extern int eval_5hand_fast(int c1, int c2, int c3, int c4, int c5);
+
 int cardToHex(std::string s){
 	const char rank = toupper(s[0]);
 	const char suit = toupper(s[1]);
@@ -149,7 +152,7 @@ std::string hexToCard(int hex) {
 
 void init_deck(int deck[]) {
 	int counter = 0;
-	const char ranks[] = {'A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K'};
+	const char ranks[] = {'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'};
 	const char suits[] = {'s', 'h', 'd', 'c'};
 	for (char i: ranks) {
 		for (char j: suits) {
@@ -208,48 +211,63 @@ void init_pairs(std::map<int, int>& pairs) {
 
 double turn(int ourCards[], int boardCards[]){
 	std::vector<int> allCards;
-	allCards.data() = ourCards;
-	unsigned int ourHandRank = -1;
-	unsigned int oppHandRank = -1;
+	for (int i = 0; i < 2; ++i)
+		allCards.push_back(ourCards[i]);
+	int deck[52];
+	init_deck(deck);
+	int ourHandRank = 9999999;		//set to be higher than any hand-rank
+	int oppHandRank = 9999999;
 	int matchup[3] = {0, 0, 0};
 	for (int i = 0; i < 4; ++i){
 		allCards.push_back(boardCards[i]);
 	}
-	for (int i = 0; i < 6; ++i){
-		if (int a = eval_5hand_fast(allCards[perm6[i][0]], allCards[perm6[i][1]], allCards[perm6[i][2]], allCards[perm6[i][3]], allCards[perm6[i][4]]) < ourHandRank){
-			ourHandRank = a;
-		}
+	for (int i = 0; i < allCards.size(); ++i) {
+		std::cout << "allCards : " << hexToCard(allCards[i]) << std::endl;
+	}
+	for (int i = 0; i < 6; ++i) {
+		//find the strongest 5 card combination (lowest number)
+		ourHandRank = std::min( ourHandRank, eval_5hand_fast(allCards[comb6[i][0]], allCards[comb6[i][1]], allCards[comb6[i][2]], allCards[comb6[i][3]], allCards[comb6[i][4]]) );
+		std::cout << "ourHandRank: " <<  ourHandRank << std::endl;
 	}
 	for (int i = 0; i < 51; ++i) {
-		if (deck[i] != ourCards[0] && deck[i] != ourCards[1])
+		if (deck[i] != ourCards[0] && deck[i] != ourCards[1] && deck[i] != boardCards[0] &&
+				deck[i] != boardCards[1] && deck[i] != boardCards[2] &&
+				deck[i] != boardCards[3]
+		   )
 			allCards[0] = deck[i];
 		else 
 			continue;
 		for (int j = i + 1; j < 52; ++j) {
-			if (deck[j] != ourCards[0] && deck[j] != ourCards[1]) {
+			if (deck[j] != ourCards[0] && deck[j] != ourCards[1] && deck[j] != boardCards[0] &&
+					deck[j] != boardCards[1] && deck[j] != boardCards[2] &&
+					deck[j] != boardCards[3]
+			   ) {
 				allCards[1] = deck[j];
+				std::cout << "\n";
+				for (int z = 0; z < allCards.size(); ++z) 
+					std::cout << "allCards : " << hexToCard(allCards[z]) << std::endl;
 			}
-			oppHandRank = -1;
-			for (int k = 0; k < 6; ++k){
-		if (int a = eval_5hand_fast(allCards[perm6[k][0]], allCards[perm6[k][1]], allCards[perm6[k][2]], allCards[perm6[k][3]], allCards[perm6[k][4]]) < oppHandRank){
-			oppHandRank = a;
-		}
-	}
-			if (oppHandRank < ourHandRank){
-				matchup[1] += 1;
-			} else if (oppHandRank > ourHandRank){
+			oppHandRank = 9999999;
+			for (int k = 0; k < 6; ++k) {
+				//find the strongest 5 card combination (lowest number)
+				oppHandRank = std::min( oppHandRank, eval_5hand_fast(allCards[comb6[k][0]], allCards[comb6[k][1]], allCards[comb6[k][2]], allCards[comb6[k][3]], allCards[comb6[k][4]]) );
+			}
+			if (oppHandRank > ourHandRank){	//lower is better
 				matchup[0] += 1;
+			} else if (oppHandRank < ourHandRank){
+				matchup[1] += 1;
 			} else {
 				matchup[2] += 1;
 			}
-	}
-		
+		}
+
 	}
 	double totalComparisons = (double) matchup[0] + (double) matchup[1] + (double) matchup[2];
 	std::cout << "totalComparisons: " << totalComparisons;
 	double aheadScore = (double) matchup[0] + ((double) matchup[2] / 2.0);
 	std::cout << " aheadScore: " << aheadScore << std::endl;
 	double returnScore = aheadScore / totalComparisons;
+	std::cout << "tieScore: " << matchup[2] << std::endl;
 	return returnScore;
 }
 

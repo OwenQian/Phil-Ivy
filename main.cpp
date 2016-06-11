@@ -15,7 +15,9 @@ int main(int argc, char* argv[]) {
 	}
 	int deck[52];
 	init_deck(deck);
-	int mainourCards[2] = {cardToHex(argv[1]), cardToHex(argv[2])};
+	int ourCards[2] = {cardToHex(argv[1]), cardToHex(argv[2])};
+	int boardCards[] = {cardToHex("Tc"), cardToHex("Ad"), cardToHex("Ac"), cardToHex("Ah")};
+	turn(ourCards, boardCards);
 
-	std::cout << preflop(mainourCards) << std::endl;
+	//std::cout << preflop(mainourCards) << std::endl;
 }
