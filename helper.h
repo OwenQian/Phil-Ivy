@@ -2,6 +2,7 @@
 #define __HELPER_H
 
 #include <string>
+#include <map>
 
 //converts string card to hex equivalent
 int cardToHex(std::string s = "Ah");
@@ -13,4 +14,17 @@ void init_deck(int deck[]);
 //returns the corresponding hand, i.e., 1 for straight flush
 int hand_rank(int i);
 
+//evaluates
+int currentStrength(int ourCards[], int stage, int boardCards[] = NULL);
+//int[0] is positive potential, int[1] is negative potential
+//number of possibilities that put us ahead, or behind
+int potentialStrength();
+
+float preflop(int ourCards[]);
+float flop(int outCards[], int boardCards[]);
+float turn(int outCards[], int boardCards[]);
+float river(int outCards[], int boardCards[]);
+
+
+void init_pairs(std::map<int, int>& pairs);
 #endif

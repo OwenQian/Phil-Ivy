@@ -1,5 +1,7 @@
 #include <cctype>
 #include <iostream>
+#include <vector>
+#include <algorithm>
 
 #include "helper.h"
 
@@ -176,5 +178,30 @@ int hand_rank(int i) {
 		return 7;
 	} else if (i <= 6185){
 		return 8;
-	} else {return 9;}
+	} else
+		return 9;
+}
+
+void init_pairs(std::map<int, int>& pairs) {
+	std::vector<std::string> ranks {"As", "Ks", "Qs", "Js", "Ts", "9s", "8s", "7s", "6s", "5s", "4s", "3s", "2s"};
+	std::vector<int> intRanks;
+	std::transform(ranks.begin(), ranks.end(), back_inserter(intRanks), cardToHex);
+	for (std::vector<int>::iterator it = intRanks.begin();
+			it != intRanks.end(); ++it) {
+		*it = *it >> 16;
+		*it = *it << 1;
+	}
+
+	int strength[13];
+	for (int i = 0; i < 13; ++i) {
+		strength[i] = i + 1;
+	}
+
+	//add element to map
+	for (int i = 0; i < 13; ++i) {
+		std::pair<int, int> tempPair;
+		tempPair.first = intRanks[i];
+		tempPair.second = strength[i];
+		pairs.insert(tempPair);
+	}
 }
