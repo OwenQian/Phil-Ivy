@@ -19,5 +19,5 @@ int main(int argc, char* argv[]) {
 	int boardCards[] = {cardToHex("Tc"), cardToHex("Ad"), cardToHex("Ac"), cardToHex("Ah")};
 	turn(ourCards, boardCards);
 
-	//std::cout << preflop(mainourCards) << std::endl;
+	std::cout << turn(ourCards, boardCards) << std::endl;
 }
