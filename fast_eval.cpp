@@ -38,7 +38,7 @@ int eval_5hand_fast(int c1, int c2, int c3, int c4, int c5)
     return hash_values[find_fast((c1 & 0xff) * (c2 & 0xff) * (c3 & 0xff) * (c4 & 0xff) * (c5 & 0xff))];
 }
 
-extern unsigned short hash_adjust[] = 
+unsigned short hash_adjust[] = 
 {
     0, 5628, 7017, 1298, 2918, 2442, 8070, 6383, 6383, 7425, 2442, 5628, 8044, 7425, 3155, 6383, 
     2918, 7452, 1533, 6849, 5586, 7452, 7452, 1533, 2209, 6029, 2794, 3509, 7992, 7733, 7452, 131, 
@@ -74,7 +74,7 @@ extern unsigned short hash_adjust[] =
     1905, 2918, 4415, 7966, 7646, 2883, 5628, 7017, 8029, 6528, 4474, 6322, 5562, 6669, 4610, 7006
 };
 
-extern unsigned short hash_values[] =
+unsigned short hash_values[] =
 {
      148, 2934,  166, 5107, 4628,  166,  166,  166,  166, 3033,  166, 4692,  166, 5571, 2225,  166, 
     5340, 3423,  166, 3191, 1752,  166, 5212,  166,  166, 3520,  166,  166,  166, 1867,  166, 3313, 
