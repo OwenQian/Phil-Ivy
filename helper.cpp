@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <map>
 
 #include "helper.h"
 
@@ -182,6 +183,7 @@ int hand_rank(int i) {
 		return 9;
 }
 
+//indexed by hexRank *2
 void init_pairs(std::map<int, int>& pairs) {
 	std::vector<std::string> ranks {"As", "Ks", "Qs", "Js", "Ts", "9s", "8s", "7s", "6s", "5s", "4s", "3s", "2s"};
 	std::vector<int> intRanks;
@@ -193,15 +195,70 @@ void init_pairs(std::map<int, int>& pairs) {
 	}
 
 	int strength[13];
-	for (int i = 0; i < 13; ++i) {
-		strength[i] = i + 1;
+	for (int i = 12; i >= 0; --i) {
+		strength[12 - i] = i + 1;
 	}
 
 	//add element to map
 	for (int i = 0; i < 13; ++i) {
 		std::pair<int, int> tempPair;
-		tempPair.first = intRanks[i];
-		tempPair.second = strength[i];
-		pairs.insert(tempPair);
+		pairs.insert(std::pair<int, int>(intRanks[i], strength[i]) );
 	}
+}
+
+double preflop(int ourCards[2]) {
+	//ahead-behind-tie
+	int matchup[3] = {0, 0, 0};
+
+	int oppCards[2];
+	std::map<int, int> pairs;
+	init_pairs(pairs);
+	int ourPairCheck = (ourCards[0] >> 16) + (ourCards[1] >> 16);
+	std::cout << "ourPairCheck: " << ourPairCheck << " our pair score: " << pairs[ourPairCheck] << std::endl;
+
+	//checking if our hole cards contain a pair
+	int deck[52];
+	init_deck(deck);
+
+	//assigning opponent cards
+	for (int i = 0; i < 51; ++i) {
+		if (deck[i] != ourCards[0] && deck[i] != ourCards[1])
+			oppCards[0] = deck[i];
+		else 
+			continue;
+		for (int j = i + 1; j < 52; ++j) {
+			if (deck[j] != ourCards[0] && deck[j] != ourCards[1]) {
+				oppCards[1] = deck[j];
+				int oppPairCheck = (oppCards[0] >> 16) + (oppCards[1] >> 16);
+
+				if (pairs[ourPairCheck]) {		//if we have a pair
+					if (pairs[ourPairCheck] > pairs[oppPairCheck])
+						matchup[0] += 1;
+					else if (pairs[ourPairCheck] < pairs[oppPairCheck])
+						matchup[1] += 1;
+					else
+						matchup[2] += 1;
+				} else {		//we have a high card
+					if (pairs[oppPairCheck] != 0) {	//if opp has pair, we lose
+						matchup[1] += 1;
+					} else {
+						int ourHighCard = (ourCards[0] >> 16) + (ourCards[1] >> 16);
+						int oppHighCard = (oppCards[0] >> 16) + (oppCards[1] >> 16);
+						if (ourHighCard > oppHighCard)
+							matchup[0] += 1;
+						else if (ourHighCard < oppHighCard)
+							matchup[1] += 1;
+						else
+							matchup[2] += 1;
+					}
+				}
+			}
+		}
+	}
+	double totalComparisons = (double) matchup[0] + (double) matchup[1] + (double) matchup[2];
+	std::cout << "totalComparisons: " << totalComparisons;
+	double aheadScore = (double) matchup[0] + ((double) matchup[2] / 2.0);
+	std::cout << " aheadScore: " << aheadScore << std::endl;
+	double returnScore = aheadScore / totalComparisons;
+	return returnScore;
 }

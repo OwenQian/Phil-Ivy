@@ -3,19 +3,19 @@
 #include <map>
 #include <vector>
 #include <algorithm>
+#include <string>
 
 #include "helper.h"
 //#include <stdio.h>
 
-int main() {
-	std::map<int, int> pairs;
-	init_pairs(pairs);
-
-	std::cout << "size: " << pairs.size() << std::endl;
-
-	for (std::map<int, int>::const_iterator it = pairs.begin(); it != pairs.end(); ++it) {
-		std::cout << it->second << std::endl;
+int main(int argc, char* argv[]) {
+	if (argc < 2) {
+		argv[1] = "7s";
+		argv[2] = "2d";
 	}
-	return 0;
-}
+	int deck[52];
+	init_deck(deck);
+	int mainourCards[2] = {cardToHex(argv[1]), cardToHex(argv[2])};
 
+	std::cout << preflop(mainourCards) << std::endl;
+}

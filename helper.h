@@ -20,7 +20,7 @@ int currentStrength(int ourCards[], int stage, int boardCards[] = NULL);
 //number of possibilities that put us ahead, or behind
 int potentialStrength();
 
-float preflop(int ourCards[]);
+double preflop(int ourCards[2]);
 float flop(int outCards[], int boardCards[]);
 float turn(int outCards[], int boardCards[]);
 float river(int outCards[], int boardCards[]);
