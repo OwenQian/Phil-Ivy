@@ -206,6 +206,53 @@ void init_pairs(std::map<int, int>& pairs) {
 	}
 }
 
+double turn(int ourCards[], int boardCards[]){
+	std::vector<int> allCards;
+	allCards.data() = ourCards;
+	unsigned int ourHandRank = -1;
+	unsigned int oppHandRank = -1;
+	int matchup[3] = {0, 0, 0};
+	for (int i = 0; i < 4; ++i){
+		allCards.push_back(boardCards[i]);
+	}
+	for (int i = 0; i < 6; ++i){
+		if (int a = eval_5hand_fast(allCards[perm6[i][0]], allCards[perm6[i][1]], allCards[perm6[i][2]], allCards[perm6[i][3]], allCards[perm6[i][4]]) < ourHandRank){
+			ourHandRank = a;
+		}
+	}
+	for (int i = 0; i < 51; ++i) {
+		if (deck[i] != ourCards[0] && deck[i] != ourCards[1])
+			allCards[0] = deck[i];
+		else 
+			continue;
+		for (int j = i + 1; j < 52; ++j) {
+			if (deck[j] != ourCards[0] && deck[j] != ourCards[1]) {
+				allCards[1] = deck[j];
+			}
+			oppHandRank = -1;
+			for (int k = 0; k < 6; ++k){
+		if (int a = eval_5hand_fast(allCards[perm6[k][0]], allCards[perm6[k][1]], allCards[perm6[k][2]], allCards[perm6[k][3]], allCards[perm6[k][4]]) < oppHandRank){
+			oppHandRank = a;
+		}
+	}
+			if (oppHandRank < ourHandRank){
+				matchup[1] += 1;
+			} else if (oppHandRank > ourHandRank){
+				matchup[0] += 1;
+			} else {
+				matchup[2] += 1;
+			}
+	}
+		
+	}
+	double totalComparisons = (double) matchup[0] + (double) matchup[1] + (double) matchup[2];
+	std::cout << "totalComparisons: " << totalComparisons;
+	double aheadScore = (double) matchup[0] + ((double) matchup[2] / 2.0);
+	std::cout << " aheadScore: " << aheadScore << std::endl;
+	double returnScore = aheadScore / totalComparisons;
+	return returnScore;
+}
+
 double preflop(int ourCards[2]) {
 	//ahead-behind-tie
 	int matchup[3] = {0, 0, 0};
