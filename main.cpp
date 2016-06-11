@@ -16,8 +16,8 @@ int main(int argc, char* argv[]) {
 	int deck[52];
 	init_deck(deck);
 	int ourCards[2] = {cardToHex(argv[1]), cardToHex(argv[2])};
-	int boardCards[] = {cardToHex("Tc"), cardToHex("Ad"), cardToHex("Ac"), cardToHex("Ah")};
+	int boardCards[] = {cardToHex("Ah"), cardToHex("Ac"), cardToHex("Ad"), cardToHex("2c"), cardToHex("Th")};
 	turn(ourCards, boardCards);
 
-	std::cout << turn(ourCards, boardCards) << std::endl;
+	std::cout << flop(ourCards, boardCards) << std::endl;
 }
