@@ -19,12 +19,21 @@ int hand_rank(int i);
 double currentStrength(int ourCards[], int stage, int boardCards[] = NULL);
 //int[0] is positive potential, int[1] is negative potential
 //number of possibilities that put us ahead, or behind
-std::vector<double> potentialStrength(int ourCards[], int stage, intboardCards[]);
 
 double currentPreflop(int ourCards[2]);
-double currenFlop(int outCards[], int boardCards[]);
+double currentFlop(int outCards[], int boardCards[]);
 double currentTurn(int outCards[], int boardCards[]);
 double currentRiver(int outCards[], int boardCards[]);
+
+//used to help deal cards
+bool alreadyDealt(int dealtCards[], int beingDealt, int numOfCards = 2);
+bool alreadyDealt(std::vector<int> dealtCards, int beingDealt);
+
+//returns the score of the best hand out of perm6 or perm7
+int bestHand(int combNum, int cards[]);
+
+//std::vector<double> potentialStrength(int ourCards[], int stage, int boardCards[]);
+//std::vector<double> potentialPreFlop(int ourCards[]);
 
 void init_pairs(std::map<int, int>& pairs);
 #endif

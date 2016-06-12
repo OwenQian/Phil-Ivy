@@ -10,7 +10,51 @@ extern int comb6[6][5];
 extern int comb7[21][5];
 extern int eval_5hand_fast(int c1, int c2, int c3, int c4, int c5);
 
-int cardToHex(std::string s){
+bool alreadyDealt(int dealtCards[], int beingDealt, int numOfCards /* = 2 */) {
+	for (int i = 0; i < numOfCards; ++i) {
+		if (beingDealt == dealtCards[i]) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool alreadyDealt(std::vector<int> dealtCards, int beingDealt) {
+	for (int i: dealtCards) {
+		if (beingDealt == i) {
+			return true;
+		}
+	}
+	return false;
+}
+
+int bestHand(int combNum, int cards[]) {
+	int ret = 9999999;
+
+	if (combNum == 6) {
+		for (int i = 0; i < combNum; ++i) {
+			ret = std::min( ret,
+					eval_5hand_fast( cards[comb6[i][0]],
+					cards[comb6[i][1]],
+					cards[comb6[i][2]],
+					cards[comb6[i][3]],
+					cards[comb6[i][4]]) );
+		}
+	}
+	else if (combNum == 21) {
+		for (int i = 0; i < combNum; ++i) {
+			ret = std::min( ret,
+					eval_5hand_fast( cards[comb7[i][0]],
+					cards[comb7[i][1]],
+					cards[comb7[i][2]],
+					cards[comb7[i][3]],
+					cards[comb7[i][4]]) );
+		}
+	}
+	return ret;
+}
+
+int cardToHex(std::string s) {
 	const char rank = toupper(s[0]);
 	const char suit = toupper(s[1]);
 	int sum = 0;
@@ -210,7 +254,7 @@ void init_pairs(std::map<int, int>& pairs) {
 	}
 }
 
-double flop(int ourCards[2], int boardCards[3]) {
+double currentFlop(int ourCards[2], int boardCards[3]) {
 	int deck[52];
 	init_deck(deck);
 	int matchup[3] = {0, 0, 0};
@@ -277,7 +321,7 @@ double flop(int ourCards[2], int boardCards[3]) {
 	return returnScore;
 }
 
-double turn(int ourCards[2], int boardCards[4]) {
+double currentTurn(int ourCards[2], int boardCards[4]) {
 	int deck[52];
 	init_deck(deck);
 	int matchup[3] = {0, 0, 0};
@@ -354,7 +398,7 @@ double turn(int ourCards[2], int boardCards[4]) {
 	return returnScore;
 }
 
-double river(int ourCards[2], int boardCards[]) {
+double currentRiver(int ourCards[2], int boardCards[]) {
 	int deck[52];
 	init_deck(deck);
 	int matchup[3] = {0, 0, 0};
@@ -491,7 +535,7 @@ double currentPreflop(int ourCards[2]) {
 }
 
 
-std::vector<double> potentialPreFlop(int ourCards[]){
+std::vector<double> potentialPreFlop(int ourCards[]) {
 	int matchup[3] = {0, 0, 0};
 	int matchupPot[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
 	int index;
@@ -499,6 +543,8 @@ std::vector<double> potentialPreFlop(int ourCards[]){
 	std::map<int, int> pairs;
 	init_pairs(pairs);
 	int ourPairCheck = (ourCards[0] >> 16) + (ourCards[1] >> 16);
+	int ourHandRank = 9999999;		//set to be higher than any hand-rank
+	int oppHandRank = 9999999;
 
 	//checking if our hole cards contain a pair
 	int deck[52];
@@ -533,15 +579,75 @@ std::vector<double> potentialPreFlop(int ourCards[]){
 						else if (ourHighCard < oppHighCard)
 							index = 1;
 						else
-							index = 2
+							index = 2;
 					}
 				}
 				matchup[index] += 1;
-				
-				for (k = 0; k < 47; ++k){
-					
+
+				std::vector<int> potentialBoardCards;
+				for (int k1 = 0; k1< 47; ++k1) {
+					if ( !alreadyDealt(ourCards, deck[k1]) && !alreadyDealt(oppCards, deck[k1]) ) {
+						potentialBoardCards.push_back( deck[k1]);
+
+						for (int k2 = k1 + 1; k2 < 48; ++k2) {
+							if ( !alreadyDealt(ourCards, deck[k2]) && !alreadyDealt(oppCards, deck[k2]) ) {
+								potentialBoardCards.push_back( deck[k2] );
+
+								for (int k3 = k2 + 1; k3 < 49; ++k3) {
+									if ( !alreadyDealt(ourCards, deck[k3]) && !alreadyDealt(oppCards, deck[k3]) ) {
+										potentialBoardCards.push_back( deck[k3] );
+
+										for (int k4 = k3 + 1; k4 < 50; ++k4) {
+											if ( !alreadyDealt(ourCards, deck[k4]) && !alreadyDealt(oppCards, deck[k4]) ) {
+												potentialBoardCards.push_back(deck[k4]);
+
+												for (int k5 = k4 + 1; k5 < 51; ++k5) {
+													if ( !alreadyDealt(ourCards, deck[k5]) && !alreadyDealt(oppCards, deck[k5]) ) {
+														potentialBoardCards.push_back(deck[k5]);
+														//all the potential board cards have been dealt, compare vs. our hand
+														std::vector<int> ourAllCards = potentialBoardCards;
+														std::vector<int> oppAllCards = potentialBoardCards;
+														ourAllCards.push_back(ourCards[0]);
+														ourAllCards.push_back(ourCards[1]);
+														oppAllCards.push_back(oppCards[0]);
+														oppAllCards.push_back(oppCards[1]);
+														ourHandRank = bestHand(21, ourAllCards.data());
+														oppHandRank = bestHand(21, oppAllCards.data());
+
+														if (ourHandRank < oppHandRank) {
+															matchupPot[index][0] += 1;
+														} else if (ourHandRank > oppHandRank) {
+															matchupPot[index][1] += 1;
+														} else {
+															matchupPot[index][2] += 1;
+														}
+													} else
+														continue;
+												}
+											} else
+												continue;
+										}
+									} else
+										continue;
+								}
+							} else
+								continue;
+						}
+					} else
+						continue;
 				}
 			}
 		}
 	}
+	// behind-ahead + (tie-ahead + behind-tie) / 2
+	double pPotential = (double) matchupPot[1][0] + (( (double)matchupPot[2][0] + (double) matchupPot[1][2]) / 2.0);
+	// pPotential / behind + tie
+	pPotential = pPotential / (double) (matchup[1] + matchup[2]);
+
+	// ahead-behind + (tie-behind + ahead-tie) / 2
+	double nPotential = (double) matchupPot[0][1] + (( (double)matchupPot[2][1] + matchupPot[0][2]) / 2.0);
+	// nPotential / ahead + tie
+	nPotential = nPotential / (double) (matchup[0] + matchup[2]);
+	std::vector<double> ret(pPotential, nPotential);
+	return ret;
 }
