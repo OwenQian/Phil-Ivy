@@ -5,8 +5,8 @@ OBJECTS = helper.o arrays.o fast_eval.o allfive.o
 allfive: allfive.o
 	$(CC) $(CFLAGS) $(OBJECTS) -o allfive
 
-allfive.o: helper.o arrays.o fast_eval.o allfive.c poker.h
-	$(CC) $(CFLAGS) -c allfive.c
+allfive.o: helper.o arrays.o fast_eval.o allfive.cpp poker.h
+	$(CC) $(CFLAGS) -c allfive.cpp
 
 fast_eval.o: fast_eval.cpp
 	$(CC) $(CFLAGS) -c $<
