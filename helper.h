@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 
 //converts string card to hex equivalent
 int cardToHex(std::string s = "Ah");
@@ -15,10 +16,10 @@ void init_deck(int deck[]);
 int hand_rank(int i);
 
 //evaluates
-int currentStrength(int ourCards[], int stage, int boardCards[] = NULL);
+double currentStrength(int ourCards[], int stage, int boardCards[] = NULL);
 //int[0] is positive potential, int[1] is negative potential
 //number of possibilities that put us ahead, or behind
-int potentialStrength();
+std::vector<double> potentialStrength(int ourCards[], int stage, intboardCards[]);
 
 double currentPreflop(int ourCards[2]);
 double currenFlop(int outCards[], int boardCards[]);

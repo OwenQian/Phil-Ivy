@@ -434,7 +434,7 @@ double river(int ourCards[2], int boardCards[]) {
 	return returnScore;
 }
 
-double preflop(int ourCards[2]) {
+double currentPreflop(int ourCards[2]) {
 	//ahead-behind-tie
 	int matchup[3] = {0, 0, 0};
 
@@ -442,7 +442,6 @@ double preflop(int ourCards[2]) {
 	std::map<int, int> pairs;
 	init_pairs(pairs);
 	int ourPairCheck = (ourCards[0] >> 16) + (ourCards[1] >> 16);
-	std::cout << "ourPairCheck: " << ourPairCheck << " our pair score: " << pairs[ourPairCheck] << std::endl;
 
 	//checking if our hole cards contain a pair
 	int deck[52];
@@ -489,4 +488,60 @@ double preflop(int ourCards[2]) {
 	std::cout << " aheadScore: " << aheadScore << std::endl;
 	double returnScore = aheadScore / totalComparisons;
 	return returnScore;
+}
+
+
+std::vector<double> potentialPreFlop(int ourCards[]){
+	int matchup[3] = {0, 0, 0};
+	int matchupPot[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+	int index;
+	int oppCards[2];
+	std::map<int, int> pairs;
+	init_pairs(pairs);
+	int ourPairCheck = (ourCards[0] >> 16) + (ourCards[1] >> 16);
+
+	//checking if our hole cards contain a pair
+	int deck[52];
+	init_deck(deck);
+
+	//assigning opponent cards
+	for (int i = 0; i < 51; ++i) {
+		if (deck[i] != ourCards[0] && deck[i] != ourCards[1])
+			oppCards[0] = deck[i];
+		else 
+			continue;
+		for (int j = i + 1; j < 52; ++j) {
+			if (deck[j] != ourCards[0] && deck[j] != ourCards[1]) {
+				oppCards[1] = deck[j];
+				int oppPairCheck = (oppCards[0] >> 16) + (oppCards[1] >> 16);
+
+				if (pairs[ourPairCheck]) {		//if we have a pair
+					if (pairs[ourPairCheck] > pairs[oppPairCheck])
+						index = 0;
+					else if (pairs[ourPairCheck] < pairs[oppPairCheck])
+						index = 1;
+					else
+						index = 2;
+				} else {		//we have a high card
+					if (pairs[oppPairCheck] != 0) {	//if opp has pair, we lose
+						index = 1;
+					} else {
+						int ourHighCard = (ourCards[0] >> 16) + (ourCards[1] >> 16);
+						int oppHighCard = (oppCards[0] >> 16) + (oppCards[1] >> 16);
+						if (ourHighCard > oppHighCard)
+							index = 0;
+						else if (ourHighCard < oppHighCard)
+							index = 1;
+						else
+							index = 2
+					}
+				}
+				matchup[index] += 1;
+				
+				for (k = 0; k < 47; ++k){
+					
+				}
+			}
+		}
+	}
 }
