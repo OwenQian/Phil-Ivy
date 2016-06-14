@@ -10,14 +10,16 @@
 
 int main(int argc, char* argv[]) {
 	if (argc < 2) {
-		argv[1] = "7s";
-		argv[2] = "2d";
+		argv[1] = "Ts";
+		argv[2] = "9s";
 	}
 	int deck[52];
 	init_deck(deck);
 	int ourCards[2] = {cardToHex(argv[1]), cardToHex(argv[2])};
-	int boardCards[] = {cardToHex("Ah"), cardToHex("Ac"), cardToHex("Ad"), cardToHex("2c"), cardToHex("Th")};
-	currentTurn(ourCards, boardCards);
+	int boardCards[] = {cardToHex("8s"), cardToHex("7s"), cardToHex("Ad")};
 
-	std::cout << currentFlop(ourCards, boardCards) << std::endl;
+
+	std::cout << "ppot: " << (potentialPostFlop(ourCards, boardCards))[0] << std::endl;
+	std::cout << "npot: " << (potentialPostFlop(ourCards, boardCards))[1] << std::endl;
+
 }

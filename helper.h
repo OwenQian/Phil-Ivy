@@ -20,6 +20,9 @@ double currentStrength(int ourCards[], int stage, int boardCards[] = NULL);
 //int[0] is positive potential, int[1] is negative potential
 //number of possibilities that put us ahead, or behind
 
+std::vector<double> potentialPreFlop(int ourCards[]);
+std::vector<double> potentialPostFlop(int ourCards[], int boardCards[]);
+
 double currentPreflop(int ourCards[2]);
 double currentFlop(int outCards[], int boardCards[]);
 double currentTurn(int outCards[], int boardCards[]);

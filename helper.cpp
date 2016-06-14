@@ -535,6 +535,90 @@ double currentPreflop(int ourCards[2]) {
 }
 
 
+std::vector<double> potentialPostFlop(int ourCards[], int boardCards[]){
+	int matchup[3] = {0, 0, 0};
+	int matchupPot[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+	int index;
+	int oppCards[2];
+
+	//checking if our hole cards contain a pair
+	int deck[52];
+	init_deck(deck);
+	
+	for (int i = 0; i < 51; ++i){
+		if (deck[i] != ourCards[0] && deck[i] != ourCards[1])
+			oppCards[0] = deck[i];
+		else 
+			continue;
+		for (int j = i + 1; j < 52; ++j){
+			if (deck[j] != ourCards[0] && deck[j] != ourCards[1]) {
+				std::cout << "asdfasdf" << std::endl;
+				oppCards[1] = deck[j];
+				std::vector<int> ourHand;
+				ourHand.reserve(7);
+				ourHand.insert(ourHand.end(), ourCards, ourCards + 2 );
+				ourHand.insert(ourHand.end(), boardCards, boardCards + 3 );
+			
+				std::vector<int> oppHand;
+				oppHand.reserve(7);
+				oppHand.insert(oppHand.end(), oppCards, oppCards + 2 );
+				oppHand.insert(oppHand.end(), boardCards, boardCards + 3 );
+				
+				if (eval_5hand_fast(ourHand[1], ourHand[2],ourHand[3],ourHand[4],ourHand[0]) 
+					< eval_5hand_fast(oppHand[1], oppHand[2], oppHand[3], oppHand[4], oppHand[0])){
+					index = 0;
+				} else if (eval_5hand_fast(ourHand[1], ourHand[2],ourHand[3],ourHand[4],ourHand[0]) 
+					> eval_5hand_fast(oppHand[1], oppHand[2], oppHand[3], oppHand[4], oppHand[0])){
+					index = 1;
+				} else {
+					index = 2;
+				}
+				matchup[index] += 1;
+				std::cout << "asdfasdf" << std::endl;
+				for (int k1 = 0; k1 < 51; ++k1){
+					if ( !alreadyDealt(ourHand, deck[k1]) && !alreadyDealt(oppHand, deck[k1]) ) {
+						ourHand.push_back(deck[k1]);
+						oppHand.push_back(deck[k1]);
+						for (int k2 = k1 + 1; k2 < 52; ++k2) {
+							if ( !alreadyDealt(ourHand, deck[k2]) && !alreadyDealt(oppHand, deck[k2]) ) {
+								ourHand.push_back(deck[k2]);
+								for (int a = 0; a < 7; ++a){
+					std::cout << "card" << a << ": " << hexToCard(ourHand[a]) << std::endl;
+				}
+								oppHand.push_back(deck[k2]);
+								for (int a = 0; a < 7; ++a){
+					std::cout << "card" << a << ": " << hexToCard(oppHand[a]) << std::endl;
+				}
+								int ourhandrank = bestHand(21, ourHand.data());
+							
+								int opphandrank = bestHand(21, oppHand.data());
+								if (ourhandrank < opphandrank){
+									matchupPot[index][0] += 1;
+								} else if (ourhandrank > opphandrank){
+									matchupPot[index][1] += 1;
+								} else {
+									matchupPot[index][2] += 1;
+								}
+							}
+					}
+				}
+			}
+		}
+	}
+	}//indent
+	// behind-ahead + (tie-ahead + behind-tie) / 2
+	double pPotential = (double) matchupPot[1][0] + (( (double)matchupPot[2][0] + (double) matchupPot[1][2]) / 2.0);
+	// pPotential / behind + tie
+	pPotential = pPotential / (double) (matchup[1] + matchup[2]);
+
+	// ahead-behind + (tie-behind + ahead-tie) / 2
+	double nPotential = (double) matchupPot[0][1] + (( (double)matchupPot[2][1] + matchupPot[0][2]) / 2.0);
+	// nPotential / ahead + tie
+	nPotential = nPotential / (double) (matchup[0] + matchup[2]);
+	std::vector<double> ret(pPotential, nPotential);
+	return ret;
+}
+
 std::vector<double> potentialPreFlop(int ourCards[]) {
 	int matchup[3] = {0, 0, 0};
 	int matchupPot[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
