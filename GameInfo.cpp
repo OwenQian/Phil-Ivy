@@ -4,6 +4,7 @@
 
 class GameInfo {
 	public:
+		GameInfo() { };
 		GameInfo(int state,
 				double pot,
 				int smallBlind,
