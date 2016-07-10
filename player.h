@@ -3,13 +3,29 @@
 
 #include <vector>
 
-class Player() {
-	public:
+class Player {
+	private:
+		std::vector<int> holeCards;
+		double chips;
+		double potInvestment;
 
-	protected:
-		std::vector<int> cards;
-		int chips;
-		std::vector<int> myHistory;
-		std::vector<std::vector<int> > oppHistory;
+	public:
+		// member accessibility fcns
+		std::vector<int> getHoleCards();
+		double getChips();
+		double getPotInvestment();
+};
+
+std::vector<int> Player::getHoleCards() {
+	return holeCards;
 }
+
+double Player::getChips() {
+	return chips;
+}
+
+double Player::getPotInvestment() {
+	return potInvestment;
+}
+
 #endif

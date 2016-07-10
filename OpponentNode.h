@@ -2,17 +2,26 @@
 #define OPPONENT_NODE_H
 
 #include "Node.h"
+#include "Player.h"
 
 class OpponentNode: public Node {
 	protected:
 	public:
 		//Constructor
-		OpponentNode();
+		OpponentNode(Node* const parent, GameInfo game);
 
 		//Action functions
-		static Node fold();
-		static Node raise(double raiseAmount);
-		static Node check();
+		Node fold();
+		Node raise(double raiseAmount);
+		Node check();
 };
+
+OpponentNode::OpponentNode(Node* const parent,
+		GameInfo game):
+	parent(parent), game(game) 
+{
+	visitCount = 0;
+	isTerminal = false;
+}
 
 #endif	//OpponentNode.h

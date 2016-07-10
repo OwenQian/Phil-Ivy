@@ -1,16 +1,21 @@
 #ifndef NODE_H
 #define NODE_H
 
+#include "GameInfo.h"
+#include "Player.h"
+
 #include <vector>
 
 class Node {
 	protected:
+		static const int EV_Const = 1;
 		std::vector<Node> childList;
 		Node* const parent;
 		GameInfo game;
 		int visitCount;
 		double expectedValue;
-		bool isTerminal;	//whether or note Node is terminal
+		bool isTerminal = false;	//whether or note Node is terminal
+		double callAmount - 0;
 
 	public:
 		//member-accessibility functions
@@ -23,9 +28,32 @@ class Node {
 
 		//functions to be implemented differently for ChoiceNode and \
 		//OpponentNode
-		static virtual Node fold() = 0; 
-		static virtual Node raise(double raiseAmount) = 0;
-		static virtual Node check() = 0;
+		virtual Node fold() = 0; 
+		virtual Node raise(double raiseAmount) = 0;
+		virtual Node check() = 0;
 };
 
+	std::vector<Node> Node::getChildList() {
+		return childList;
+	}
+
+	Node* Node::getParent() {
+		return parent;
+	}
+
+	GameInfo Node::getGame() {
+		return game;
+	}
+
+	int Node::getVisitCount() {
+		return visitCount;
+	}
+
+	double Node::getExpectedValue() {
+		return expectedValue;
+	}
+
+	bool Node::getTerminalStatus() {
+		return isTerminal;
+	}
 #endif	//Node.h
