@@ -15,7 +15,7 @@ class Node {
 		int visitCount;
 		double expectedValue;
 		bool isTerminal = false;	//whether or note Node is terminal
-		double callAmount - 0;
+		double callAmount = 0;
 
 	public:
 		//member-accessibility functions
@@ -33,27 +33,4 @@ class Node {
 		virtual Node check() = 0;
 };
 
-	std::vector<Node> Node::getChildList() {
-		return childList;
-	}
-
-	Node* Node::getParent() {
-		return parent;
-	}
-
-	GameInfo Node::getGame() {
-		return game;
-	}
-
-	int Node::getVisitCount() {
-		return visitCount;
-	}
-
-	double Node::getExpectedValue() {
-		return expectedValue;
-	}
-
-	bool Node::getTerminalStatus() {
-		return isTerminal;
-	}
 #endif	//Node.h
