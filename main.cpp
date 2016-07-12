@@ -10,8 +10,8 @@
 
 int main(int argc, char* argv[]) {
 	if (argc < 2) {
-		argv[1] = "Ts";
-		argv[2] = "9s";
+		argv[1] = "Th";
+		argv[2] = "9h";
 	}
 	int deck[52];
 	init_deck(deck);
@@ -20,6 +20,7 @@ int main(int argc, char* argv[]) {
 
 
 	std::cout << "ppot: " << (potentialPostFlop(ourCards, boardCards))[0] << std::endl;
+
 	std::cout << "npot: " << (potentialPostFlop(ourCards, boardCards))[1] << std::endl;
 
 }

@@ -7,22 +7,20 @@
 
 class GameInfo {
 	protected:
-		int state;	//TODO make this enum?
-		std::vector<int> boardCards;
-		std::vector<Player> playerList;
-		double pot;
-		int smallBlind;
-		int bigBlind;
+		const int state;	//TODO make this enum?
+		const std::vector<int> boardCards;
+		const std::vector<Player> playerList;
+		const double pot;
+		const int playerTurn;
 
 	public:
 		//Constructors and Destructors
 		GameInfo();
 		GameInfo(int state,
 				double pot,
-				int smallBlind,
-				int bigBlind,
 				std::vector<int> boardCards,
 				std::vector<Player> playerList,
+				int playerTurn
 				);
 
 		// Member-accessibility functions
@@ -30,8 +28,8 @@ class GameInfo {
 		std::vector<int> getBoardCards() const;
 		std::vector<Player> getPlayerList() const;
 		double getPot() const;
-		int getSmallBlind() const;
-		int getBigBlind() const;
+		int getPlayerTurn() const;
+	
 };
 
 #endif //GameInfo.h
