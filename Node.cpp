@@ -2,26 +2,26 @@
 
 #include <vector>
 
-	std::vector<Node> Node::getChildList() {
-		return childList;
-	}
+std::vector<Node> Node::getChildList() {
+	return childList;
+}
 
-	Node* Node::getParent() {
-		return parent;
-	}
+Node* Node::getParent() {
+	return parent;
+}
 
-	GameInfo Node::getGame() {
-		return game;
-	}
+GameObject Node::getGame() {
+	return game;
+}
 
-	int Node::getVisitCount() {
-		return visitCount;
-	}
+int Node::getVisitCount() {
+	return visitCount;
+}
 
-	double Node::getExpectedValue() {
-		return expectedValue;
-	}
+double Node::getExpectedValue() {
+	return expectedValue;
+}
 
-	bool Node::getTerminalStatus() {
-		return isTerminal;
-	}
+bool Node::getTerminalStatus() {
+	return isTerminal;
+}

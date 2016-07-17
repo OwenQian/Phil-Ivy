@@ -1,8 +1,8 @@
 #include "Node.h"
-#include "GameInfo.h"
+#include "GameObject.h"
 #include "ChoiceNode.h"
 
-ChoiceNode::ChoiceNode(Node* const parent, GameInfo game):
+ChoiceNode::ChoiceNode(Node* const parent, GameObject game):
 	parent(parent), game(game)
 {
 	visitCount = 0;
@@ -20,7 +20,7 @@ ChoiceNode::ChoiceNode(Node* const parent, GameInfo game):
 }
 
 *Node ChoiceNode::check() {
-	GameInfo checkGame(game.getState() + 1,
+	GameObject checkGame(game.getState() + 1,
 			game.getPot(),
 			game.getSmallBlind(),
 			game.getBigBlind(),

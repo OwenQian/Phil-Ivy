@@ -5,7 +5,7 @@
 
 #include <vector>
 
-class GameInfo {
+class GameObject {
 	protected:
 		const int state;	//TODO make this enum?
 		const std::vector<int> boardCards;
@@ -15,8 +15,8 @@ class GameInfo {
 
 	public:
 		//Constructors and Destructors
-		GameInfo();
-		GameInfo(int state,
+		GameObject();
+		GameObject(int state,
 				double pot,
 				std::vector<int> boardCards,
 				std::vector<Player> playerList,
@@ -29,7 +29,7 @@ class GameInfo {
 		std::vector<Player> getPlayerList() const;
 		double getPot() const;
 		int getPlayerTurn() const;
-	
+
 };
 
-#endif //GameInfo.h
+#endif //GameObject.h

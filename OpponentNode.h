@@ -8,7 +8,7 @@ class OpponentNode: public Node {
 	protected:
 	public:
 		//Constructor
-		OpponentNode(Node* const parent, GameInfo game);
+		OpponentNode(Node* const parent, GameObject game);
 
 		//Action functions
 		Node fold();
@@ -17,7 +17,7 @@ class OpponentNode: public Node {
 };
 
 OpponentNode::OpponentNode(Node* const parent,
-		GameInfo game):
+		GameObject game):
 	parent(parent), game(game) 
 {
 	visitCount = 0;
