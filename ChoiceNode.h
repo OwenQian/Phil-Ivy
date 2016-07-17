@@ -1,6 +1,8 @@
 #ifndef CHOICE_NODE_H
 #define CHOICE_NODE_H
 
+#include <memory>
+
 #include "Node.h"
 #include "GameObject.h"
 
@@ -9,22 +11,22 @@ class ChoiceNode: public Node {	//inheriting from Node class
 		double invested;
 	public:
 		// Constructor
-		ChoiceNode(Node* const parent, GameObject game);
+		ChoiceNode(std::shared_ptr<Node> const parent, GameObject game);
 
 		// Action functions
-		*Node fold();
-		*Node raise(double raiseAmount);
-		*Node check();
+		std::shared_ptr<Node> fold();
+		std::shared_ptr<Node> raise(double raiseAmount);
+		std::shared_ptr<Node> check();
 
-		*Node fold() {
-			*Node foldNode = new Node();
+		std::shared_ptr<Node> fold() {
+			std::shared_ptr<Node> foldNode = new Node();
 			foldNode->isTerminal = true;
 			this->childList[0] = foldNode;
 			return foldNode;
 		}
 
-		*Node raise(double raiseAmount) {
-			*Node raiseNode = new Node(int state,
+		std::shared_ptr<Node> raise(double raiseAmount) {
+			std::shared_ptr<Node> raiseNode = new Node(int state,
 					double (pot + raiseAmount),
 					std::vector<int> boardCards,
 					std::vector<Player> playerList,
