@@ -5,26 +5,29 @@
 #include "Player.h"
 
 #include <vector>
+#include <memory>
 
-class Node: GameObject {
+class Node: public GameObject {
 	protected:
-		static const int EV_Const = 1;
-		std::vector<Node*> childList;
-		Node* const parent;
-		GameObject game;
-		int visitCount;
-		double expectedValue;
-		bool isTerminal = false;	//whether or note Node is terminal
-		double callAmount = 0;
+		//static const int EV_Const = 1;
+		std::vector<std::shared_ptr<Node> > childList; // 0 = fold, 1 = call, 2 = raise
+		std:shared_ptr<Node> const parent; //the parent of this node in the game tree
+		//GameObject game; //unsure whether it is better for node to inherit gameObject or to have 
+						   //gameObject as a field
+		int visitCount;    //number of times a node has been visited/simulated on
+		double expectedValue; 	//the expected value derived from choosing this node action, updated through backprop
+		bool isTerminal = false;	//whether or not Node is terminal
 
 	public:
 		//member-accessibility functions
 		std::vector<Node> getChildList() const;
 		Node* getParent() const;
-		GameObject getGame() const;
+		//GameObject getGame() const;
 		int getVisitCount() const;
 		double getExpectedValue() const;
 		bool getTerminalStatus() const;
+		
+		
 
 		//constructor
 		Node();
@@ -35,11 +38,11 @@ class Node: GameObject {
 				std::vector<Player> playerList,
 				int playerTurn);
 
-		//functions to be implemented differently for ChoiceNode and \
-		//OpponentNode
-		virtual Node fold() = 0; 
-		virtual Node raise(double raiseAmount) = 0;
-		virtual Node call(double callAmount = 0.0) = 0;
+		// Action functions
+		std::shared_ptr<Node> fold();
+		std::shared_ptr<Node> raise(double raiseAmount);
+		std::shared_ptr<Node> call();
+		
 
 
 		//constructor implementation
@@ -56,6 +59,26 @@ class Node: GameObject {
 					std::vector<int> boardCards,
 					std::vector<Player> playerList,
 					int playerTurn) { }
+					
+		std::shared_ptr<Node> fold() { //not sure where fold/raise/check should be located
+			std::shared_ptr<Node> foldNode(new Node)
+			foldNode->isTerminal = true;
+			this->childList[0] = foldNode;
+			return foldNode;
+		}
+
+		std::shared_ptr<Node> raise(double raiseAmount) {
+			std::shared_ptr<Node> raiseNode(new Node(int state,
+					double (pot + raiseAmount),
+					std::vector<int> boardCards,
+					std::vector<Player> playerList,
+					int ++playerTurn));
+		}
+		
+		std::shared_ptr<Node> call(){
+			
+		}
+					
 };
 
 #endif	//Node.h
