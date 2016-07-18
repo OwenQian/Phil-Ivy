@@ -8,6 +8,7 @@ class Player {
 		std::vector<int> holeCards;
 		double chips;
 		double potInvestment;
+		bool isFolded;
 
 
 	public:
@@ -15,8 +16,10 @@ class Player {
 		Player();
 		Player(std::vector<int> hcards, double c, double pi);
 		std::vector<int> getHoleCards();
-		double getChips();
-		double getPotInvestment();
+		double getChips() const;
+		double getPotInvestment() const;
+		bool getIsFolded() const;
+		void setIsFolded(bool status);
 		void setChips();
 		void setPotInvestment();
 
@@ -49,6 +52,14 @@ class Player {
 
 		void setPotInvestment(double pi){
 			potInvestment = pi;
+		}
+
+		bool getIsFolded() const{
+			return isFolded;
+		}
+
+		void setIsFolded(bool status) {
+			isFolded = status;
 		}
 };
 

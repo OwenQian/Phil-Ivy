@@ -19,7 +19,7 @@ class Node: public GameObject {
 		bool isTerminal = false;	//whether or not Node is terminal
 
 	public:
-		//member-accessibility functions
+		// Member-accessibility functions
 		std::vector<Node> getChildList() const;
 		Node* getParent() const;
 		//GameObject getGame() const;
@@ -29,9 +29,9 @@ class Node: public GameObject {
 		
 		
 
-		//constructor
+		// Constructor
 		Node();
-		
+
 		Node(int state,
 				double pot,
 				std::vector<int> boardCards,
@@ -39,13 +39,35 @@ class Node: public GameObject {
 				int playerTurn);
 
 		// Action functions
-		std::shared_ptr<Node> fold();
-		std::shared_ptr<Node> raise(double raiseAmount);
-		std::shared_ptr<Node> call();
-		
+		virtual shared_ptr<Node> fold(); 
+		virtual shared_ptr<Node> raise(double raiseAmount);
+		virtual shared_ptr<Node> call(double callAmount = 0.0);
 
 
-		//constructor implementation
+		// ##################### Start of implementation ######################
+
+		// Getter and Setter implementation
+		std::shared_ptr getParent() {
+			return parent;
+		}
+
+		int getVisitCount() {
+			return visitCount;
+		}
+
+		double getExpectedValue() {
+			return expectedValue;
+		}
+
+		bool getTerminalStatus() {
+			return isTerminal;
+		}
+
+		std::vector<Node> getChildList() {
+			return childList;
+		}
+
+		// Constructor implementation
 		Node() {
 			childList.resize(3, NULL);
 		}
@@ -59,11 +81,12 @@ class Node: public GameObject {
 					std::vector<int> boardCards,
 					std::vector<Player> playerList,
 					int playerTurn) { }
-					
-		std::shared_ptr<Node> fold() { //not sure where fold/raise/check should be located
-			std::shared_ptr<Node> foldNode(new Node)
+
+		// Action function implementation
+		std::shared_ptr<Node> fold() {
+			std::shared_ptr<Node> foldNode(new Node());   //create child foldNode
 			foldNode->isTerminal = true;
-			this->childList[0] = foldNode;
+			this->childList[0] = foldNode;                 //childList[0] holds the foldNodes
 			return foldNode;
 		}
 
@@ -72,13 +95,8 @@ class Node: public GameObject {
 					double (pot + raiseAmount),
 					std::vector<int> boardCards,
 					std::vector<Player> playerList,
-					int ++playerTurn));
+					int ++playerTurn) );
 		}
-		
-		std::shared_ptr<Node> call(){
-			
-		}
-					
 };
 
 #endif	//Node.h

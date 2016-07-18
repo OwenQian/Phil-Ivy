@@ -29,7 +29,6 @@ class GameObject {
 		std::vector<Player> getPlayerList() const;
 		double getPot() const;
 		int getPlayerTurn() const;
-
 };
 
 #endif //GameObject.h

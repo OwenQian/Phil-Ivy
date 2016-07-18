@@ -5,7 +5,8 @@
 #include "Player.h"
 
 class OpponentNode: public Node {
-	protected:
+	private:
+		double invested;
 	public:
 		//Constructor
 		OpponentNode(Node* const parent, GameObject game);
