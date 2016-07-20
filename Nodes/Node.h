@@ -28,7 +28,6 @@ class Node: public GameObject {
 		double getExpectedValue() const;
 		bool getTerminalStatus() const;
 		
-		
 
 		// Constructor
 		Node();
@@ -56,7 +55,7 @@ class Node: public GameObject {
 			return visitCount;
 		}
 		
-		int getCurrentRaise(){
+		int getCurrentRaise() const {
 			return currentRaise;
 		}
 
@@ -80,16 +79,17 @@ class Node: public GameObject {
 		Node() {
 			childList.resize(3, NULL);
 		}
-		Node(int state,
-				double pot,
-				std::vector<int> boardCards,
-				std::vector<Player> playerList,
-				int playerTurn): 
-			GameObject(int state,
-					double pot,
-					std::vector<int> boardCards,
-					std::vector<Player> playerList,
-					int playerTurn) { }
+
+		Node(	int								state,
+				double							pot,
+				std::vector<int>				boardCards,
+				std::vector<Player> 			playerList,
+				int								playerTurn) 
+		: GameObject(	int					state,
+						double				pot,
+						std::vector<int>	boardCards,
+						std::vector<Player> playerList,
+						int					playerTurn) { }
 
 		// Action function implementation
 		virtual std::shared_ptr<Node> fold() {
@@ -99,33 +99,38 @@ class Node: public GameObject {
 			return foldNode;
 		}
 		
-		virtual std::shared_ptr<Node> call() {
+		virtual std::shared_ptr<Node> call(double callAmount /* = 0 */) {
 			//creates a temporary playerlist and updates the player's potinvestment and chip count
 			std::vector<Player>tempPlayerList;
-			tempPlayerList.reserve(game.getPlayerList().size());
+			tempPlayerList.reserve(getPlayerList().size());
 			//copying the elements of current playerlist into the temp
-			std::copy(game.getPlayerList().begin(), game.getPlayerList().end(), back_inserter(tempPlayerList));
-			//updating the values
-			tempPlayerList[game.getPlayerTurn()].setChips(tempPlayerList[game.getPlayerTurn()].getChips() - currentRaise); // NOT STRAIGHT
-			tempPlayerList[game.getPlayerTurn()].setPotInvestment(tempPlayerList[game.getPlayerTurn()].getPotInvestment() + currentRaise); //GAY
+			std::copy(getPlayerList().begin(), getPlayerList().end(), back_inserter(tempPlayerList));
+			// Creating tempPlayer and updating its values
+			Player tempPlayer = tempPlayerList[getPlayerTurn()];
+			//match raise by subtracting chip amount by raise amount
+			tempPlayer.setChips(tempPlayer.getChips() - getCurrentRaise());     
+			//Increase player potinvestment
+			tempPlayer.setPotInvestment(tempPlayer.getPotInvestment() + getCurrentRaise());    
+			tempPlayerList[getPlayerTurn()] = tempPlayer;    //update tempPlayerList
 			
-			std::shared_ptr<Node> callNode(new Node(game.getState() + 1,
-					game.getPot() + currentRaise,
-					game.getSmallBlind(),
-					game.getBigBlind(),
-					game.getBoardCards(),
-					tempPlayerList));
-			
-			ChoiceNode* choiceCheck = new ChoiceNode(this, checkGame);
-			return choiceCheck;
+			// increasing state by 1, increasing pot by raiseAmount,
+			// blinds and board cards stay the same, playerList updated 
+			auto callNode = std::make_shared<Node>(getState() + 1,
+											getPot() + getCurrentRaise(),
+											getSmallBlind(),
+											getBigBlind(),
+											getBoardCards(),
+											tempPlayerList);
+			this->childList[1] = foldNode;
+			return callNode;
 		}
 
-		virtual std::shared_ptr<Node> raise(double raiseAmount) {
-			std::shared_ptr<Node> raiseNode(new Node(int state,
-					double (pot + raiseAmount),
-					std::vector<int> boardCards,
-					std::vector<Player> playerList,
-					int ++playerTurn) );
+		virtual std::shared_ptr<Node> raise(double raiseAmount /* = 0 */) {
+			auto raiseNode = std::make_shared<Node>(int					state,
+													double				(pot + raiseAmount),
+													std::vector<int>	boardCards,
+													std::vector<Player> playerList,
+													int					++playerTurn);
 		}
 };
 
