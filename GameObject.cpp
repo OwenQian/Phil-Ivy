@@ -34,4 +34,8 @@ int GameObject::getBoardCards() {
 	return bigBlind;
 }
 
+int GameObject::getPlayerTurn() const {
+	return playerTurn;
+}
+
 #endif	//GameObject.h

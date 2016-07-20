@@ -17,6 +17,7 @@ class Node: public GameObject {
 		int visitCount;    //number of times a node has been visited/simulated on
 		double expectedValue; 	//the expected value derived from choosing this node action, updated through backprop
 		bool isTerminal = false;	//whether or not Node is terminal
+		int currentRaise; //the current raise
 
 	public:
 		// Member-accessibility functions
@@ -54,6 +55,10 @@ class Node: public GameObject {
 		int getVisitCount() {
 			return visitCount;
 		}
+		
+		int getCurrentRaise(){
+			return currentRaise;
+		}
 
 		double getExpectedValue() {
 			return expectedValue;
@@ -61,6 +66,10 @@ class Node: public GameObject {
 
 		bool getTerminalStatus() {
 			return isTerminal;
+		}
+		
+		void setCurrentRaise(double amount){
+			currentRaise = amount;
 		}
 
 		std::vector<Node> getChildList() {
@@ -83,14 +92,35 @@ class Node: public GameObject {
 					int playerTurn) { }
 
 		// Action function implementation
-		std::shared_ptr<Node> fold() {
+		virtual std::shared_ptr<Node> fold() {
 			std::shared_ptr<Node> foldNode(new Node());   //create child foldNode
 			foldNode->isTerminal = true;
 			this->childList[0] = foldNode;                 //childList[0] holds the foldNodes
 			return foldNode;
 		}
+		
+		virtual std::shared_ptr<Node> call() {
+			//creates a temporary playerlist and updates the player's potinvestment and chip count
+			std::vector<Player>tempPlayerList;
+			tempPlayerList.reserve(game.getPlayerList().size());
+			//copying the elements of current playerlist into the temp
+			std::copy(game.getPlayerList().begin(), game.getPlayerList().end(), back_inserter(tempPlayerList));
+			//updating the values
+			tempPlayerList[game.getPlayerTurn()].setChips(tempPlayerList[game.getPlayerTurn()].getChips() - currentRaise); // NOT STRAIGHT
+			tempPlayerList[game.getPlayerTurn()].setPotInvestment(tempPlayerList[game.getPlayerTurn()].getPotInvestment() + currentRaise); //GAY
+			
+			std::shared_ptr<Node> callNode(new Node(game.getState() + 1,
+					game.getPot() + currentRaise,
+					game.getSmallBlind(),
+					game.getBigBlind(),
+					game.getBoardCards(),
+					tempPlayerList));
+			
+			ChoiceNode* choiceCheck = new ChoiceNode(this, checkGame);
+			return choiceCheck;
+		}
 
-		std::shared_ptr<Node> raise(double raiseAmount) {
+		virtual std::shared_ptr<Node> raise(double raiseAmount) {
 			std::shared_ptr<Node> raiseNode(new Node(int state,
 					double (pot + raiseAmount),
 					std::vector<int> boardCards,

@@ -2,13 +2,15 @@
 #define CHOICE_NODE_H
 
 #include <memory>
+#include <algorithm>
+#include <vector>
+#include <iterator>
 
 #include "Node.h"
 #include "GameObject.h"
 
 class ChoiceNode: public Node {	//inheriting from Node class
-	private:
-		double currentRaise;
+	
 	public:
 		// Constructor
 		ChoiceNode(std::shared_ptr<Node> const parent, GameObject game);
@@ -25,14 +27,28 @@ class ChoiceNode: public Node {	//inheriting from Node class
 
 //TODO make sure this function is correct
 		std::shared_ptr<Node> call() {
-			GameObject checkGame(game.getState() + 1,
-					game.getPot(),
-					game.getSmallBlind(),
-					game.getBigBlind(),
-					game.getBoardCards(),
-					game.getPlayerList());
+			//creates a temporary playerlist and updates the player's potinvestment and chip count
+			std::vector<Player>tempPlayerList;
+			tempPlayerList.reserve(game.getPlayerList().size());
+			//copying the elements of current playerlist into the temp
+			std::copy(game.getPlayerList().begin(), game.getPlayerList().end(), back_inserter(tempPlayerList));
+			//updating the values
+			tempPlayerList[getPlayerTurn()].setChips(tempPlayerList[getPlayerTurn()].getChips() - getCurrentRaise()); // NOT STRAIGHT
+			tempPlayerList[getPlayerTurn()].setPotInvestment(tempPlayerList[getPlayerTurn()].getPotInvestment() + getCurrentRaise()); //GAY
+			
+			Node checkGame(getState() + 1,
+					getPot() + getCurrentRaise(),
+					getSmallBlind(),
+					getBigBlind(),
+					getBoardCards(),
+					tempPlayerList);
+			
 			ChoiceNode* choiceCheck = new ChoiceNode(this, checkGame);
 			return choiceCheck;
+		}
+		
+		std::shared_ptr<Node> raise(double amount) {
+			
 		}
 };
 
