@@ -1,42 +1,26 @@
 #ifndef POTINFO_H
 #define POTINFO_H
 
+#include "Player.h"
+
 #include <vector>
 
 class PotInfo {
 	private:
-		std::vector<Player> playerList;
+		const std::vector<Player> playerList;
 		double potSize;
 
 	public:
+		// Constructors
 		PotInfo();
 		PotInfo(std::vector<Player> plist, double psize);
-		std::vector<Player> getPlayers();
-		double getPotSize();
-		void addPot(double amount);
 
-		PotInfo(){
-			potSize = 0;
-		}
+		// Getters
+		std::vector<Player> getPlayerList() const { return playerList; }
+		double getPotSize() const { return potSize; }
 
-		PotInfo(std::vector<Player> plist, double psize) {
-			playerList = plist;
-			potSize = psize;
-		}
-
-		std::vector<Player> getPlayers() {
-			return playerList;
-		}	
-
-		double getPotSize() {
-			return potSize;
-		}
-
-		void addPot(double amount) {
-			potSize += amount;
-		}
+		// Pot Modifier
+		void addPot(double amount) { potSize += amount; }
 };
 
 #endif
-
-

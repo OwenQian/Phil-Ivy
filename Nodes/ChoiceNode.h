@@ -16,7 +16,10 @@ class ChoiceNode: public Node {	//inheriting from Node class
 		ChoiceNode(std::shared_ptr<Node> const parent, GameObject game);
 
 // ##################### Start of Implementation ##########################
-
+		std::shared_ptr<Node> fold();
+		std::shared_ptr<Node> call();
+		std::shared_ptr<Node> raise();
+};
 		std::shared_ptr<Node> fold() {
 			std::shared_ptr<Node> foldNode(new Node() );   //create child foldNode
 			foldNode->isTerminal = true;
@@ -47,9 +50,8 @@ class ChoiceNode: public Node {	//inheriting from Node class
 			return choiceCheck;
 		}
 		
-		std::shared_ptr<Node> raise(double amount) {
+		std::shared_ptr<Node> Node::raise(double amount) {
 			
 		}
-};
 
 #endif //Node.h

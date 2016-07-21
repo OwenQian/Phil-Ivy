@@ -5,62 +5,32 @@
 
 class Player {
 	private:
-		std::vector<int> holeCards;
+		const std::vector<int> holeCards;
 		double chips;
 		double potInvestment;
 		bool isFolded;
 
-
 	public:
-		// member accessibility fcns
+
+		// Default Constructor, initialzes chips, potInvestment, isFolded
 		Player();
-		Player(std::vector<int> hcards, double c, double pi);
-		std::vector<int> getHoleCards();
-		double getChips() const;
-		double getPotInvestment() const;
-		bool getIsFolded() const;
-		void setIsFolded(bool status);
-		void setChips();
-		void setPotInvestment();
+		// Creates players with appropriate values
+		Player(std::vector<int> hcards, double chip, double pi);
+		Player(int c1, int c2, double chip, double pi);
 
-		Player(){
-			chips = 0;
-			potInvestment = 0;
-		}
+		// Member accessibility fcns
 
-		Player(std::vector<int> hcards, double c, double pi){
-			holeCards = hcards;
-			chips = c;
-			potInvestment = pi;
-		}
+		// Getters
+		std::vector<int> getHoleCards() const { return holeCards; }
+		double getChips() const { return chips; }
+		double getPotInvestment() const { return potInvestment; }
+		bool getIsFolded() const { return isFolded; }
 
-		std::vector<int> getHoleCards() {
-			return holeCards;
-		}
-
-		double getChips() {
-			return chips;
-		}
-
-		double getPotInvestment() {
-			return potInvestment;
-		}
-
-		void setChips (double chip){
-			chips = chip;
-		}
-
-		void setPotInvestment(double pi){
-			potInvestment = pi;
-		}
-
-		bool getIsFolded() const{
-			return isFolded;
-		}
-
-		void setIsFolded(bool status) {
-			isFolded = status;
-		}
+		// Setters
+		void setIsFolded(bool status) { isFolded = status; }
+		void setChips(double c) { chips = c; }
+		void setPotInvestment(double pi) { potInvestment = pi; }
+		// No setter for holeCards bc its const
 };
 
 #endif
