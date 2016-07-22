@@ -37,11 +37,11 @@ class Node: public GameObject {
 
 		// Constructors
 		Node();
-		Node(	int						state,
-				double					pot,
-				std::vector<int>		boardCards,
-				std::vector<Player>		playerList,
-				int						playerTurn);
+		Node(int                    state,
+			 double                 pot,
+			 std::vector<int>       boardCards,
+			 std::vector<Player>    playerList,
+			 int                    playerTurn);
 
 		// Action functions
 		virtual std::shared_ptr<Node> fold(); 
@@ -53,16 +53,16 @@ class Node: public GameObject {
 
 // Constructor implementation
 
-Node::Node(	int								state,
-			double							pot,
-			std::vector<int>				boardCards,
-			std::vector<Player> 			playerList,
-			int								playerTurn) :
-	GameObject(	state,
-				pot,
-				boardCards,
-				playerList,
-				playerTurn) { }
+Node::Node(int              state,
+		double              pot,
+		std::vector<int>    boardCards,
+		std::vector<Player> playerList,
+		int                 playerTurn) :
+	GameObject(state,
+			   pot,
+			   boardCards,
+			   playerList,
+			   playerTurn) { }
 
 
 // Member accessibility functions
@@ -113,10 +113,10 @@ std::shared_ptr<Node> Node::call(double callAmount) {
 
 std::shared_ptr<Node> Node::raise(double raiseAmount) {
 	auto raiseNode = std::make_shared<Node>(state,
-											pot + raiseAmount,
-											boardCards,
-											playerList,
-											playerTurn + 1);
+			                                pot + raiseAmount,
+			                                boardCards,
+			                                playerList,
+			                                playerTurn + 1);
 	raiseChild = raiseNode;
 	return raiseNode;
 }

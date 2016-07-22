@@ -18,11 +18,11 @@ class GameObject {
 	public:
 		// Constructors
 		// Doesn't make sense to have default constructor
-		GameObject( int						state,
-					double					pot,
-					std::vector<int>		boardCards,
-					std::vector<Player>		playerList,
-					int						playerTurn);
+		GameObject( int                     state,
+					double                  pot,
+					std::vector<int>        boardCards,
+					std::vector<Player>     playerList,
+					int                     playerTurn);
 
 		// Member-accessibility functions
 
