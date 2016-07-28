@@ -41,7 +41,7 @@ class Node: public GameObject {
 
 		// Constructors
 		//Node(Node);
-		Node(int                    state,
+		Node(	int                    state,
 				double                 pot,
 				std::vector<int>       boardCards,
 				std::vector<Player>    playerList,
