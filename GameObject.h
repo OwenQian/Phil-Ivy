@@ -7,8 +7,7 @@
 
 class GameObject {
 	protected:
-		// TODO make state an enum?
-		//enum state { FOLD, RAISE, CHECK }
+		enum states {PREFLOP, FLOP, TURN, RIVER};
 		const int state;
 		const std::vector<int> boardCards;
 		const std::vector<Player> playerList;
