@@ -10,11 +10,11 @@ int main() {
 	std::vector<int> v{1,2};
 	Player Max(13, 15, 1000, 0);
 	Player Owen(13, 15, 1000, 0);
-	std::vector<Player> players{Max, Owen};
 	int pTurn = 2;
 	Node n(myState,
 			myPot,
 			v,
-			players,
+			Max,
+			Owen,
 			pTurn);
 }

@@ -10,7 +10,8 @@ class GameObject {
 		enum states {PREFLOP, FLOP, TURN, RIVER};
 		const int state;
 		const std::vector<int> boardCards;
-		const std::vector<Player> playerList;
+		const Player botPlayer;
+		const Player oppPlayer;
 		const double pot;
 		const int playerTurn;
 
@@ -20,7 +21,8 @@ class GameObject {
 		GameObject( int                     state,
 					double                  pot,
 					std::vector<int>        boardCards,
-					std::vector<Player>     playerList,
+					Player					botPlayer,
+					Player					oppPlayer,
 					int                     playerTurn);
 
 		// Member-accessibility functions
@@ -28,7 +30,8 @@ class GameObject {
 		// Getters
 		int getState() const { return state; }
 		std::vector<int> getBoardCards() const { return boardCards; }
-		std::vector<Player> getPlayerList() const { return playerList; }
+		Player getBotPlayer() const { return botPlayer; }
+		Player getOppPlayer() const { return oppPlayer; }
 		double getPot() const { return pot; }
 		int getPlayerTurn() const { return playerTurn; }
 };

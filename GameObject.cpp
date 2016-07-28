@@ -3,10 +3,12 @@
 GameObject::GameObject( int                 state,
 						double              pot,
 						std::vector<int>    boardCards,
-						std::vector<Player>	playerList,
+						Player				botPlayer,
+						Player				oppPlayer,
 						int                 playerTurn) :
 	state(state),
 	pot(pot),
 	boardCards(boardCards),
-	playerList(playerList),
+	botPlayer(botPlayer),
+	oppPlayer(oppPlayer),
 	playerTurn(playerTurn) { }

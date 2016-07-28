@@ -3,23 +3,18 @@
 extern const double smallBlind;
 extern const double bigBlind;
 
-// Constructor implementation
-//Node::Node(Node n) :
-//	Node(n.state,
-//			n.pot,
-//			n.boardCards,
-//			n.playerList,
-//			n.playerTurn) { }
 
 Node::Node(int              state,
 		double              pot,
 		std::vector<int>    boardCards,
-		std::vector<Player> playerList,
+		Player				botPlayer,
+		Player				oppPlayer,
 		int                 playerTurn) :
 	GameObject(state,
 			pot,
 			boardCards,
-			playerList,
+			botPlayer,
+			oppPlayer,
 			playerTurn) { }
 
 	// Action function implementation
@@ -33,29 +28,40 @@ Node::Node(int              state,
 
 std::shared_ptr<Node> Node::call(double callAmount) {
 	//creates a temporary playerlist and updates the player's potinvestment and chip count
-	std::vector<Player>tempPlayerList = getPlayerList();
-	// Creating tempPlayer and updating its values
-	Player tempPlayer = tempPlayerList[getPlayerTurn()];
-	//match raise by subtracting chip amount by raise amount
-	//Increase player potinvestment
-	tempPlayerList[getPlayerTurn()].setChips(tempPlayer.getChips() - getCurrentRaise());    //update tempPlayerList
-	tempPlayerList[getPlayerTurn()].setPotInvestment(tempPlayer.getPotInvestment() + getCurrentRaise());    //update tempPlayerList
-	// increasing state by 1, increasing pot by raiseAmount,
-	// blinds and board cards stay the same, playerList updated 
-	auto callNode = std::make_shared<Node>( getState() + 1,
+	if (getPlayerTurn() == 0){
+		Player tempPlayer = getBotPlayer();
+		tempPlayer.setPotInvestment(callAmount + tempPlayer.getPotInvestment());
+		tempPlayer.setChips(tempPlayer.getChips() - callAmount);
+		auto callNode = std::make_shared<Node>( getState() + 1,
 			getPot() + getCurrentRaise(),
 			getBoardCards(),
-			tempPlayerList,
+			tempPlayer,
+			getOppPlayer(),
 			getPlayerTurn() + 1);
-	callChild = callNode;
-	return callNode;
+		callChild = callNode;
+
+	} else {
+		Player tempPlayer = getOppPlayer();
+		tempPlayer.setPotInvestment(callAmount + tempPlayer.getPotInvestment());
+		tempPlayer.setChips(tempPlayer.getChips() - callAmount);
+		auto callNode = std::make_shared<Node>( getState() + 1,
+			getPot() + getCurrentRaise(),
+			getBoardCards(),
+			getBotPlayer(),
+			tempPlayer,
+			getPlayerTurn() + 1);
+		callChild = callNode;
+	}
+	
+	return callChild;
 }
 
 std::shared_ptr<Node> Node::raise(double raiseAmount) {
 	auto raiseNode = std::make_shared<Node>(state,
 			pot + raiseAmount,
 			boardCards,
-			playerList,
+			botPlayer,
+			oppPlayer,
 			playerTurn + 1);
 	raiseChild = raiseNode;
 	return raiseNode;

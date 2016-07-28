@@ -3,7 +3,8 @@
 PotInfo::PotInfo() :
 	potSize(0) { }
 
-PotInfo::PotInfo(std::vector<Player> plist, double psize) :
-	playerList(plist),
+PotInfo::PotInfo(Player bPlayer, Player oPlayer, double psize) :
+	botPlayer(bPlayer),
+	oppPlayer(oPlayer),
 	potSize(psize) { }
 
