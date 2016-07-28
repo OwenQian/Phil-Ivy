@@ -7,16 +7,18 @@
 
 class PotInfo {
 	private:
-		const std::vector<Player> playerList;
+		const Player botPlayer;
+		const Player oppPlayer;
 		double potSize;
 
 	public:
 		// Constructors
 		PotInfo();
-		PotInfo(std::vector<Player> plist, double psize);
+		PotInfo(Player bPlayer, Player oPlayer, double psize);
 
 		// Getters
-		std::vector<Player> getPlayerList() const { return playerList; }
+		Player getBotPlayer() const { return botPlayer; }
+		Player getOppPlayer() const { return oppPlayer; }
 		double getPotSize() const { return potSize; }
 
 		// Pot Modifier

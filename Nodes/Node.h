@@ -44,7 +44,8 @@ class Node: public GameObject {
 		Node(int                    state,
 				double                 pot,
 				std::vector<int>       boardCards,
-				std::vector<Player>    playerList,
+				Player				   botPlayer,
+				Player				   oppPlayer,
 				int                    playerTurn);
 
 		// Action functions
