@@ -1,4 +1,5 @@
 #include <vector>
+#include <string>
 #include <algorithm>
 #include <random>		//for deck shuffling
 #include <chrono>		//for deck shuffling
@@ -158,10 +159,7 @@ std::string hexToCard(int hex) {
 			return "error suit";
 			break;
 	}
-	char s[3];
-	s[0] = first;
-	s[1] = second;
-	s[2] = '\0';
+	std::string s {first, second};
 	return (s);
 }
 
@@ -171,10 +169,7 @@ void init_deck(std::vector<int>& deck) {
 	const char suits[] = {'s', 'h', 'd', 'c'};
 	for (char i: ranks) {
 		for (char j: suits) {
-			char s[3];
-			s[0] = i;
-			s[1] = j;
-			s[2] = '\0';
+			std::string s {i, j};
 			deck.push_back(cardToHex(s));
 		}
 	}
