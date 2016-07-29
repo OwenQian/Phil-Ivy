@@ -5,15 +5,27 @@
 #include "../GameObject.h"
 
 #include <memory>		//smart pointer
-#include <vector>
 
 class ChoiceNode: public Node {	//inheriting from Node class
 	private:
-		//Made private because they're called by doFold, doCall and doRaise only
 
 	public:
 		// Constructor
-		ChoiceNode(std::shared_ptr<Node> const parent, GameObject game);
+		ChoiceNode(		std::shared_ptr<OpponentNode>	const parent,
+						int								state,
+						double							pot,
+						std::vector<int>				boardCards,
+						Player							botPlayer,
+						Player							oppPlayer,
+						int								playerTurn);
+
+		ChoiceNode(		std::shared_ptr<ChoiceNode>		const parent,
+						int								state,
+						double							pot,
+						std::vector<int>				boardCards,
+						Player							botPlayer,
+						Player							oppPlayer,
+						int								playerTurn);
 
 		// Wrapper for action functions to return correct type
 		std::shared_ptr<OpponentNode> doFold() {

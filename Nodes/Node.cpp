@@ -1,9 +1,5 @@
 #include "Node.h"
 
-extern const double smallBlind;
-extern const double bigBlind;
-
-
 Node::Node(int              state,
 		double              pot,
 		std::vector<int>    boardCards,
@@ -39,7 +35,6 @@ std::shared_ptr<Node> Node::call(double callAmount) {
 			getOppPlayer(),
 			getPlayerTurn() + 1);
 		callChild = callNode;
-
 	} else {
 		Player tempPlayer = getOppPlayer();
 		tempPlayer.setPotInvestment(callAmount + tempPlayer.getPotInvestment());
@@ -52,7 +47,6 @@ std::shared_ptr<Node> Node::call(double callAmount) {
 			getPlayerTurn() + 1);
 		callChild = callNode;
 	}
-	
 	return callChild;
 }
 

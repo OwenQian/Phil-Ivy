@@ -40,7 +40,6 @@ class Node: public GameObject {
 		void setCurrentRaise(double amount) { currentRaise = amount; }
 
 		// Constructors
-		//Node(Node);
 		Node(	int                    state,
 				double                 pot,
 				std::vector<int>       boardCards,
