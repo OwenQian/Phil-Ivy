@@ -22,6 +22,13 @@ int main() {
 	std::vector<int> boardCards;
 	
 	Node g(0, 75.0, boardCards, botPlayer, oppPlayer, 0);
-	g.call(25.0);
+	auto f = g.call(25.0);
 	
+	std::cout << "botPlayer chip count, expected 975 :" << (*f).getBotPlayer().getChips() <<std::endl;
+	std::cout << "pot chip count, expected 100 :" << (*f).getPot() <<std::endl;
+	
+	auto d = (*f).raise(500.0);
+	std::cout << "botPlayer chip count, expected 500 :" << (*d).getOppPlayer().getChips() <<std::endl;
+	std::cout << "pot chip count, expected 600 :" << (*d).getPot() <<std::endl;
+	return 0;
 }

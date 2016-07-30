@@ -37,7 +37,7 @@ class Node: public GameObject {
 		double getCurrentRaise() const { return currentRaise; }
 
 		// Setters
-		void setCurrentRaise(double amount) { currentRaise = amount; }
+		void addCurrentRaise(double amount) { currentRaise += amount; }
 
 		// Constructors
 		Node(	int                    state,

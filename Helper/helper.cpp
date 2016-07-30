@@ -18,8 +18,7 @@ std::vector<int> deal(	std::vector<int>	&previousDeck,
 			dealtCards.push_back(previousDeck.back());
 			previousDeck.pop_back();
 		}
-	}
-	else if (state == PREFLOP) {
+	} else if (state == PREFLOP) {
 		for (int i = 0; i < 3; ++i) {
 			dealtCards.push_back(previousDeck.back());
 			previousDeck.pop_back();

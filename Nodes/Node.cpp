@@ -29,7 +29,7 @@ std::shared_ptr<Node> Node::call(double callAmount) { //remove call amount later
 		tempPlayer.setPotInvestment(callAmount + tempPlayer.getPotInvestment());
 		tempPlayer.setChips(tempPlayer.getChips() - callAmount);
 		auto callNode = std::make_shared<Node>( getState() + 1,
-			getPot() + getCurrentRaise(),
+			getPot() + callAmount,
 			getBoardCards(),
 			tempPlayer,
 			getOppPlayer(),
@@ -40,7 +40,7 @@ std::shared_ptr<Node> Node::call(double callAmount) { //remove call amount later
 		tempPlayer.setPotInvestment(callAmount + tempPlayer.getPotInvestment());
 		tempPlayer.setChips(tempPlayer.getChips() - callAmount);
 		auto callNode = std::make_shared<Node>( getState() + 1,
-			getPot() + getCurrentRaise(),
+			getPot() + callAmount,
 			getBoardCards(),
 			getBotPlayer(),
 			tempPlayer,
@@ -51,12 +51,31 @@ std::shared_ptr<Node> Node::call(double callAmount) { //remove call amount later
 }
 
 std::shared_ptr<Node> Node::raise(double raiseAmount) {
-	auto raiseNode = std::make_shared<Node>(state,
-			pot + raiseAmount,
-			boardCards,
-			botPlayer,
-			oppPlayer,
-			playerTurn + 1);
-	raiseChild = raiseNode;
-	return raiseNode;
+	if (getPlayerTurn() == 0){
+		Player tempPlayer = getBotPlayer();
+		tempPlayer.setPotInvestment(raiseAmount + tempPlayer.getPotInvestment());
+		tempPlayer.setChips(tempPlayer.getChips() - raiseAmount);
+		auto raiseNode = std::make_shared<Node>( getState(),
+			getPot() + raiseAmount,
+			getBoardCards(),
+			tempPlayer,
+			getOppPlayer(),
+			getPlayerTurn() + 1);
+		(*raiseNode).addCurrentRaise(raiseAmount);
+		raiseChild = raiseNode;
+	} else {
+		Player tempPlayer = getOppPlayer();
+		tempPlayer.setPotInvestment(raiseAmount + tempPlayer.getPotInvestment());
+		tempPlayer.setChips(tempPlayer.getChips() - raiseAmount);
+		auto raiseNode = std::make_shared<Node>( getState(),
+			getPot() + raiseAmount,
+			getBoardCards(),
+			getBotPlayer(),
+			tempPlayer,
+			getPlayerTurn() + 1);
+		(*raiseNode).addCurrentRaise(raiseAmount);
+		raiseChild = raiseNode;
+	}
+	
+	return raiseChild;
 }

@@ -5,7 +5,7 @@
 #include <map>
 #include <vector>
 
-std::vector<int> deal(	std::vector<int>	previousDeck,
+std::vector<int> deal(	std::vector<int>	&previousDeck,
 						int					state);
 
 //converts string card to hex equivalent
