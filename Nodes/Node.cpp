@@ -22,7 +22,7 @@ Node::Node(int              state,
 		return foldNode;
 	}
 
-std::shared_ptr<Node> Node::call(double callAmount) {
+std::shared_ptr<Node> Node::call(double callAmount) { //remove call amount later
 	//creates a temporary playerlist and updates the player's potinvestment and chip count
 	if (getPlayerTurn() == 0){
 		Player tempPlayer = getBotPlayer();

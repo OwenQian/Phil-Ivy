@@ -6,14 +6,20 @@
 
 #include "helper.h"
 
-std::vector<int> deal(	std::vector<int>	previousDeck,
+std::vector<int> deal(	std::vector<int>	&previousDeck,
 						int					state) {
-	enum states {PREFLOP, FLOP, TURN, RIVER};
+	enum states {HOLECARDS, PREFLOP, FLOP, TURN, RIVER};
 	unsigned seed =	std::chrono::system_clock::now().time_since_epoch().count();
 	std::vector<int> dealtCards;
 	std::shuffle(previousDeck.begin(), previousDeck.end(), 
 			std::default_random_engine(seed));
-	if (state == PREFLOP) {
+	if (state == HOLECARDS){
+		for (int i = 0; i < 2; ++i){
+			dealtCards.push_back(previousDeck.back());
+			previousDeck.pop_back();
+		}
+	}
+	else if (state == PREFLOP) {
 		for (int i = 0; i < 3; ++i) {
 			dealtCards.push_back(previousDeck.back());
 			previousDeck.pop_back();
@@ -24,6 +30,8 @@ std::vector<int> deal(	std::vector<int>	previousDeck,
 	}
 	return dealtCards;
 }
+
+
 
 int cardToHex(std::string s) {
 	const char rank = toupper(s[0]);

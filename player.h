@@ -5,7 +5,7 @@
 
 class Player {
 	private:
-		const std::vector<int> holeCards;
+		std::vector<int> holeCards;
 		double chips;
 		double potInvestment;
 		bool isFolded;
@@ -27,6 +27,8 @@ class Player {
 		bool getIsFolded() const { return isFolded; }
 
 		// Setters
+		void setHoleCards(std::vector<int> hCards) { holeCards = hCards; }
+		void setHoleCards(int c1, int c2);
 		void setIsFolded(bool status) { isFolded = status; }
 		void setChips(double c) { chips = c; }
 		void setPotInvestment(double pi) { potInvestment = pi; }

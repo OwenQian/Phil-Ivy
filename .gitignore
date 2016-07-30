@@ -2,4 +2,5 @@
 *.swp
 *.swo
 *.exe
+*.stackdump
 /Notes
