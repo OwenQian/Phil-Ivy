@@ -12,11 +12,10 @@ int main() {
 	init_deck(deck);
 	double bigBlind = 50.0;
 	double smallBlind = 25.0;
-	int smallBlindPosition;
-	std::cout << "small blind position: " << std::endl;
-	std::cin >> smallBlindPosition;
+	int smallBlindPosition = 0;
 	
 	Player botPlayer(deal(deck, HOLECARDS), 1000.0, 25.0);
+	std::cout << hexToCard(botPlayer.getHoleCards()[0]) << " " << hexToCard(botPlayer.getHoleCards()[1]) << std::endl;
 	Player oppPlayer(deal(deck, HOLECARDS), 1000.0, 50.0); //update with pot investment
 	
 	std::vector<int> boardCards;

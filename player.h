@@ -35,4 +35,9 @@ class Player {
 		// No setter for holeCards bc its const
 };
 
+inline void Player::setHoleCards(int c1, int c2) {
+	std::vector<int> v{c1, c2};
+	holeCards = v;
+}
+
 #endif
