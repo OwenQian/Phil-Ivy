@@ -9,10 +9,10 @@ class GameObject {
 	protected:
 		enum states {PREFLOP, FLOP, TURN, RIVER};
 		const int state;
+		const double pot;
 		const std::vector<int> boardCards;
 		const Player botPlayer;
 		const Player oppPlayer;
-		const double pot;
 		const int playerTurn;
 
 	public:

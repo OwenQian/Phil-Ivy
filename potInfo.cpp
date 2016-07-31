@@ -7,4 +7,3 @@ PotInfo::PotInfo(Player bPlayer, Player oPlayer, double psize) :
 	botPlayer(bPlayer),
 	oppPlayer(oPlayer),
 	potSize(psize) { }
-

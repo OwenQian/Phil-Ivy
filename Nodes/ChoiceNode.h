@@ -11,21 +11,23 @@ class ChoiceNode: public Node {	//inheriting from Node class
 
 	public:
 		// Constructor
-		ChoiceNode(		std::shared_ptr<OpponentNode>	const parent,
-						int								state,
-						double							pot,
-						std::vector<int>				boardCards,
-						Player							botPlayer,
-						Player							oppPlayer,
-						int								playerTurn);
+		ChoiceNode(
+				std::shared_ptr<OpponentNode>	const parent,
+				int								state,
+				double							pot,
+				std::vector<int>				boardCards,
+				Player							botPlayer,
+				Player							oppPlayer,
+				int								playerTurn);
 
-		ChoiceNode(		std::shared_ptr<ChoiceNode>		const parent,
-						int								state,
-						double							pot,
-						std::vector<int>				boardCards,
-						Player							botPlayer,
-						Player							oppPlayer,
-						int								playerTurn);
+		ChoiceNode(
+				std::shared_ptr<ChoiceNode>		const parent,
+				int								state,
+				double							pot,
+				std::vector<int>				boardCards,
+				Player							botPlayer,
+				Player							oppPlayer,
+				int								playerTurn);
 
 		// Wrapper for action functions to return correct type
 		std::shared_ptr<OpponentNode> doFold() {
