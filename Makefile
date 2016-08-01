@@ -15,7 +15,6 @@ VPATH    = Nodes:Helper
 $(OBJDIR)/%.o: %.cpp $(INCLUDES)
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-
 # Linking of files
 main: $(OBJECTS)
 	$(CXX) $(CXXFLAGS) $^ -o $@

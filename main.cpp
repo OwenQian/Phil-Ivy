@@ -11,9 +11,9 @@ int main() {
 	enum states {HOLECARDS, PREFLOP, FLOP, TURN, RIVER};
 	std::vector<int> deck;
 	init_deck(deck);
-	double bigBlind = 50.0;
-	double smallBlind = 25.0;
-	int smallBlindPosition = 0;
+//	double bigBlind = 50.0;
+//	double smallBlind = 25.0;
+//	int smallBlindPosition = 0;
 	
 	Player botPlayer(deal(deck, HOLECARDS), 1000.0, 25.0);
 	std::cout << hexToCard(botPlayer.getHoleCards()[0]) << " " << hexToCard(botPlayer.getHoleCards()[1]) << std::endl;

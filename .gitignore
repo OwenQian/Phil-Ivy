@@ -1,6 +1,18 @@
+# Ignore all
+*
+
+# Unignore all with extensions
+!*.*
+
+# Unignroe all dirs
+!*/
+
+# Normal ignores
 *.o
 *.swp
 *.swo
 *.exe
 *.stackdump
 /Notes
+/obj
+*.DS_Store
