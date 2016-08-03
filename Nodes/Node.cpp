@@ -1,11 +1,14 @@
 #include "Node.h"
 
+#include <memory>
+
 Node::Node(int              state,
 		double              pot,
 		std::vector<int>    boardCards,
 		Player				botPlayer,
 		Player				oppPlayer,
-		int                 playerTurn) :
+		int                 playerTurn,
+		std::shared_ptr<Node> parent) :
 	GameObject(state,
 			pot,
 			boardCards,
@@ -33,7 +36,8 @@ std::shared_ptr<Node> Node::call(double callAmount) { //remove call amount later
 			getBoardCards(),
 			tempPlayer,
 			getOppPlayer(),
-			getPlayerTurn() + 1);
+			getPlayerTurn() + 1,
+			std::shared_ptr<Node> (this) );
 		callChild = callNode;
 	} else {
 		Player tempPlayer = getOppPlayer();
@@ -44,7 +48,8 @@ std::shared_ptr<Node> Node::call(double callAmount) { //remove call amount later
 			getBoardCards(),
 			getBotPlayer(),
 			tempPlayer,
-			getPlayerTurn() + 1);
+			getPlayerTurn() + 1,
+			std::shared_ptr<Node> (this) );
 		callChild = callNode;
 	}
 	return callChild;
@@ -60,7 +65,8 @@ std::shared_ptr<Node> Node::raise(double raiseAmount) {
 			getBoardCards(),
 			tempPlayer,
 			getOppPlayer(),
-			getPlayerTurn() + 1);
+			getPlayerTurn() + 1,
+			std::shared_ptr<Node> (this) );
 		(*raiseNode).addCurrentRaise(raiseAmount);
 		raiseChild = raiseNode;
 	} else {
@@ -72,7 +78,8 @@ std::shared_ptr<Node> Node::raise(double raiseAmount) {
 			getBoardCards(),
 			getBotPlayer(),
 			tempPlayer,
-			getPlayerTurn() + 1);
+			getPlayerTurn() + 1,
+			std::shared_ptr<Node> (this) );
 		(*raiseNode).addCurrentRaise(raiseAmount);
 		raiseChild = raiseNode;
 	}

@@ -14,21 +14,23 @@ class OpponentNode: public Node {
 
 	public:
 		//Constructor
-		OpponentNode(	std::shared_ptr<OpponentNode>	const parent,
+		OpponentNode(	
 						int								state,
 						double							pot,
 						std::vector<int>				boardCards,
 						Player							botPlayer,
 						Player							oppPlayer,
-						int								playerTurn);
+						int								playerTurn,
+						std::shared_ptr<OpponentNode>	const parent);
 
-		OpponentNode(	std::shared_ptr<ChoiceNode>		const parent,
+		OpponentNode(	
 						int								state,
 						double							pot,
 						std::vector<int>				boardCards,
 						Player							botPlayer,
 						Player							oppPlayer,
-						int								playerTurn);
+						int								playerTurn,
+						std::shared_ptr<ChoiceNode>		const parent);
 
 		// Wrapper for Action functions to return correct type
 		std::shared_ptr<ChoiceNode> doFold() {

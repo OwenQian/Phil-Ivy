@@ -45,7 +45,8 @@ class Node: public GameObject {
 				std::vector<int>       boardCards,
 				Player				   botPlayer,
 				Player				   oppPlayer,
-				int                    playerTurn);
+				int                    playerTurn,
+				std::shared_ptr<Node>  parent);
 
 		// Action functions
 		virtual std::shared_ptr<Node> fold(); 
