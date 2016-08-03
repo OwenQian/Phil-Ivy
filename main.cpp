@@ -24,7 +24,7 @@ int main() {
 	
 	std::vector<int> boardCards;
 	
-	Node g(0, 75.0, boardCards, botPlayer, oppPlayer, 0);
+	auto initialNode = std::make_shared<Node>(0, 75.0, boardCards, botPlayer, oppPlayer, 0, NULL);
 	auto f = g.call(25.0);
 	
 	std::cout << "botPlayer chip count, expected 975 :" << (*f).getBotPlayer().getChips() <<std::endl;

@@ -33,8 +33,8 @@ class ChoiceNode: public Node {	//inheriting from Node class
 				std::shared_ptr<ChoiceNode>		const parent);
 
 		// Wrapper for action functions to return correct type
-		std::shared_ptr<OpponentNode> doFold() {
-			return std::static_pointer_cast<OpponentNode> (fold());
+		std::shared_ptr<ChoiceNode> doFold() {
+			return std::static_pointer_cast<ChoiceNode> (fold());
 		}
 		std::shared_ptr<OpponentNode> doCall(double callAmount) {
 			return std::static_pointer_cast<OpponentNode> (call(callAmount));

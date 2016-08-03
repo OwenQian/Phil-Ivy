@@ -1,6 +1,8 @@
 #include "ChoiceNode.h"
 #include "OpponentNode.h"
 
+#include <memory>
+
 ChoiceNode::ChoiceNode(
 							int							state,
 							double						pot,
