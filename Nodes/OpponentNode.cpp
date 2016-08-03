@@ -1,3 +1,4 @@
+#include "ChoiceNode.h"
 #include "OpponentNode.h"
 
 OpponentNode::OpponentNode(		std::shared_ptr<ChoiceNode>	const parent,

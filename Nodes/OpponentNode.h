@@ -2,9 +2,12 @@
 #define OPPONENT_NODE_H
 
 #include "Node.h"
+#include "ChoiceNode.h"
 #include "../GameObject.h"
 
 #include <memory>
+
+class ChoiceNode;
 
 class OpponentNode: public Node {
 	private:
@@ -31,11 +34,11 @@ class OpponentNode: public Node {
 		std::shared_ptr<ChoiceNode> doFold() {
 			return std::static_pointer_cast<ChoiceNode> (fold());
 		}
-		std::shared_ptr<ChoiceNode> doCall() {
-			return std::static_pointer_cast<ChoiceNode> (call());
+		std::shared_ptr<ChoiceNode> doCall(double callAmount) {
+			return std::static_pointer_cast<ChoiceNode> (call(callAmount));
 		}
-		std::shared_ptr<ChoiceNode> doRaise() {
-			return std::static_pointer_cast<ChoiceNode> (raise());
+		std::shared_ptr<ChoiceNode> doRaise(double raiseAmount) {
+			return std::static_pointer_cast<ChoiceNode> (raise(raiseAmount));
 		}
 };
 

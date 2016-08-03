@@ -1,12 +1,12 @@
 CXX      = g++
 CXXFLAGS = -Wall -std=c++11
 
-SRCS     = Player.cpp GameObject.cpp potInfo.cpp main.cpp Node.cpp helper.cpp
+SRCS     = Player.cpp GameObject.cpp potInfo.cpp main.cpp Node.cpp helper.cpp ChoiceNode.cpp OpponentNode.cpp
 INCLUDES = $(wildcard *.h)
 OBJDIR   = obj
 
 # Prefixes each of the object files with obj/
-OBJECTS  = $(addprefix $(OBJDIR)/, Player.o GameObject.o potInfo.o main.o Node.o helper.o)
+OBJECTS  = $(addprefix $(OBJDIR)/, Player.o GameObject.o potInfo.o main.o Node.o helper.o ChoiceNode.o OpponentNode.o)
 
 # Directories to look for headers and src files
 VPATH    = Nodes:Helper
