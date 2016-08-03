@@ -17,7 +17,10 @@ int main() {
 	
 	Player botPlayer(deal(deck, HOLECARDS), 1000.0, 25.0);
 	std::cout << hexToCard(botPlayer.getHoleCards()[0]) << " " << hexToCard(botPlayer.getHoleCards()[1]) << std::endl;
+	std::cout << "Deck Size: " << deck.size() << std::endl;
 	Player oppPlayer(deal(deck, HOLECARDS), 1000.0, 50.0); //update with pot investment
+	std::cout << hexToCard(oppPlayer.getHoleCards()[0]) << " " << hexToCard(oppPlayer.getHoleCards()[1]) << std::endl;
+	std::cout << "Deck Size: " << deck.size() << std::endl;
 	
 	std::vector<int> boardCards;
 	
