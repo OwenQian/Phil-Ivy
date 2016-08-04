@@ -7,9 +7,10 @@
 #include <vector>
 #include <memory>
 
-class Node: public GameObject {
+class Node {
 	protected:
-		//static const int EV_Const = 1;
+		//static const int EV_Const = 1
+		GameObject game;
 		std::shared_ptr<Node> foldChild;
 		std::shared_ptr<Node> callChild;
 		std::shared_ptr<Node> raiseChild;
@@ -27,6 +28,7 @@ class Node: public GameObject {
 		// Member-accessibility functions
 
 		// Getters
+		GameObject getGame() const { return game; }
 		std::shared_ptr<Node> getFoldChild() const { return foldChild; }
 		std::shared_ptr<Node> getCallChild() const { return callChild; }
 		std::shared_ptr<Node> getRaiseChild() const { return raiseChild; }
@@ -38,7 +40,7 @@ class Node: public GameObject {
 
 		// Setters
 		void addCurrentRaise(double amount) { currentRaise += amount; }
-
+		
 		// Constructors
 		Node(	int                    state,
 				double                 pot,
