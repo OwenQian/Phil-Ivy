@@ -10,7 +10,7 @@ class GameObject {
 		enum states {PREFLOP, FLOP, TURN, RIVER};
 		const int state;
 		const double pot;
-		const std::vector<int> boardCards;
+		std::vector<int> boardCards;
 		const Player botPlayer;
 		const Player oppPlayer;
 		const int playerTurn;
@@ -34,6 +34,9 @@ class GameObject {
 		Player getOppPlayer() const { return oppPlayer; }
 		double getPot() const { return pot; }
 		int getPlayerTurn() const { return playerTurn; }
+
+		// Setter; Note: be careful about changing boardCards
+		void setBoardCards(std::vector<int> boardCards) { this->boardCards = boardCards; }
 };
 
 #endif //GameObject.h

@@ -3,13 +3,19 @@
 #include <algorithm> 	//for deck shuffling
 #include <random>		//for deck shuffling
 #include <chrono>		//for deck shuffling seed
+#include <iostream>
 
 #include "GameUtilities.h"
 #include "helper.h"
 #include "../Nodes/ChoiceNode.h"
 #include "../Nodes/OpponentNode.h"
 
-std::vector<int> deal(	std::vector<int>	&previousDeck,
+static double smallBlind = 25.0;
+static double bigBlind = 50.0;
+static int smallBlindPosition = 0;
+
+std::vector<int> deal(
+						std::vector<int>	&previousDeck,
 						int					state) {
 	enum states {HOLECARDS, PREFLOP, FLOP, TURN, RIVER};
 	unsigned seed =	std::chrono::system_clock::now().time_since_epoch().count();
@@ -46,10 +52,7 @@ void init_deck(std::vector<int>& deck) {
 }
 
 void playGame(){
-	static double bigBlind = 50.0;
-	static double smallBlind = 25.0;
 	double initialChips = 1000.0;
-	static int smallBlindPosition = 0;
 	
 	Player botPlayer(0, 0, initialChips, 0); //0, 0 represetn dummy cards
 	Player oppPlayer(0, 0, initialChips, 0);
@@ -66,35 +69,36 @@ std::vector<Player> playRound(Player botPlayer, Player oppPlayer){
 	enum states {HOLECARDS, PREFLOP, FLOP, TURN, RIVER};
 	std::vector<int> deck;
 	init_deck(deck);
-	botPlayer.setHoldCards(deal(deck, HOLECARDS));
+	botPlayer.setHoleCards(deal(deck, HOLECARDS));
 	oppPlayer.setHoleCards(deal(deck, HOLECARDS));
 	int currentStage = 0;
+	std::shared_ptr<Node> root;
 	if (smallBlindPosition == 0){
-		auto root = std::make_shared<ChoiceNode>(0, bigBlind + smallBlind, std::vector<int>(),\
+		root = std::make_shared<ChoiceNode>(0, bigBlind + smallBlind, std::vector<int>(), \
 		botPlayer, oppPlayer, smallBlindPosition, std::shared_ptr<ChoiceNode> (NULL));
 	} else if (smallBlindPosition == 1){
-		auto root = std::make_shared<OpponentNode>(0, bigBlind + smallBlind, std::vector<int>(),\
+		root = std::make_shared<OpponentNode>(0, bigBlind + smallBlind, std::vector<int>(), \
 		botPlayer, oppPlayer, smallBlindPosition, std::shared_ptr<OpponentNode> (NULL));
 	} else {
 		std::cout << "fuck owen, also why is smallblindposition not 1 or 0" << std::endl;
 		return std::vector<Player>();
 	}
-	//infers which type of node it is
+	// currentNode infers type of node from root type
 	auto currentNode = root;
-	while (currentNode != NULL) { //might ahve to be shared_ptr null
+	while (currentNode != std::shared_ptr<Node>(NULL)) { //might ahve to be shared_ptr null
 		currentNode = playTurn(currentNode);
-		if (currentStage != currentNode.getGame().getState()){
+		if (currentStage != (*currentNode).getGame().getState()){
 			currentStage++; //goes to the next stage in the game
-			std::vector<int> newBoard = deal(deck, currentStage);
+			std::vector<int> oldBoard = (*currentNode).getGame().getBoardCards();
+			std::vector<int> newCards = deal(deck, currentStage);
 			//adding current board cards to newly dealt cards
-			for (auto i = currentNode.getGame().getBoardCards().begin();
-			i != currentNode.getGame().getBoardCards().end(); ++i){
-				newBoard.push_back(*i);
+			for (auto i = newCards.begin(); i != newCards.end(); ++i){
+				oldBoard.push_back(*i);
 			}
-			currentNode.getGame().setBoardCards(newBoard); //cards are reversed in order, might mess up when we display the cards
+			(*currentNode).getGame().setBoardCards(oldBoard);
 		}
 	}
-	// currentNode.getBotPlayer or soemtihng like that
-	std::vector<Player> updatePlayers{botPlayer, oppPlayer};
+	// currentNode.getBotPlayer or something like that
+	std::vector<Player> updatePlayers{(*currentNode).getGame().getBotPlayer(), (*currentNode).getGame().getOppPlayer() };
 	return updatePlayers;
 }
