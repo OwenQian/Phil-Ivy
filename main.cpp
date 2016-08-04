@@ -3,8 +3,11 @@
 #include "Nodes/Node.h"
 #include "potInfo.h"
 #include "Helper/helper.h"
+#include "Nodes/ChoiceNode.h"
+#include "Nodes/OpponentNode.h"
 
 #include <vector>
+#include <memory>
 #include <iostream>
 
 int main() {
@@ -24,8 +27,8 @@ int main() {
 	
 	std::vector<int> boardCards;
 	
-	auto initialNode = std::make_shared<Node>(0, 75.0, boardCards, botPlayer, oppPlayer, 0, NULL);
-	auto f = g.call(25.0);
+	auto initialNode = std::make_shared<ChoiceNode>(0, 75.0, boardCards, botPlayer, oppPlayer, 0, std::shared_ptr<ChoiceNode> (NULL));
+	auto f = (*initialNode).doCall(25.0);
 	
 	std::cout << "botPlayer chip count, expected 975 :" << (*f).getBotPlayer().getChips() <<std::endl;
 	std::cout << "pot chip count, expected 100 :" << (*f).getPot() <<std::endl;

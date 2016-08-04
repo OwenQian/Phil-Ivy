@@ -1,14 +1,14 @@
 CXX      = g++
-CXXFLAGS = -Wall -std=c++11
+CXXFLAGS = -Wall -std=c++11 -g
 
 VPATH    = Nodes:Helper
 
-SRCS     = Player.cpp GameObject.cpp potInfo.cpp Node.cpp helper.cpp ChoiceNode.cpp OpponentNode.cpp
+SRCS     = Player.cpp GameObject.cpp potInfo.cpp Node.cpp helper.cpp ChoiceNode.cpp OpponentNode.cpp main.cpp
 INCLUDES = $(wildcard *.h)
 OBJDIR   = obj
 
 # Prefixes each of the object files with obj/
-OBJECTS  = $(addprefix $(OBJDIR)/, Player.o GameObject.o potInfo.o Node.o helper.o ChoiceNode.o OpponentNode.o)
+OBJECTS  = $(addprefix $(OBJDIR)/, Player.o GameObject.o potInfo.o Node.o helper.o ChoiceNode.o OpponentNode.o main.o )
 
 # Directories to look for headers and src files
 
@@ -16,7 +16,6 @@ OBJECTS  = $(addprefix $(OBJDIR)/, Player.o GameObject.o potInfo.o Node.o helper
 $(OBJDIR)/%.o: %.cpp $(INCLUDES)
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-all: $(OBJECTS)
 # Linking of files
-# main: $(OBJECTS)
-# 	$(CXX) $(CXXFLAGS) $^ -o $@
+main: $(OBJECTS)
+	$(CXX) $(CXXFLAGS) $^ -o $@

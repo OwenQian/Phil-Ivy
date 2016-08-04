@@ -14,7 +14,8 @@ Node::Node(int              state,
 			boardCards,
 			botPlayer,
 			oppPlayer,
-			playerTurn) { }
+			playerTurn),
+	parent(parent) { }
 
 	// Action function implementation
 	std::shared_ptr<Node> Node::fold() {
