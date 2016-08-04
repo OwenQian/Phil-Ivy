@@ -15,6 +15,8 @@ void init_deck(std::vector<int>& deck);
 
 void playGame(); 
 std::vector<Player> playRound(Player botPlayer, Player oppPlayer); 
-std::shared_ptr<Node> playTurn(std::shared_ptr<Node> currentNode);
+std::shared_ptr<ChoiceNode> playTurn(std::shared_ptr<ChoiceNode> currentNode);
+std::shared_ptr<OpponentNode> playTurn(std::shared_ptr<OpponentNode> currentNode);
+std::shared_ptr<AllInNode> playTurn(std::shared_ptr<AllInNode> currentNode);
 
 #endif

@@ -102,3 +102,17 @@ std::vector<Player> playRound(Player botPlayer, Player oppPlayer){
 	std::vector<Player> updatePlayers{(*currentNode).getGame().getBotPlayer(), (*currentNode).getGame().getOppPlayer() };
 	return updatePlayers;
 }
+
+std::shared_ptr<ChoiceNode> playTurn(std::shared_ptr<ChoiceNode> currentNode) {
+	Decision = bot.decideAction();
+	return std::shared_ptr<ChoiceNode>(NULL);
+}
+
+std::shared_ptr<OpponentNode> playTurn(std::shared_ptr<OpponentNode> currentNode) {
+	return std::shared_ptr<OpponentNode>(NULL);
+}
+
+// Won't compile bc AllInNode isn't defined
+std::shared_ptr<AllInNode> playTurn(std::shared_ptr<AllInNode> currentNode) {
+	return std::shared_ptr<AllInNode>(NULL);
+}
