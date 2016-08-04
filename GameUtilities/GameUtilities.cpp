@@ -42,3 +42,19 @@ void init_deck(std::vector<int>& deck) {
 		}
 	}
 }
+
+void playGame(){
+	double bigBlind = 50.0;
+	double smallBlind = 25.0;
+	double initialChips = 1000.0;
+	int smallBlindPosition = 0;
+	
+	Player botPlayer(0, 0, initialChips, 0); //0, 0 represetn dummy cards
+	Player oppPlayer(0, 0, initialChips, 0);
+	
+	while (botPlayer.getChips() && oppPlayer.getChips()){ // while both players have chips
+		std::vector<Player> updatePlayers = playRound (botPlayer, oppPlayer);
+		botPlayer = updatePlayers[0];
+		oppPlayer = updatePlayers[1];
+	}
+}
