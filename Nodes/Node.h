@@ -23,6 +23,10 @@ class Node {
 		bool isTerminal;	        //whether or not Node is terminal
 		bool isAllIn;				//only true when accepted
 
+		// Action functions
+		std::shared_ptr<Node> doFold(); 
+		std::shared_ptr<Node> doRaise(double);
+		std::shared_ptr<Node> doCall();
 	public:
 		// Member-accessibility functions
 
@@ -48,11 +52,6 @@ class Node {
 				Player				   oppPlayer,
 				int                    playerTurn,
 				std::shared_ptr<Node>  parent);
-
-		// Action functions
-		virtual std::shared_ptr<Node> fold(); 
-		virtual std::shared_ptr<Node> raise(double);
-		virtual std::shared_ptr<Node> call();
 };
 
 #endif	//Node.h

@@ -21,7 +21,7 @@ Node::Node(int              state,
 	isAllIn(false) { }
 
 	// Action function implementation
-	std::shared_ptr<Node> Node::fold() {
+	std::shared_ptr<Node> Node::doFold() {
 		//create child foldNode
 		std::shared_ptr<Node> foldNode(new Node(*this));
 		foldNode->isTerminal = true;
@@ -29,7 +29,7 @@ Node::Node(int              state,
 		return foldNode;
 	}
 
-std::shared_ptr<Node> Node::call() {
+std::shared_ptr<Node> Node::doCall() {
 	//creates a temporary playerlist and updates the player's potinvestment and chip count
 	if (game.getPlayerTurn() == 0) {
 		Player tempPlayer = game.getBotPlayer();
@@ -72,7 +72,7 @@ std::shared_ptr<Node> Node::call() {
 }
 
 // raiseAmount means amount raising to, NOT raising by
-std::shared_ptr<Node> Node::raise(double raiseAmount) {
+std::shared_ptr<Node> Node::doRaise(double raiseAmount) {
 	// if raise all-in (or more) create AllInNode
 	if (raiseAmount >= game.getBotPlayer().getChips() ||
 			raiseAmount >= game.getOppPlayer().getChips() ) {
