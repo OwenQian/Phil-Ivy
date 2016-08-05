@@ -5,7 +5,8 @@
 #include <memory>
 
 class Player;
-class Node;
+class ChoiceNode;
+class OpponentNode;
 
 std::vector<int> deal(
 						std::vector<int>	&previousDeck,
@@ -17,6 +18,5 @@ void playGame();
 std::vector<Player> playRound(Player botPlayer, Player oppPlayer); 
 std::shared_ptr<ChoiceNode> playTurn(std::shared_ptr<ChoiceNode> currentNode);
 std::shared_ptr<OpponentNode> playTurn(std::shared_ptr<OpponentNode> currentNode);
-std::shared_ptr<AllInNode> playTurn(std::shared_ptr<AllInNode> currentNode);
 
 #endif

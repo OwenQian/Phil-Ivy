@@ -36,8 +36,8 @@ class OpponentNode: public Node {
 		std::shared_ptr<OpponentNode> doFold() {
 			return std::static_pointer_cast<OpponentNode> (fold());
 		}
-		std::shared_ptr<ChoiceNode> doCall(double callAmount) {
-			return std::static_pointer_cast<ChoiceNode> (call(callAmount));
+		std::shared_ptr<ChoiceNode> doCall() {
+			return std::static_pointer_cast<ChoiceNode> (call());
 		}
 		std::shared_ptr<ChoiceNode> doRaise(double raiseAmount) {
 			return std::static_pointer_cast<ChoiceNode> (raise(raiseAmount));

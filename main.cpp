@@ -15,9 +15,6 @@ int main() {
 	enum states {HOLECARDS, PREFLOP, FLOP, TURN, RIVER};
 	std::vector<int> deck;
 	init_deck(deck);
-//	double bigBlind = 50.0;
-//	double smallBlind = 25.0;
-//	int smallBlindPosition = 0;
 	
 	Player botPlayer(deal(deck, HOLECARDS), 1000.0, 25.0);
 	std::cout << hexToCard(botPlayer.getHoleCards()[0]) << " " << hexToCard(botPlayer.getHoleCards()[1]) << std::endl;
@@ -29,13 +26,14 @@ int main() {
 	std::vector<int> boardCards;
 	
 	auto initialNode = std::make_shared<ChoiceNode>(0, 75.0, boardCards, botPlayer, oppPlayer, 0, std::shared_ptr<ChoiceNode> (NULL));
-	auto f = (*initialNode).doCall(25.0);
+	auto f = (*initialNode).doRaise(5000.0);
+	std::cout << "currentRaise amount: " << (*f).getCurrentRaise() << std::endl;
+	auto g = (*f).doCall();
+	std::cout << "currentRaise amount: " << (*g).getCurrentRaise() << std::endl;
+	std::cout << "Player Turn: " << (*f).getGame().getPlayerTurn() << std::endl;
+	std::cout << "Player Turn: " << (*g).getGame().getPlayerTurn() << std::endl;
+	std::cout << (*f).getIsAllIn() << std::endl;
+	std::cout << (*g).getIsAllIn() << std::endl;
 	
-	std::cout << "botPlayer chip count, expected 975 :" << (*f).getGame().getBotPlayer().getChips() <<std::endl;
-	std::cout << "pot chip count, expected 100 :" << (*f).getGame().getPot() <<std::endl;
-	
-	auto d = (*f).raise(500.0);
-	std::cout << "botPlayer chip count, expected 500 :" << (*d).getGame().getOppPlayer().getChips() <<std::endl;
-	std::cout << "pot chip count, expected 600 :" << (*d).getGame().getPot() <<std::endl;
 	return 0;
 }

@@ -10,6 +10,9 @@
 #include "../Nodes/ChoiceNode.h"
 #include "../Nodes/OpponentNode.h"
 
+class ChoiceNode;
+class OpponentNode;
+
 static double smallBlind = 25.0;
 static double bigBlind = 50.0;
 static int smallBlindPosition = 0;
@@ -86,7 +89,7 @@ std::vector<Player> playRound(Player botPlayer, Player oppPlayer){
 	// currentNode infers type of node from root type
 	auto currentNode = root;
 	while (currentNode != std::shared_ptr<Node>(NULL)) { //might ahve to be shared_ptr null
-		currentNode = playTurn(currentNode);
+		//currentNode = playTurn(currentNode);
 		if (currentStage != (*currentNode).getGame().getState()){
 			currentStage++; //goes to the next stage in the game
 			std::vector<int> oldBoard = (*currentNode).getGame().getBoardCards();
@@ -103,16 +106,15 @@ std::vector<Player> playRound(Player botPlayer, Player oppPlayer){
 	return updatePlayers;
 }
 
+std::shared_ptr<Node> playTurn(std::shared_ptr<Node> currentNode) {
+	return std::shared_ptr<Node>(NULL);
+}
+
 std::shared_ptr<ChoiceNode> playTurn(std::shared_ptr<ChoiceNode> currentNode) {
-	Decision = bot.decideAction();
+	//Decision = bot.decideAction();
 	return std::shared_ptr<ChoiceNode>(NULL);
 }
 
 std::shared_ptr<OpponentNode> playTurn(std::shared_ptr<OpponentNode> currentNode) {
 	return std::shared_ptr<OpponentNode>(NULL);
-}
-
-// Won't compile bc AllInNode isn't defined
-std::shared_ptr<AllInNode> playTurn(std::shared_ptr<AllInNode> currentNode) {
-	return std::shared_ptr<AllInNode>(NULL);
 }
