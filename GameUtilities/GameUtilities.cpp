@@ -9,6 +9,7 @@
 #include "helper.h"
 #include "../Nodes/ChoiceNode.h"
 #include "../Nodes/OpponentNode.h"
+#include "../Stage.h"
 
 class ChoiceNode;
 class OpponentNode;
@@ -20,22 +21,21 @@ static int smallBlindPosition = 0;
 std::vector<int> deal(
 						std::vector<int>	&previousDeck,
 						int					state) {
-	enum states {HOLECARDS, PREFLOP, FLOP, TURN, RIVER};
 	unsigned seed =	std::chrono::system_clock::now().time_since_epoch().count();
 	std::vector<int> dealtCards;
 	std::shuffle(previousDeck.begin(), previousDeck.end(), 
 			std::default_random_engine(seed));
-	if (state == HOLECARDS){
+	if (state == static_cast<int>(Stage::HOLECARDS) ){
 		for (int i = 0; i < 2; ++i){
 			dealtCards.push_back(previousDeck.back());
 			previousDeck.pop_back();
 		}
-	} else if (state == PREFLOP) {
+	} else if (state == static_cast<int>(Stage::PREFLOP) ) {
 		for (int i = 0; i < 3; ++i) {
 			dealtCards.push_back(previousDeck.back());
 			previousDeck.pop_back();
 		}
-	} else if (state != RIVER) {
+	} else if (state != static_cast<int>(Stage::RIVER) ) {
 		dealtCards.push_back(previousDeck.back());
 		previousDeck.pop_back();
 	}
@@ -69,11 +69,10 @@ void playGame(){
 }
 
 std::vector<Player> playRound(Player botPlayer, Player oppPlayer){
-	enum states {HOLECARDS, PREFLOP, FLOP, TURN, RIVER};
 	std::vector<int> deck;
 	init_deck(deck);
-	botPlayer.setHoleCards(deal(deck, HOLECARDS));
-	oppPlayer.setHoleCards(deal(deck, HOLECARDS));
+	botPlayer.setHoleCards(deal(deck, static_cast<int>(Stage::HOLECARDS) ));
+	oppPlayer.setHoleCards(deal(deck, static_cast<int>(Stage::HOLECARDS) ));
 	int currentStage = 0;
 	std::shared_ptr<Node> root;
 	if (smallBlindPosition == 0){

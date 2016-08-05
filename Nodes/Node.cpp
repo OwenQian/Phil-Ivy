@@ -23,7 +23,7 @@ Node::Node(int              state,
 	// Action function implementation
 	std::shared_ptr<Node> Node::doFold() {
 		//create child foldNode
-		std::shared_ptr<Node> foldNode(new Node(*this));
+		auto foldNode = std::make_shared<Node>(*this);
 		foldNode->isTerminal = true;
 		foldChild = foldNode;
 		return foldNode;
