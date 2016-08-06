@@ -1,6 +1,7 @@
 #include "Node.h"
 
 #include <memory>
+#include <iostream>
 
 Node::Node(int              state,
 		double              pot,
@@ -15,49 +16,72 @@ Node::Node(int              state,
 			botPlayer,
 			oppPlayer,
 			playerTurn),
-	parent(parent) { }
+	parent(parent),
+	isTerminal(false),
+	isAllIn(false) { }
 
 	// Action function implementation
-	std::shared_ptr<Node> Node::fold() {
+	std::shared_ptr<Node> Node::doFold() {
 		//create child foldNode
-		std::shared_ptr<Node> foldNode(new Node(*this));
+		auto foldNode = std::make_shared<Node>(*this);
 		foldNode->isTerminal = true;
 		foldChild = foldNode;
 		return foldNode;
 	}
 
-std::shared_ptr<Node> Node::call(double callAmount) { //remove call amount later
+std::shared_ptr<Node> Node::doCall() {
 	//creates a temporary playerlist and updates the player's potinvestment and chip count
-	if (game.getPlayerTurn() == 0){
+	if (game.getPlayerTurn() == 0) {
 		Player tempPlayer = game.getBotPlayer();
-		tempPlayer.setPotInvestment(callAmount + tempPlayer.getPotInvestment());
-		tempPlayer.setChips(tempPlayer.getChips() - callAmount);
+		tempPlayer.setPotInvestment(currentRaise + tempPlayer.getPotInvestment());
+		tempPlayer.setChips(tempPlayer.getChips() - currentRaise);
+		bool tempAllIn = false;
+		if (game.getBotPlayer().getChips() == currentRaise ||
+				game.getOppPlayer().getChips() == currentRaise) {
+			tempAllIn = true;
+		}
 		auto callNode = std::make_shared<Node>(game.getState() + 1,
-			game.getPot() + callAmount,
+			game.getPot() + currentRaise,
 			game.getBoardCards(),
 			tempPlayer,
 			game.getOppPlayer(),
-			game.getPlayerTurn() + 1,
-			std::shared_ptr<Node> (this) );
+			!(game.getPlayerTurn()),
+			std::make_shared<Node> (*this) );
+		(*callNode).setIsAllIn(tempAllIn);
 		callChild = callNode;
 	} else {
 		Player tempPlayer = game.getOppPlayer();
-		tempPlayer.setPotInvestment(callAmount + tempPlayer.getPotInvestment());
-		tempPlayer.setChips(tempPlayer.getChips() - callAmount);
+		tempPlayer.setPotInvestment(currentRaise + tempPlayer.getPotInvestment());
+		tempPlayer.setChips(tempPlayer.getChips() - currentRaise);
+		bool tempAllIn = false;
+		if (game.getBotPlayer().getChips() == currentRaise ||
+				game.getOppPlayer().getChips() == currentRaise) {
+			tempAllIn = true;
+		}
 		auto callNode = std::make_shared<Node>( game.getState() + 1,
-			game.getPot() + callAmount,
+			game.getPot() + currentRaise,
 			game.getBoardCards(),
 			game.getBotPlayer(),
 			tempPlayer,
-			game.getPlayerTurn() + 1,
-			std::shared_ptr<Node> (this) );
+			!(game.getPlayerTurn()),
+			std::make_shared<Node> (*this) );
+		(*callNode).setIsAllIn(tempAllIn);
 		callChild = callNode;
 	}
 	return callChild;
 }
 
-std::shared_ptr<Node> Node::raise(double raiseAmount) {
-	if (game.getPlayerTurn() == 0){
+// raiseAmount means amount raising to, NOT raising by
+std::shared_ptr<Node> Node::doRaise(double raiseAmount) {
+	// if raise all-in (or more) create AllInNode
+	if (raiseAmount >= game.getBotPlayer().getChips() ||
+			raiseAmount >= game.getOppPlayer().getChips() ) {
+		std::cout << "Raising All-In" << std::endl;
+		// set raiseAmount to lesser of chip amounts
+		raiseAmount = (game.getBotPlayer().getChips() < game.getOppPlayer().getChips()) ? 
+			game.getBotPlayer().getChips() : game.getOppPlayer().getChips();
+	}
+	if (game.getPlayerTurn() == 0) {
 		Player tempPlayer = game.getBotPlayer();
 		tempPlayer.setPotInvestment(raiseAmount + tempPlayer.getPotInvestment());
 		tempPlayer.setChips(tempPlayer.getChips() - raiseAmount);
@@ -66,9 +90,9 @@ std::shared_ptr<Node> Node::raise(double raiseAmount) {
 			game.getBoardCards(),
 			tempPlayer,
 			game.getOppPlayer(),
-			game.getPlayerTurn() + 1,
-			std::shared_ptr<Node> (this) );
-		(*raiseNode).addCurrentRaise(raiseAmount);
+			!(game.getPlayerTurn()),
+			std::make_shared<Node> (*this) );
+		(*raiseNode).setCurrentRaise(raiseAmount);
 		raiseChild = raiseNode;
 	} else {
 		Player tempPlayer = game.getOppPlayer();
@@ -79,9 +103,9 @@ std::shared_ptr<Node> Node::raise(double raiseAmount) {
 			game.getBoardCards(),
 			game.getBotPlayer(),
 			tempPlayer,
-			game.getPlayerTurn() + 1,
-			std::shared_ptr<Node> (this) );
-		(*raiseNode).addCurrentRaise(raiseAmount);
+			!(game.getPlayerTurn()),
+			std::make_shared<Node> (*this) );
+		(*raiseNode).setCurrentRaise(raiseAmount);
 		raiseChild = raiseNode;
 	}
 	

@@ -6,36 +6,32 @@
 #include "GameUtilities/GameUtilities.h"
 #include "Nodes/ChoiceNode.h"
 #include "Nodes/OpponentNode.h"
+#include "Stage.h"
 
 #include <vector>
 #include <memory>
 #include <iostream>
 
 int main() {
-	enum states {HOLECARDS, PREFLOP, FLOP, TURN, RIVER};
 	std::vector<int> deck;
 	init_deck(deck);
-//	double bigBlind = 50.0;
-//	double smallBlind = 25.0;
-//	int smallBlindPosition = 0;
-	
-	Player botPlayer(deal(deck, HOLECARDS), 1000.0, 25.0);
+
+	Player botPlayer(deal(deck, static_cast<int>(Stage::HOLECARDS)), 1000.0, 25.0);
 	std::cout << hexToCard(botPlayer.getHoleCards()[0]) << " " << hexToCard(botPlayer.getHoleCards()[1]) << std::endl;
 	std::cout << "Deck Size: " << deck.size() << std::endl;
-	Player oppPlayer(deal(deck, HOLECARDS), 1000.0, 50.0); //update with pot investment
+	Player oppPlayer(deal(deck, static_cast<int>(Stage::HOLECARDS) ), 1000.0, 50.0); //update with pot investment
 	std::cout << hexToCard(oppPlayer.getHoleCards()[0]) << " " << hexToCard(oppPlayer.getHoleCards()[1]) << std::endl;
 	std::cout << "Deck Size: " << deck.size() << std::endl;
-	
+
 	std::vector<int> boardCards;
-	
+
 	auto initialNode = std::make_shared<ChoiceNode>(0, 75.0, boardCards, botPlayer, oppPlayer, 0, std::shared_ptr<ChoiceNode> (NULL));
-	auto f = (*initialNode).doCall(25.0);
-	
-	std::cout << "botPlayer chip count, expected 975 :" << (*f).getGame().getBotPlayer().getChips() <<std::endl;
-	std::cout << "pot chip count, expected 100 :" << (*f).getGame().getPot() <<std::endl;
-	
-	auto d = (*f).raise(500.0);
-	std::cout << "botPlayer chip count, expected 500 :" << (*d).getGame().getOppPlayer().getChips() <<std::endl;
-	std::cout << "pot chip count, expected 600 :" << (*d).getGame().getPot() <<std::endl;
+	std::cout << "Bot Chips: " << (*initialNode).getGame().getBotPlayer().getChips() << std::endl;
+	auto f = (*initialNode).raise(1000.0);
+	std::cout << "currentRaise amount: " << (*f).getCurrentRaise() << std::endl;
+	auto g = (*f).call();
+	std::cout << "Bot Chips: " << (*f).getGame().getBotPlayer().getChips() << std::endl;
+	std::cout << "Opp Chips: " << (*g).getGame().getBotPlayer().getChips() << std::endl;
+
 	return 0;
 }

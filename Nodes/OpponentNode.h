@@ -33,14 +33,14 @@ class OpponentNode: public Node {
 						std::shared_ptr<ChoiceNode>		const parent);
 
 		// Wrapper for Action functions to return correct type
-		std::shared_ptr<OpponentNode> doFold() {
-			return std::static_pointer_cast<OpponentNode> (fold());
+		std::shared_ptr<OpponentNode> fold() {
+			return std::static_pointer_cast<OpponentNode> (doFold());
 		}
-		std::shared_ptr<ChoiceNode> doCall(double callAmount) {
-			return std::static_pointer_cast<ChoiceNode> (call(callAmount));
+		std::shared_ptr<ChoiceNode> call() {
+			return std::static_pointer_cast<ChoiceNode> (doCall());
 		}
-		std::shared_ptr<ChoiceNode> doRaise(double raiseAmount) {
-			return std::static_pointer_cast<ChoiceNode> (raise(raiseAmount));
+		std::shared_ptr<ChoiceNode> raise(double raiseAmount) {
+			return std::static_pointer_cast<ChoiceNode> (doRaise(raiseAmount));
 		}
 };
 

@@ -17,13 +17,18 @@ class Node {
 		//the parent of this node in the game tree
 		std::shared_ptr<Node> const parent; 
 		//number of times a node has been visited/simulated on
-		int visitCount;
 		//the expected value derived from choosing this node action 
 		//updated through backprop
-		double expectedValue;
-		bool isTerminal;	        //whether or not Node is terminal
 		double currentRaise;                   //the current raise
+		bool isTerminal;	        //whether or not Node is terminal
+		bool isAllIn;				//only true when accepted
 
+		// Action functions implementations
+		// Note, if we're not using different implementations of these functions for c-o/node
+		// these don't need to be virtual, but they do if we are
+		std::shared_ptr<Node> doFold();
+		std::shared_ptr<Node> doRaise(double);
+		std::shared_ptr<Node> doCall();
 	public:
 		// Member-accessibility functions
 
@@ -33,13 +38,13 @@ class Node {
 		std::shared_ptr<Node> getCallChild() const { return callChild; }
 		std::shared_ptr<Node> getRaiseChild() const { return raiseChild; }
 		//std::shared_ptr<Node> getParent() const { return parent; }
-		int getVisitCount() const { return visitCount; }
-		double getExpectedValue() const { return expectedValue; }
 		bool getTerminalStatus() const { return isTerminal; }
 		double getCurrentRaise() const { return currentRaise; }
+		bool getIsAllIn() const { return isAllIn; }
 
 		// Setters
-		void addCurrentRaise(double amount) { currentRaise += amount; }
+		void setCurrentRaise(double amount) { currentRaise = amount; }
+		void setIsAllIn(bool status) { isAllIn = status; }
 		
 		// Constructors
 		Node(	int                    state,
@@ -50,10 +55,6 @@ class Node {
 				int                    playerTurn,
 				std::shared_ptr<Node>  parent);
 
-		// Action functions
-		virtual std::shared_ptr<Node> fold(); 
-		virtual std::shared_ptr<Node> raise(double);
-		virtual std::shared_ptr<Node> call(double);
 };
 
 #endif	//Node.h

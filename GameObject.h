@@ -7,7 +7,6 @@
 
 class GameObject {
 	protected:
-		enum states {PREFLOP, FLOP, TURN, RIVER};
 		const int state;
 		const double pot;
 		std::vector<int> boardCards;
