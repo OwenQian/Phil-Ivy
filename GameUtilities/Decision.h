@@ -5,11 +5,15 @@
 
 #include <memory>
 
+class ChoiceNode;
+class OpponentNode;
+
 class Decision {
 	public:
-		const Action action;
-		const double raiseAmount;
-
+		Action action;
+		double raiseAmount;
+		
+		
 		static Decision makeDecision(std::shared_ptr<ChoiceNode> currentNode);
 		static Decision makeDecision(std::shared_ptr<OpponentNode> currentNode);
 };

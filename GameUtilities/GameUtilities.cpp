@@ -6,11 +6,12 @@
 #include <iostream>
 
 #include "GameUtilities.h"
-#include "helper.h"
+#include "../handEval/helper.h"
 #include "../Nodes/ChoiceNode.h"
 #include "../Nodes/OpponentNode.h"
 #include "../Stage.h"
 #include "Action.h"
+#include "Decision.h"
 
 class ChoiceNode;
 class OpponentNode;
@@ -106,26 +107,29 @@ std::vector<Player> playRound(Player botPlayer, Player oppPlayer){
 	return updatePlayers;
 }
 
-std::shared_ptr<OpponentNode> playTurn(std::shared_ptr<ChoiceNode> currentNode) {
+std::shared_ptr<OpponentNode> playTurn(std::shared_ptr<ChoiceNode> currentNode, std::vector<int> deck) {
 	if ((*currentNode).getGame().getState() != static_cast<int>(Stage::SHOWDOWN)
 			&& !(*currentNode).getIsAllIn()
 			&& !(*currentNode).getIsFolded()) {
 		Decision decision = Decision::makeDecision(currentNode);
 		switch(decision.action) {
-			case CALL:
+			case Action::CALL: {
 				auto returnNode = (*currentNode).call();
 				break; 
-			case RAISE:
+			}
+			case Action::RAISE:{
 				auto returnNode = (*currentNode).raise(decision.raiseAmount);
 				break;
-			case FOLD:
+			}
+			case Action::FOLD:{
 				auto returnNode = (*currentNode).fold();
 				break;
+			}
 			default:
 				std::cout << "Invalid action" << std::endl;
 		}
 		//TODO: Need to add handeval and chip assignment for winner
-	} else if ((*currentNode).getGame().getIsAllIn()) {
+	} else if ((*currentNode).getIsAllIn()) {
 		for (int i = (*currentNode).getGame().getState(); i < static_cast<int>(Stage::SHOWDOWN); ++i) {
 			std::vector<int> oldBoard = (*currentNode).getGame().getBoardCards();
 			std::vector<int> newCards = deal(deck, i);
@@ -135,10 +139,10 @@ std::shared_ptr<OpponentNode> playTurn(std::shared_ptr<ChoiceNode> currentNode) 
 			}
 			(*currentNode).getGame().setBoardCards(oldBoard);
 		}
-	} else if ((*currentNode).getGame().getState() == static_cast<int> Stage::SHOWDOWN) {
+	} else if ((*currentNode).getGame().getState() == static_cast<int> (Stage::SHOWDOWN)) {
 		//TODO: Handeval and chip assignment to winner
 
-	} else if ((*currentNode).getGame().getIsFolded()) {
+	} else if ((*currentNode).getIsFolded()) {
 		//TODO: Allocated chips
 		//return terminal node
 	} else {

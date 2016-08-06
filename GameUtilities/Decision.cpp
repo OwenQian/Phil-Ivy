@@ -4,11 +4,14 @@
 #include <memory>
 #include <iostream>
 
+
 Decision Decision::makeDecision(std::shared_ptr<ChoiceNode> currentNode) {
 	std::cout << "Enter Action: Call(0), Raise(1), Fold(2)" << std::endl;
 	Decision decision;
-	std::cin >> decision.action;
-	if (decision.action == RAISE) {
+	int temp;
+	std::cin >> temp;
+	decision.action = static_cast<Action> (temp);
+	if (decision.action == Action::RAISE) {
 		std::cout << "Enter Raise amount" << std::endl;
 		double amount;
 		std::cin >> amount;
@@ -17,11 +20,13 @@ Decision Decision::makeDecision(std::shared_ptr<ChoiceNode> currentNode) {
 	return decision;
 }
 
-Decision Decision::makeDecision(std::shared_ptr<ChoiceNode> currentNode) {
+Decision Decision::makeDecision(std::shared_ptr<OpponentNode> currentNode) {
 	std::cout << "Enter Action: Call(0), Raise(1), Fold(2)" << std::endl;
 	Decision decision;
-	std::cin >> decision.action;
-	if (decision.action == RAISE) {
+	int temp;
+	std::cin >> temp;
+	decision.action = static_cast<Action> (temp);
+	if (decision.action == Action::RAISE) {
 		std::cout << "Enter Raise amount" << std::endl;
 		double amount;
 		std::cin >> amount;

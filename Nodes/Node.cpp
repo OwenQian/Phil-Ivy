@@ -17,14 +17,14 @@ Node::Node(int              state,
 			oppPlayer,
 			playerTurn),
 	parent(parent),
-	isTerminal(false),
+	isFolded(false),
 	isAllIn(false) { }
 
 	// Action function implementation
 	std::shared_ptr<Node> Node::doFold() {
 		//create child foldNode
 		auto foldNode = std::make_shared<Node>(*this);
-		foldNode->isTerminal = true;
+		foldNode->isFolded = true;
 		foldChild = foldNode;
 		return foldNode;
 	}

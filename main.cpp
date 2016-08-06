@@ -2,7 +2,7 @@
 #include "GameObject.h"
 #include "Nodes/Node.h"
 #include "potInfo.h"
-#include "GameUtilities/helper.h"
+#include "handEval/helper.h"
 #include "GameUtilities/GameUtilities.h"
 #include "Nodes/ChoiceNode.h"
 #include "Nodes/OpponentNode.h"
