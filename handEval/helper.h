@@ -12,7 +12,7 @@ int cardToHex(std::string s = "Ah");
 //converts hex to string equivalent
 std::string hexToCard(int hex);
 
-
+int showdown (std::vector<int> ourCards, std::vector<int> oppCards, std::vector<int> boardCards);
 //returns the corresponding hand, i.e., 1 for straight flush
 int hand_rank(int i);
 

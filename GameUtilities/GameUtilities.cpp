@@ -13,12 +13,21 @@
 #include "Action.h"
 #include "Decision.h"
 
+class Node;
 class ChoiceNode;
 class OpponentNode;
 
 static double smallBlind = 25.0;
 static double bigBlind = 50.0;
 static int smallBlindPosition = 0;
+
+void allocateChips(int whoWon, Node &currentNode){
+	if (whoWon == 0) { //when bot player wins
+		currentNode.getGame().getBotPlayer().addChips(currentNode.getGame().getPot());
+	} else { // when opp player wins
+		currentNode.getGame().getOppPlayer().addChips(currentNode.getGame().getPot());
+	}
+}
 
 std::vector<int> deal(
 						std::vector<int>	&previousDeck,
@@ -80,9 +89,12 @@ std::vector<Player> playRound(Player botPlayer, Player oppPlayer){
 	if (smallBlindPosition == 0){
 		root = std::make_shared<ChoiceNode>(0, bigBlind + smallBlind, std::vector<int>(), \
 		botPlayer, oppPlayer, smallBlindPosition, std::shared_ptr<ChoiceNode> (NULL));
+		
+	
 	} else if (smallBlindPosition == 1){
 		root = std::make_shared<OpponentNode>(0, bigBlind + smallBlind, std::vector<int>(), \
 		botPlayer, oppPlayer, smallBlindPosition, std::shared_ptr<OpponentNode> (NULL));
+		
 	} else {
 		std::cout << "fuck owen, also why is smallblindposition not 1 or 0" << std::endl;
 		return std::vector<Player>();
@@ -90,7 +102,7 @@ std::vector<Player> playRound(Player botPlayer, Player oppPlayer){
 	// currentNode infers type of node from root type
 	auto currentNode = root;
 	while (currentNode != std::shared_ptr<Node>(NULL)) { //might ahve to be shared_ptr null
-		//currentNode = playTurn(currentNode);
+		currentNode = playTurn(currentNode);
 		if (currentStage != (*currentNode).getGame().getState()){
 			currentStage++; //goes to the next stage in the game
 			std::vector<int> oldBoard = (*currentNode).getGame().getBoardCards();
@@ -107,7 +119,7 @@ std::vector<Player> playRound(Player botPlayer, Player oppPlayer){
 	return updatePlayers;
 }
 
-std::shared_ptr<OpponentNode> playTurn(std::shared_ptr<ChoiceNode> currentNode, std::vector<int> deck) {
+std::shared_ptr<Node> playTurn(std::shared_ptr<ChoiceNode> currentNode, std::vector<int> deck) {
 	if ((*currentNode).getGame().getState() != static_cast<int>(Stage::SHOWDOWN)
 			&& !(*currentNode).getIsAllIn()
 			&& !(*currentNode).getIsFolded()) {
@@ -139,14 +151,85 @@ std::shared_ptr<OpponentNode> playTurn(std::shared_ptr<ChoiceNode> currentNode, 
 			}
 			(*currentNode).getGame().setBoardCards(oldBoard);
 		}
+		int winner = showdown((*currentNode).getGame().getBotPlayer().getHoleCards(),
+									  (*currentNode).getGame().getOppPlayer().getHoleCards(),
+									  (*currentNode).getGame().getBoardCards());
+		allocateChips(winner, (*currentNode));
+		return currentNode;
+		
 	} else if ((*currentNode).getGame().getState() == static_cast<int> (Stage::SHOWDOWN)) {
 		//TODO: Handeval and chip assignment to winner
-
+		int winner = showdown((*currentNode).getGame().getBotPlayer().getHoleCards(),
+									  (*currentNode).getGame().getOppPlayer().getHoleCards(),
+									  (*currentNode).getGame().getBoardCards());
+		allocateChips(winner, (*currentNode));
+		return currentNode;
+			
 	} else if ((*currentNode).getIsFolded()) {
 		//TODO: Allocated chips
 		//return terminal node
+		allocateChips(0, (*currentNode));
+		return currentNode;
 	} else {
 		std::cout << "What the fuck kind of Node is this" << std::endl;
 		return std::shared_ptr<OpponentNode>(NULL);
 	}
 }
+
+std::shared_ptr<Node> playTurn(std::shared_ptr<OpponentNode> currentNode, std::vector<int> deck) {
+	if ((*currentNode).getGame().getState() != static_cast<int>(Stage::SHOWDOWN)
+			&& !(*currentNode).getIsAllIn()
+			&& !(*currentNode).getIsFolded()) {
+		Decision decision = Decision::makeDecision(currentNode);
+		switch(decision.action) {
+			case Action::CALL: {
+				auto returnNode = (*currentNode).call();
+				break; 
+			}
+			case Action::RAISE:{
+				auto returnNode = (*currentNode).raise(decision.raiseAmount);
+				break;
+			}
+			case Action::FOLD:{
+				auto returnNode = (*currentNode).fold();
+				break;
+			}
+			default:
+				std::cout << "Invalid action" << std::endl;
+		}
+		//TODO: Need to add handeval and chip assignment for winner
+	} else if ((*currentNode).getIsAllIn()) {
+		for (int i = (*currentNode).getGame().getState(); i < static_cast<int>(Stage::SHOWDOWN); ++i) {
+			std::vector<int> oldBoard = (*currentNode).getGame().getBoardCards();
+			std::vector<int> newCards = deal(deck, i);
+			//adding current board cards to newly dealt cards
+			for (auto j = newCards.begin(); j != newCards.end(); ++j){
+				oldBoard.push_back(*j);
+			}
+			(*currentNode).getGame().setBoardCards(oldBoard);
+		}
+		int winner = showdown((*currentNode).getGame().getBotPlayer().getHoleCards(),
+									  (*currentNode).getGame().getOppPlayer().getHoleCards(),
+									  (*currentNode).getGame().getBoardCards());
+		allocateChips(winner, (*currentNode));
+		return currentNode;
+		
+	} else if ((*currentNode).getGame().getState() == static_cast<int> (Stage::SHOWDOWN)) {
+		//TODO: Handeval and chip assignment to winner
+		int winner = showdown((*currentNode).getGame().getBotPlayer().getHoleCards(),
+									  (*currentNode).getGame().getOppPlayer().getHoleCards(),
+									  (*currentNode).getGame().getBoardCards());
+		allocateChips(winner, (*currentNode));
+		return currentNode;
+			
+	} else if ((*currentNode).getIsFolded()) {
+		//TODO: Allocated chips
+		//return terminal node
+		allocateChips(1, (*currentNode));
+		return currentNode;
+	} else {
+		std::cout << "What the fuck kind of Node is this" << std::endl;
+		return std::shared_ptr<OpponentNode>(NULL);
+	}
+}
+

@@ -31,6 +31,7 @@ class Player {
 		void setHoleCards(int c1, int c2);
 		void setIsFolded(bool status) { isFolded = status; }
 		void setChips(double c) { chips = c; }
+		void addChips(double c) { chips += c; }
 		void setPotInvestment(double pi) { potInvestment = pi; }
 		// No setter for holeCards bc its const
 };
