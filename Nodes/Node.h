@@ -20,7 +20,7 @@ class Node {
 		//the expected value derived from choosing this node action 
 		//updated through backprop
 		double currentRaise;                   //the current raise
-		bool isTerminal;	        //whether or not Node is terminal
+		bool isFolded;	        //whether or not Node is Folded
 		bool isAllIn;				//only true when accepted
 
 		// Action functions implementations
@@ -38,7 +38,7 @@ class Node {
 		std::shared_ptr<Node> getCallChild() const { return callChild; }
 		std::shared_ptr<Node> getRaiseChild() const { return raiseChild; }
 		//std::shared_ptr<Node> getParent() const { return parent; }
-		bool getTerminalStatus() const { return isTerminal; }
+		bool getIsFolded() const { return isFolded; }
 		double getCurrentRaise() const { return currentRaise; }
 		bool getIsAllIn() const { return isAllIn; }
 

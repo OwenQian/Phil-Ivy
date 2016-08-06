@@ -10,6 +10,7 @@
 #include "../Nodes/ChoiceNode.h"
 #include "../Nodes/OpponentNode.h"
 #include "../Stage.h"
+#include "Action.h"
 
 class ChoiceNode;
 class OpponentNode;
@@ -105,15 +106,43 @@ std::vector<Player> playRound(Player botPlayer, Player oppPlayer){
 	return updatePlayers;
 }
 
-std::shared_ptr<Node> playTurn(std::shared_ptr<Node> currentNode) {
-	return std::shared_ptr<Node>(NULL);
-}
+std::shared_ptr<OpponentNode> playTurn(std::shared_ptr<ChoiceNode> currentNode) {
+	if ((*currentNode).getGame().getState() != static_cast<int>(Stage::SHOWDOWN)
+			&& !(*currentNode).getIsAllIn()
+			&& !(*currentNode).getIsFolded()) {
+		Decision decision = Decision::makeDecision(currentNode);
+		switch(decision.action) {
+			case CALL:
+				auto returnNode = (*currentNode).call();
+				break; 
+			case RAISE:
+				auto returnNode = (*currentNode).raise(decision.raiseAmount);
+				break;
+			case FOLD:
+				auto returnNode = (*currentNode).fold();
+				break;
+			default:
+				std::cout << "Invalid action" << std::endl;
+		}
+		//TODO: Need to add handeval and chip assignment for winner
+	} else if ((*currentNode).getGame().getIsAllIn()) {
+		for (int i = (*currentNode).getGame().getState(); i < static_cast<int>(Stage::SHOWDOWN); ++i) {
+			std::vector<int> oldBoard = (*currentNode).getGame().getBoardCards();
+			std::vector<int> newCards = deal(deck, i);
+			//adding current board cards to newly dealt cards
+			for (auto j = newCards.begin(); j != newCards.end(); ++j){
+				oldBoard.push_back(*j);
+			}
+			(*currentNode).getGame().setBoardCards(oldBoard);
+		}
+	} else if ((*currentNode).getGame().getState() == static_cast<int> Stage::SHOWDOWN) {
+		//TODO: Handeval and chip assignment to winner
 
-std::shared_ptr<ChoiceNode> playTurn(std::shared_ptr<ChoiceNode> currentNode) {
-	//Decision = bot.decideAction();
-	return std::shared_ptr<ChoiceNode>(NULL);
-}
-
-std::shared_ptr<OpponentNode> playTurn(std::shared_ptr<OpponentNode> currentNode) {
-	return std::shared_ptr<OpponentNode>(NULL);
+	} else if ((*currentNode).getGame().getIsFolded()) {
+		//TODO: Allocated chips
+		//return terminal node
+	} else {
+		std::cout << "What the fuck kind of Node is this" << std::endl;
+		return std::shared_ptr<OpponentNode>(NULL);
+	}
 }
