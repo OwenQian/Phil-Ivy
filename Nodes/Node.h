@@ -37,7 +37,7 @@ class Node {
 		std::shared_ptr<Node> getFoldChild() const { return foldChild; }
 		std::shared_ptr<Node> getCallChild() const { return callChild; }
 		std::shared_ptr<Node> getRaiseChild() const { return raiseChild; }
-		//std::shared_ptr<Node> getParent() const { return parent; }
+		std::shared_ptr<Node> getParent() const { return parent; }
 		bool getIsFolded() const { return isFolded; }
 		double getCurrentRaise() const { return currentRaise; }
 		bool getIsAllIn() const { return isAllIn; }

@@ -16,22 +16,24 @@ int main() {
 	std::vector<int> deck;
 	init_deck(deck);
 
-	Player botPlayer(deal(deck, static_cast<int>(Stage::HOLECARDS)), 1000.0, 25.0);
-	std::cout << hexToCard(botPlayer.getHoleCards()[0]) << " " << hexToCard(botPlayer.getHoleCards()[1]) << std::endl;
-	std::cout << "Deck Size: " << deck.size() << std::endl;
-	Player oppPlayer(deal(deck, static_cast<int>(Stage::HOLECARDS) ), 1000.0, 50.0); //update with pot investment
-	std::cout << hexToCard(oppPlayer.getHoleCards()[0]) << " " << hexToCard(oppPlayer.getHoleCards()[1]) << std::endl;
-	std::cout << "Deck Size: " << deck.size() << std::endl;
+	Player botPlayer(deal(deck, static_cast<int>(Stage::PREFLOP)), 1000.0, 0.0);
+	Player oppPlayer(deal(deck, static_cast<int>(Stage::PREFLOP)), 1000.0, 0.0);
 
-	std::vector<int> boardCards;
+	std::vector<int> boardCards{cardToHex("Ac"), cardToHex("Kd"), cardToHex("3h"), cardToHex("2s"), cardToHex("7h")};
+	for (auto i = boardCards.begin(); i != boardCards.end(); ++i)
+		std::cout << hexToCard(*i) << " " ;
+	std::cout << "\n";
+	std::cout << "botCards: " << hexToCard(botPlayer.getHoleCards()[0]) << " " << hexToCard(botPlayer.getHoleCards()[1]) << std::endl;
+	std::cout << "oppCards: " << hexToCard(oppPlayer.getHoleCards()[0]) << " " << hexToCard(oppPlayer.getHoleCards()[1]) << std::endl;
+	std::cout << showdown(botPlayer.getHoleCards(), oppPlayer.getHoleCards(), boardCards) << std::endl;
 
-	auto initialNode = std::make_shared<ChoiceNode>(0, 75.0, boardCards, botPlayer, oppPlayer, 0, std::shared_ptr<ChoiceNode> (NULL));
-	std::cout << "Bot Chips: " << (*initialNode).getGame().getBotPlayer().getChips() << std::endl;
-	auto f = (*initialNode).raise(1000.0);
-	std::cout << "currentRaise amount: " << (*f).getCurrentRaise() << std::endl;
-	auto g = (*f).call();
-	std::cout << "Bot Chips: " << (*f).getGame().getBotPlayer().getChips() << std::endl;
-	std::cout << "Opp Chips: " << (*g).getGame().getBotPlayer().getChips() << std::endl;
+//	auto cnode = std::make_shared<ChoiceNode>(0, 0.0, boardCards, botPlayer, oppPlayer, 0, std::shared_ptr<ChoiceNode>(NULL) );
+//
+//	auto newNode = playTurn(cnode, deck);
+//	auto newObj = *newNode;
+//	std::cout << "isFolded: " << newObj.getIsFolded() << std::endl;
+//	std::cout << "raiseAmount: " << newObj.getCurrentRaise() << std::endl;
 
 	return 0;
 }
+
