@@ -3,8 +3,10 @@
 #include <vector>
 #include <algorithm>
 #include <map>
+#include <climits>
 
 #include "helper.h"
+#include "../GameUtilities/GameUtilities.h"
 
 extern int comb6[6][5];
 extern int comb7[21][5];
@@ -382,6 +384,37 @@ double currentTurn(int ourCards[2], int boardCards[4]) {
 	double aheadScore = (double) matchup[0] + ((double) matchup[2] / 2.0);
 	double returnScore = aheadScore / totalComparisons;
 	return returnScore;
+}
+
+int showdown (std::vector<int> ourCards, std::vector<int> oppCards, std::vector<int> boardCards){
+	int ourHandRank = INT_MAX;		//set to be higher than any hand-rank
+	int oppHandRank = INT_MAX;
+	std::vector<int> allCards;
+	allCards.reserve(7);
+	allCards = ourCards;
+	for (auto i = boardCards.begin(); i != boardCards.end(); ++i){
+		allCards.push_back(*i);
+	}
+	for (int i = 0; i < 21; ++i) {
+		ourHandRank = std::min( ourHandRank,
+				eval_5hand_fast(allCards[comb7[i][0]],
+				allCards[comb7[i][1]],
+				allCards[comb7[i][2]],
+				allCards[comb7[i][3]],
+				allCards[comb7[i][4]]) );
+	}
+	allCards[0] = oppCards[0];
+	allCards[1] = oppCards[1];
+	for (int k = 0; k < 21; ++k) {
+					oppHandRank = std::min( oppHandRank,
+							eval_5hand_fast(allCards[comb7[k][0]],
+								allCards[comb7[k][1]],
+								allCards[comb7[k][2]],
+								allCards[comb7[k][3]],
+								allCards[comb7[k][4]]) );
+				}
+	return (ourHandRank > oppHandRank) ? 0 : 1;
+	
 }
 
 double currentRiver(int ourCards[2], int boardCards[]) {
