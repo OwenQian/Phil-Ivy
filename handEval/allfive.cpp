@@ -2,8 +2,8 @@
 #include <iostream>
 #include <iomanip>
 #include <cstdlib>
-#include "poker.h"
-#include "helper.h"
+#include "../poker.h"
+#include "../GameUtilities/helper.h"
 
 /*************************************************/
 /*                                               */
