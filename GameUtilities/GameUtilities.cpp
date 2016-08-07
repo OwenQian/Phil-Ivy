@@ -24,8 +24,11 @@ static int smallBlindPosition = 0;
 void allocateChips(int whoWon, Node &currentNode){
 	if (whoWon == 0) { //when bot player wins
 		currentNode.getGame().getBotPlayer().addChips(currentNode.getGame().getPot());
-	} else { // when opp player wins
+	} else if (whoWon == 1) { // when opp player wins
 		currentNode.getGame().getOppPlayer().addChips(currentNode.getGame().getPot());
+	} else { //tie
+		currentNode.getGame().getOppPlayer().addChips(currentNode.getGame().getPot()/2);
+		currentNode.getGame().getBotPlayer().addChips(currentNode.getGame().getPot()/2)
 	}
 }
 

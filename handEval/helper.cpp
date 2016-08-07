@@ -271,6 +271,6 @@ int showdown (std::vector<int> ourCards, std::vector<int> oppCards, std::vector<
 								allCards[comb7[k][4]]) );
 				}
 	// lower handRank is better
-	return (ourHandRank < oppHandRank) ? 0 : 1;
+	return (ourHandRank < oppHandRank) ? 0 : (ourHandRank > oppHandRank) ? 0 : 2;
 	
 }
