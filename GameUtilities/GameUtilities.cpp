@@ -28,7 +28,7 @@ void allocateChips(int whoWon, Node &currentNode){
 		currentNode.getGame().getOppPlayer().addChips(currentNode.getGame().getPot());
 	} else { //tie
 		currentNode.getGame().getOppPlayer().addChips(currentNode.getGame().getPot()/2);
-		currentNode.getGame().getBotPlayer().addChips(currentNode.getGame().getPot()/2)
+		currentNode.getGame().getBotPlayer().addChips(currentNode.getGame().getPot()/2);
 	}
 }
 
