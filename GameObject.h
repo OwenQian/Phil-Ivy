@@ -9,12 +9,12 @@ class GameObject {
 	protected:
 		const int state;
 		const double pot;
-		std::vector<int> boardCards;
-		const Player botPlayer;
-		const Player oppPlayer;
+		
 		const int playerTurn;
 
 	public:
+
+
 		// Constructors
 		// Doesn't make sense to have default constructor
 		GameObject( int                     state,
@@ -25,7 +25,9 @@ class GameObject {
 					int                     playerTurn);
 
 		// Member-accessibility functions
-
+		Player botPlayer;
+		 Player oppPlayer;
+		 std::vector<int> boardCards;
 		// Getters
 		int getState() const { return state; }
 		std::vector<int> getBoardCards() const { return boardCards; }

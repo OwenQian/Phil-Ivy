@@ -6,6 +6,7 @@ enum class Stage {
 	FLOP,
 	TURN,
 	RIVER,
-	SHOWDOWN
+	SHOWDOWN,
+	END
 };
 #endif

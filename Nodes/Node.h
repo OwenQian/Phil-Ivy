@@ -8,9 +8,10 @@
 #include <memory>
 
 class Node {
-	protected:
+public:
 		//static const int EV_Const = 1
 		GameObject game;
+		protected:
 		std::shared_ptr<Node> foldChild;
 		std::shared_ptr<Node> callChild;
 		std::shared_ptr<Node> raiseChild;
@@ -29,6 +30,7 @@ class Node {
 		std::shared_ptr<Node> doFold();
 		std::shared_ptr<Node> doRaise(double);
 		std::shared_ptr<Node> doCall();
+		std::shared_ptr<Node> doTerminal();
 	public:
 		// Member-accessibility functions
 

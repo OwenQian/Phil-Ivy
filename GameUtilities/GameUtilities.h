@@ -20,7 +20,7 @@ void init_deck(std::vector<int>& deck);
 void allocateChips (int whoWon, Node &currentNode);
 void playGame(); 
 std::vector<Player> playRound(Player botPlayer, Player oppPlayer); 
-std::shared_ptr<Node> playTurn(std::shared_ptr<ChoiceNode>, std::vector<int> deck);
-std::shared_ptr<Node> playTurn(std::shared_ptr<OpponentNode>, std::vector<int> deck);
+std::shared_ptr<OpponentNode> playTurn(std::shared_ptr<ChoiceNode>, std::vector<int> deck);
+std::shared_ptr<ChoiceNode> playTurn(std::shared_ptr<OpponentNode>, std::vector<int> deck);
 
 #endif

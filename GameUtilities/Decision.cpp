@@ -6,7 +6,7 @@
 
 
 Decision Decision::makeDecision(std::shared_ptr<ChoiceNode> currentNode) {
-	std::cout << "Enter Action: Call(0), Raise(1), Fold(2)" << std::endl;
+	std::cout << "Enter Action bot: Call(0), Raise(1), Fold(2)" << std::endl;
 	Decision decision;
 	int temp;
 	std::cin >> temp;
@@ -21,7 +21,7 @@ Decision Decision::makeDecision(std::shared_ptr<ChoiceNode> currentNode) {
 }
 
 Decision Decision::makeDecision(std::shared_ptr<OpponentNode> currentNode) {
-	std::cout << "Enter Action: Call(0), Raise(1), Fold(2)" << std::endl;
+	std::cout << "Enter Action opp: Call(0), Raise(1), Fold(2)" << std::endl;
 	Decision decision;
 	int temp;
 	std::cin >> temp;

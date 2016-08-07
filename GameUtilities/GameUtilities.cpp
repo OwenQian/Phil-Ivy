@@ -23,12 +23,12 @@ static int smallBlindPosition = 0;
 
 void allocateChips(int whoWon, Node &currentNode){
 	if (whoWon == 0) { //when bot player wins
-		currentNode.getGame().getBotPlayer().addChips(currentNode.getGame().getPot());
+		currentNode.game.botPlayer.addChips(currentNode.getGame().getPot());
 	} else if (whoWon == 1) { // when opp player wins
-		currentNode.getGame().getOppPlayer().addChips(currentNode.getGame().getPot());
+		currentNode.game.oppPlayer.addChips(currentNode.getGame().getPot());
 	} else { //tie
-		currentNode.getGame().getOppPlayer().addChips(currentNode.getGame().getPot()/2);
-		currentNode.getGame().getBotPlayer().addChips(currentNode.getGame().getPot()/2);
+		currentNode.game.oppPlayer.addChips(currentNode.getGame().getPot()/2);
+		currentNode.game.botPlayer.addChips(currentNode.getGame().getPot()/2);
 	}
 }
 
@@ -83,19 +83,20 @@ void playGame(){
 }
 
 std::vector<Player> playRound(Player botPlayer, Player oppPlayer){
+	int smallBlindPosition = 0;
 	std::vector<int> deck;
 	init_deck(deck);
 	botPlayer.setHoleCards(deal(deck, static_cast<int>(Stage::HOLECARDS) ));
 	oppPlayer.setHoleCards(deal(deck, static_cast<int>(Stage::HOLECARDS) ));
-	int currentStage = 0;
+	int currentStage = 1;
 	std::shared_ptr<Node> root;
 	if (smallBlindPosition == 0){
-		root = std::make_shared<ChoiceNode>(0, bigBlind + smallBlind, std::vector<int>(), \
+		root = std::make_shared<ChoiceNode>(1, bigBlind + smallBlind, std::vector<int>(), \
 		botPlayer, oppPlayer, smallBlindPosition, std::shared_ptr<ChoiceNode> (NULL));
 		
 	
 	} else if (smallBlindPosition == 1){
-		root = std::make_shared<OpponentNode>(0, bigBlind + smallBlind, std::vector<int>(), \
+		root = std::make_shared<OpponentNode>(1, bigBlind + smallBlind, std::vector<int>(), \
 		botPlayer, oppPlayer, smallBlindPosition, std::shared_ptr<OpponentNode> (NULL));
 		
 	} else {
@@ -104,138 +105,159 @@ std::vector<Player> playRound(Player botPlayer, Player oppPlayer){
 	}
 	// currentNode infers type of node from root type
 	auto currentNode = root;
-	while (currentNode != std::shared_ptr<Node>(NULL)) { 
-		if ((*currentNode).getGame().getPlayerTurn() == 0)
+	while (currentNode->getIsFolded() == 0) { 
+		if (currentNode->getGame().getPlayerTurn() == 0)
 			currentNode = playTurn(std::static_pointer_cast<ChoiceNode>(currentNode), deck);
 		else
 			currentNode = playTurn(std::static_pointer_cast<OpponentNode>(currentNode), deck);
-		if (currentStage != (*currentNode).getGame().getState()){
-			currentStage++; //goes to the next stage in the game
-			std::vector<int> oldBoard = (*currentNode).getGame().getBoardCards();
+		if (currentStage != currentNode->getGame().getState()){
+			std::vector<int> oldBoard = currentNode->getGame().getBoardCards();
 			std::vector<int> newCards = deal(deck, currentStage);
+			currentStage++; //goes to the next stage in the game
 			//adding current board cards to newly dealt cards
 			for (auto i = newCards.begin(); i != newCards.end(); ++i){
 				oldBoard.push_back(*i);
 			}
-			(*currentNode).getGame().setBoardCards(oldBoard);
+			currentNode->game.boardCards = oldBoard;
+			for (auto j = oldBoard.begin(); j != oldBoard.end(); ++j){
+				std::cout << hexToCard(*j) << " ";
+			}
+			std::cout << std::endl << "current board cards: ";
+			for (auto j = currentNode->game.getBoardCards().begin(); j != currentNode->game.getBoardCards().end(); ++j){
+				std::cout << *j << " ";
+				std::cout << hexToCard(*j) << " ";
+			}
+			std::cout << std::endl;
+			std::cout << "oldboard cards: ";
+for (auto j = oldBoard.begin(); j != oldBoard.end(); ++j){
+				std::cout << hexToCard(*j) << " ";
+			}
+			std::cout << std::endl;
 		}
 	}
 	// currentNode.getBotPlayer or something like that
-	std::vector<Player> updatePlayers{(*currentNode).getGame().getBotPlayer(), (*currentNode).getGame().getOppPlayer() };
+	std::vector<Player> updatePlayers{currentNode->getGame().getBotPlayer(), currentNode->getGame().getOppPlayer() };
 	return updatePlayers;
 }
 
-std::shared_ptr<Node> playTurn(std::shared_ptr<ChoiceNode> currentNode, std::vector<int> deck) {
-	if ((*currentNode).getGame().getState() != static_cast<int>(Stage::SHOWDOWN)
-			&& !(*currentNode).getIsAllIn()
-			&& !(*currentNode).getIsFolded()) {
+std::shared_ptr<OpponentNode> playTurn(std::shared_ptr<ChoiceNode> currentNode, std::vector<int> deck) {
+	if (currentNode->getGame().getState() != static_cast<int>(Stage::SHOWDOWN)
+			&& !currentNode->getIsAllIn()
+			&& !currentNode->getIsFolded()) {
 		Decision decision = Decision::makeDecision(currentNode);
 		switch(decision.action) {
 			case Action::CALL: {
-				auto returnNode = (*currentNode).call();
+				auto returnNode = currentNode->call();
 				return returnNode;
 				break; 
 			}
 			case Action::RAISE:{
-				auto returnNode = (*currentNode).raise(decision.raiseAmount);
+				auto returnNode = currentNode->raise(decision.raiseAmount);
 				return returnNode;
 				break;
 			}
 			case Action::FOLD:{
-				auto returnNode = (*currentNode).fold();
+				allocateChips(0, (*currentNode));
+				auto returnNode = currentNode->fold();
 				return returnNode;
 				break;
 			}
 			default:
 				std::cout << "Invalid action" << std::endl;
 		}
-	} else if ((*currentNode).getIsAllIn()) {
-		for (int i = (*currentNode).getGame().getState(); i < static_cast<int>(Stage::SHOWDOWN); ++i) {
-			std::vector<int> oldBoard = (*currentNode).getGame().getBoardCards();
+	} else if (currentNode->getIsAllIn()) {
+		for (int i = currentNode->getGame().getState(); i < static_cast<int>(Stage::SHOWDOWN); ++i) {
+			std::vector<int> oldBoard = currentNode->getGame().getBoardCards();
 			std::vector<int> newCards = deal(deck, i);
 			//adding current board cards to newly dealt cards
 			for (auto j = newCards.begin(); j != newCards.end(); ++j){
 				oldBoard.push_back(*j);
 			}
-			(*currentNode).getGame().setBoardCards(oldBoard);
+			std::cout << std::endl;
+			currentNode->game.setBoardCards(oldBoard);
 		}
-		int winner = showdown((*currentNode).getGame().getBotPlayer().getHoleCards(),
-									  (*currentNode).getGame().getOppPlayer().getHoleCards(),
-									  (*currentNode).getGame().getBoardCards());
+		std::cout << "number of cards: " << currentNode->getGame().getBoardCards().size() << std::endl;
+		std::cout << "botCards: " << hexToCard(currentNode->getGame().getBotPlayer().getHoleCards()[0]) << " " << hexToCard(currentNode->getGame().getBotPlayer().getHoleCards()[1]) << std::endl;
+		std::cout << "oppCards: " << hexToCard(currentNode->getGame().getOppPlayer().getHoleCards()[0]) << " " << hexToCard(currentNode->getGame().getOppPlayer().getHoleCards()[1]) << std::endl;
+		int winner = showdown(currentNode->getGame().getBotPlayer().getHoleCards(),
+									  currentNode->getGame().getOppPlayer().getHoleCards(),
+									  currentNode->getGame().getBoardCards());
 		allocateChips(winner, (*currentNode));
-		return currentNode;
+		auto returnNode = currentNode->fold();
+		return returnNode;
 		
-	} else if ((*currentNode).getGame().getState() == static_cast<int> (Stage::SHOWDOWN)) {
-		int winner = showdown((*currentNode).getGame().getBotPlayer().getHoleCards(),
-									  (*currentNode).getGame().getOppPlayer().getHoleCards(),
-									  (*currentNode).getGame().getBoardCards());
+	} else if (currentNode->getGame().getState() == static_cast<int> (Stage::SHOWDOWN)) {
+		int winner = showdown(currentNode->getGame().getBotPlayer().getHoleCards(),
+									  currentNode->getGame().getOppPlayer().getHoleCards(),
+									  currentNode->getGame().getBoardCards());
 		allocateChips(winner, (*currentNode));
-		return currentNode;
+		auto returnNode = currentNode->fold();
+		return returnNode;
 			
-	} else if ((*currentNode).getIsFolded()) {
-		allocateChips(0, (*currentNode));
-		return currentNode;
 	} else {
 		std::cout << "What the fuck kind of Node is this" << std::endl;
 		return std::shared_ptr<OpponentNode>(NULL);
 	}
-	return std::shared_ptr<Node>(NULL);
+	return std::shared_ptr<OpponentNode>(NULL);
 }
 
-std::shared_ptr<Node> playTurn(std::shared_ptr<OpponentNode> currentNode, std::vector<int> deck) {
-	if ((*currentNode).getGame().getState() != static_cast<int>(Stage::SHOWDOWN)
-			&& !(*currentNode).getIsAllIn()
-			&& !(*currentNode).getIsFolded()) {
+std::shared_ptr<ChoiceNode> playTurn(std::shared_ptr<OpponentNode> currentNode, std::vector<int> deck) {
+	if (currentNode->getGame().getState() != static_cast<int>(Stage::SHOWDOWN)
+			&& !currentNode->getIsAllIn()
+			&& !currentNode->getIsFolded()) {
 		Decision decision = Decision::makeDecision(currentNode);
 		switch(decision.action) {
 			case Action::CALL: {
-				auto returnNode = (*currentNode).call();
+				auto returnNode = currentNode->call();
 				return returnNode;
 				break; 
 			}
 			case Action::RAISE:{
-				auto returnNode = (*currentNode).raise(decision.raiseAmount);
+				auto returnNode = currentNode->raise(decision.raiseAmount);
 				return returnNode;
 				break;
 			}
 			case Action::FOLD:{
-				auto returnNode = (*currentNode).fold();
+				allocateChips(1, (*currentNode));
+				auto returnNode = currentNode->fold();
 				return returnNode;
 				break;
 			}
 			default:
 				std::cout << "Invalid action" << std::endl;
 		}
-	} else if ((*currentNode).getIsAllIn()) {
-		for (int i = (*currentNode).getGame().getState(); i < static_cast<int>(Stage::SHOWDOWN); ++i) {
-			std::vector<int> oldBoard = (*currentNode).getGame().getBoardCards();
+	} else if (currentNode->getIsAllIn()) {
+		for (int i = currentNode->getGame().getState(); i < static_cast<int>(Stage::SHOWDOWN); ++i) {
+			std::vector<int> oldBoard = currentNode->getGame().getBoardCards();
 			std::vector<int> newCards = deal(deck, i);
 			//adding current board cards to newly dealt cards
 			for (auto j = newCards.begin(); j != newCards.end(); ++j){
 				oldBoard.push_back(*j);
 			}
-			(*currentNode).getGame().setBoardCards(oldBoard);
+			for (auto j = oldBoard.begin(); j != oldBoard.end(); ++j){
+				std::cout << hexToCard(*j) << " ";
+			}
+			std::cout << std::endl;
+			currentNode->getGame().setBoardCards(oldBoard);
 		}
-		int winner = showdown((*currentNode).getGame().getBotPlayer().getHoleCards(),
-									  (*currentNode).getGame().getOppPlayer().getHoleCards(),
-									  (*currentNode).getGame().getBoardCards());
+		int winner = showdown(currentNode->getGame().getBotPlayer().getHoleCards(),
+									  currentNode->getGame().getOppPlayer().getHoleCards(),
+									  currentNode->getGame().getBoardCards());
+									  std::cout << "winner :" << winner << std::endl;
 		allocateChips(winner, (*currentNode));
-		return currentNode;
-		
-	} else if ((*currentNode).getGame().getState() == static_cast<int> (Stage::SHOWDOWN)) {
-		int winner = showdown((*currentNode).getGame().getBotPlayer().getHoleCards(),
-									  (*currentNode).getGame().getOppPlayer().getHoleCards(),
-									  (*currentNode).getGame().getBoardCards());
+		auto returnNode = currentNode->fold();
+		return returnNode;
+	} else if (currentNode->getGame().getState() == static_cast<int> (Stage::SHOWDOWN)) {
+		int winner = showdown(currentNode->getGame().getBotPlayer().getHoleCards(),
+									  currentNode->getGame().getOppPlayer().getHoleCards(),
+									  currentNode->getGame().getBoardCards());
 		allocateChips(winner, (*currentNode));
-		return currentNode;
-			
-	} else if ((*currentNode).getIsFolded()) {
-		allocateChips(1, (*currentNode));
-		return currentNode;
+		auto returnNode = currentNode->fold();
+		return returnNode;
 	} else {
 		std::cout << "What the fuck kind of Node is this" << std::endl;
-		return std::shared_ptr<OpponentNode>(NULL);
+		return std::shared_ptr<ChoiceNode>(NULL);
 	}
-	return std::shared_ptr<Node>(NULL);
+	return std::shared_ptr<ChoiceNode>(NULL);
 }
 
