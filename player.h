@@ -23,6 +23,7 @@ class Player {
 		// Getters
 		std::vector<int> getHoleCards() const { return holeCards; }
 		double getChips() const { return chips; }
+		double getChips() { return chips; }
 		double getPotInvestment() const { return potInvestment; }
 		bool getIsFolded() const { return isFolded; }
 

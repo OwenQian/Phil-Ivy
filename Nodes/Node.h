@@ -7,14 +7,12 @@
 #include <vector>
 #include <memory>
 
-class Node {
-public:
-		//static const int EV_Const = 1
-		GameObject game;
-		protected:
+class Node: public std::enable_shared_from_this<Node> {
+	protected:
 		std::shared_ptr<Node> foldChild;
 		std::shared_ptr<Node> callChild;
 		std::shared_ptr<Node> raiseChild;
+		GameObject game;
 		//the parent of this node in the game tree
 		std::shared_ptr<Node> const parent; 
 		//number of times a node has been visited/simulated on
@@ -35,19 +33,20 @@ public:
 		// Member-accessibility functions
 
 		// Getters
-		GameObject getGame() const { return game; }
+		GameObject & getGame() { return game; }
+		GameObject const & getGame() const { return game; }
 		std::shared_ptr<Node> getFoldChild() const { return foldChild; }
 		std::shared_ptr<Node> getCallChild() const { return callChild; }
 		std::shared_ptr<Node> getRaiseChild() const { return raiseChild; }
 		std::shared_ptr<Node> getParent() const { return parent; }
 		bool getIsFolded() const { return isFolded; }
-		double getCurrentRaise() const { return currentRaise; }
+		double const & getCurrentRaise() const { return currentRaise; }
 		bool getIsAllIn() const { return isAllIn; }
 
 		// Setters
 		void setCurrentRaise(double amount) { currentRaise = amount; }
 		void setIsAllIn(bool status) { isAllIn = status; }
-		
+
 		// Constructors
 		Node(	int                    state,
 				double                 pot,

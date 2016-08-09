@@ -22,6 +22,8 @@ int main() {
 	std::cout << "botPlayer cards: " << hexToCard(botPlayer.getHoleCards()[0]) << " " << hexToCard(botPlayer.getHoleCards()[1]) << std::endl;
 	std::cout << "oppPlayer cards: " << hexToCard(oppPlayer.getHoleCards()[0]) << " " << hexToCard(oppPlayer.getHoleCards()[1]) << std::endl;
 	
+	std::cout << "bot chips: " << botPlayer.getChips() << std::endl;
+	std::cout << "opp chips: " << oppPlayer.getChips() << std::endl;
 	playRound(botPlayer, oppPlayer);
 
 	return 0;
