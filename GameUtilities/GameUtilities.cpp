@@ -75,10 +75,12 @@ void playGame(){
 	Player botPlayer(0, 0, initialChips, 0); //0, 0 represetn dummy cards
 	Player oppPlayer(0, 0, initialChips, 0);
 	
-	while (botPlayer.getChips() && oppPlayer.getChips()){ // while both players have chips
+	while ((botPlayer.getChips() > 0)&& (oppPlayer.getChips() > 0)){ // while both players have chips
 		std::vector<Player> updatePlayers = playRound (botPlayer, oppPlayer);
 		botPlayer = updatePlayers[0];
 		oppPlayer = updatePlayers[1];
+		std::cout << "bot player chips: " << botPlayer.getChips() << std::endl;
+		std::cout << "opp player chips: " << oppPlayer.getChips() << std::endl;
 		smallBlindPosition = !smallBlindPosition;
 	}
 }
@@ -189,7 +191,7 @@ std::shared_ptr<OpponentNode> playTurn(std::shared_ptr<ChoiceNode> currentNode, 
 				break;
 			}
 			case Action::FOLD:{
-				allocateChips(0, (*currentNode));
+				allocateChips(1, (*currentNode));
 				auto returnNode = currentNode->fold();
 				return returnNode;
 				break;
@@ -228,7 +230,7 @@ std::shared_ptr<ChoiceNode> playTurn(std::shared_ptr<OpponentNode> currentNode, 
 				break;
 			}
 			case Action::FOLD:{
-				allocateChips(1, (*currentNode));
+				allocateChips(0, (*currentNode));
 				auto returnNode = currentNode->fold();
 				return returnNode;
 				break;
