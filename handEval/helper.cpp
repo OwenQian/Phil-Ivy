@@ -252,6 +252,7 @@ int showdown (std::vector<int> ourCards, std::vector<int> oppCards, std::vector<
 	for (auto i = boardCards.begin(); i != boardCards.end(); ++i){
 		allCards.push_back(*i);
 	}
+	std::cout << std::endl;
 	for (int i = 0; i < 21; ++i) {
 		ourHandRank = std::min( ourHandRank,
 				eval_5hand_fast(allCards[comb7[i][0]],
@@ -273,7 +274,7 @@ int showdown (std::vector<int> ourCards, std::vector<int> oppCards, std::vector<
 	// lower handRank is better
 	if (ourHandRank < oppHandRank)
 		return 0;
-	else if (oppHandRank > ourHandRank)
+	else if (oppHandRank < ourHandRank)
 		return 1;
 	else
 		// chop

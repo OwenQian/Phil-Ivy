@@ -125,31 +125,7 @@ std::vector<Player> playRound(Player botPlayer, Player oppPlayer){
 			currentNode = playTurn(std::static_pointer_cast<ChoiceNode>(currentNode), deck);
 		else
 			currentNode = playTurn(std::static_pointer_cast<OpponentNode>(currentNode), deck);
-		if (currentNode->getIsAllIn()) {
-			for (int i = currentNode->getGame().getState(); i < static_cast<int>(Stage::SHOWDOWN); ++i) {
-				std::vector<int> updateBoard = currentNode->getGame().getBoardCards();
-				std::vector<int> newCards = deal(deck, i);
-				//adding current board cards to newly dealt cards
-				assert(newCards.size() <= 3);
-				for (auto j = newCards.begin(); j != newCards.end(); ++j){
-					updateBoard.push_back(*j);
-				}
-				assert(updateBoard.size() <=5);
-				currentNode->getGame().setBoardCards(updateBoard);
-				for (auto j = currentNode->getGame().getBoardCards().begin(); j != currentNode->getGame().getBoardCards().end(); ++j){
-					std::cout << hexToCard(*j) << " ";
-				}
-				std::cout << std::endl;
-			}
-			std::cout << "botCards: " << hexToCard(currentNode->getGame().getBotPlayer().getHoleCards()[0]) << " " << hexToCard(currentNode->getGame().getBotPlayer().getHoleCards()[1]) << std::endl;
-			std::cout << "oppCards: " << hexToCard(currentNode->getGame().getOppPlayer().getHoleCards()[0]) << " " << hexToCard(currentNode->getGame().getOppPlayer().getHoleCards()[1]) << std::endl;
-			int winner = showdown(currentNode->getGame().getBotPlayer().getHoleCards(),
-					currentNode->getGame().getOppPlayer().getHoleCards(),
-					currentNode->getGame().getBoardCards());
-			allocateChips(winner, (*currentNode));
-			std::cout << "Winner: " << winner << std::endl;
-			currentNode = std::static_pointer_cast<ChoiceNode>(currentNode)->fold();
-		} else if (currentStage != currentNode->getGame().getState()){
+		if (currentStage != currentNode->getGame().getState()){
 			std::vector<int> updateBoard = currentNode->getGame().getBoardCards();
 			std::vector<int> newCards = deal(deck, currentStage);
 			currentStage++; //goes to the next stage in the game
@@ -160,6 +136,31 @@ std::vector<Player> playRound(Player botPlayer, Player oppPlayer){
 			}
 			assert(updateBoard.size() <= 5);
 			currentNode->getGame().setBoardCards(updateBoard);
+			if (currentNode->getIsAllIn()) {
+			for (int i = currentNode->getGame().getState(); i < static_cast<int>(Stage::SHOWDOWN); ++i) {
+				std::vector<int> updateBoard = currentNode->getGame().getBoardCards();
+				std::vector<int> newCards = deal(deck, i);
+				//adding current board cards to newly dealt cards
+				assert(newCards.size() <= 3);
+				for (auto j = newCards.begin(); j != newCards.end(); ++j){
+					updateBoard.push_back(*j);
+				}
+				assert(updateBoard.size() <=5);
+				currentNode->getGame().setBoardCards(updateBoard);
+			
+			}
+		
+			std::cout << "botCards: " << hexToCard(currentNode->getGame().getBotPlayer().getHoleCards()[0]) << " " << hexToCard(currentNode->getGame().getBotPlayer().getHoleCards()[1]) << std::endl;
+			std::cout << "oppCards: " << hexToCard(currentNode->getGame().getOppPlayer().getHoleCards()[0]) << " " << hexToCard(currentNode->getGame().getOppPlayer().getHoleCards()[1]) << std::endl;
+				std::cout << std::endl;
+			int winner = showdown(currentNode->getGame().getBotPlayer().getHoleCards(),
+					currentNode->getGame().getOppPlayer().getHoleCards(),
+					currentNode->getGame().getBoardCards());
+			allocateChips(winner, (*currentNode));
+			std::cout << "Winner: " << winner << std::endl;
+			currentNode = std::static_pointer_cast<ChoiceNode>(currentNode)->fold();
+		}
+			
 		}
 	}
 	// currentNode.getBotPlayer or something like that
