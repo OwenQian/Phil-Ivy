@@ -79,18 +79,19 @@ void playGame(){
 		std::vector<Player> updatePlayers = playRound (botPlayer, oppPlayer);
 		botPlayer = updatePlayers[0];
 		oppPlayer = updatePlayers[1];
-		smallBlindPosition = ~smallBlindPosition;
+		smallBlindPosition = !smallBlindPosition;
 	}
 }
 
 std::vector<Player> playRound(Player botPlayer, Player oppPlayer){
-	int smallBlindPosition = 0;
+
 	std::vector<int> deck;
 	init_deck(deck);
 	botPlayer.setHoleCards(deal(deck, static_cast<int>(Stage::HOLECARDS) ));
 	oppPlayer.setHoleCards(deal(deck, static_cast<int>(Stage::HOLECARDS) ));
 	int currentStage = 1;
 	std::shared_ptr<Node> root;
+	std::cout << "smallblindposition: " << smallBlindPosition << std::endl;
 	if (smallBlindPosition == 0){
 		root = std::make_shared<ChoiceNode>(1, bigBlind + smallBlind, std::vector<int>(),
 		botPlayer, oppPlayer, smallBlindPosition, std::shared_ptr<ChoiceNode> (NULL));
@@ -120,12 +121,14 @@ std::vector<Player> playRound(Player botPlayer, Player oppPlayer){
 	root->setCurrentRaise(bigBlind - smallBlind);
 	// currentNode infers type of node from root type
 	auto currentNode = root;
+	currentNode->setIsFirst(true);
 	while (currentNode->getIsFolded() == 0 && !currentNode->getIsAllIn()) { 
 		if (currentNode->getGame().getPlayerTurn() == 0)
 			currentNode = playTurn(std::static_pointer_cast<ChoiceNode>(currentNode), deck);
 		else
 			currentNode = playTurn(std::static_pointer_cast<OpponentNode>(currentNode), deck);
 		if (currentStage != currentNode->getGame().getState()){
+			std::cout << "state changed!" << std::endl;
 			std::vector<int> updateBoard = currentNode->getGame().getBoardCards();
 			std::vector<int> newCards = deal(deck, currentStage);
 			currentStage++; //goes to the next stage in the game
@@ -160,7 +163,9 @@ std::vector<Player> playRound(Player botPlayer, Player oppPlayer){
 			std::cout << "Winner: " << winner << std::endl;
 			currentNode = std::static_pointer_cast<ChoiceNode>(currentNode)->fold();
 		}
-			
+		
+		currentNode->setIsFirst(true);
+		currentNode->getGame().setPlayerTurn(smallBlindPosition);
 		}
 	}
 	// currentNode.getBotPlayer or something like that

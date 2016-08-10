@@ -17,9 +17,7 @@ Node::Node(int              state,
 			botPlayer,
 			oppPlayer,
 			playerTurn),
-	parent(parent),
-	isFolded(false),
-	isAllIn(false) { }
+	parent(parent){ }
 
 	// Action function implementation
 	std::shared_ptr<Node> Node::doFold() {
@@ -31,6 +29,7 @@ Node::Node(int              state,
 	}
 
 std::shared_ptr<Node> Node::doCall() {
+	std::cout << "isfirst?: " << getIsFirst() << std::endl;
 	//creates a temporary playerlist and updates the player's potinvestment and chip count
 	if (game.getPlayerTurn() == 0) {
 		Player tempPlayer = game.getBotPlayer();
@@ -41,7 +40,7 @@ std::shared_ptr<Node> Node::doCall() {
 				game.getOppPlayer().getChips() <= currentRaise) {
 			tempAllIn = true;
 		}
-		auto callNode = std::make_shared<Node>(game.getState() + 1,
+		auto callNode = std::make_shared<Node>(game.getState() + !getIsFirst(), //only advances state if not first action taken that stage
 			tempPlayer.getPotInvestment() + game.getOppPlayer().getPotInvestment(),
 			game.getBoardCards(),
 			tempPlayer,
@@ -59,22 +58,24 @@ std::shared_ptr<Node> Node::doCall() {
 				game.getOppPlayer().getChips() <= currentRaise) {
 			tempAllIn = true;
 		}
-		auto callNode = std::make_shared<Node>( game.getState() + 1,
+		auto callNode = std::make_shared<Node>( game.getState() + !getIsFirst(),
 			game.getBotPlayer().getPotInvestment() + tempPlayer.getPotInvestment(),
 			game.getBoardCards(),
 			game.getBotPlayer(),
 			tempPlayer,
 			!(game.getPlayerTurn()),
-			shared_from_this() );
+			shared_from_this() );	
 		(*callNode).setIsAllIn(tempAllIn);
 		callChild = callNode;
 	}
+	callChild->setIsFirst(false);
 	return callChild;
 }
 
 // raiseAmount means amount raising to, NOT raising by
 std::shared_ptr<Node> Node::doRaise(double raiseAmount) {
 	// if raise all-in (or more) create AllInNode
+	std::cout << "isfirst?: " << getIsFirst() << std::endl;
 	if (raiseAmount >= game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment() ||
 			raiseAmount >= game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment() ) {
 		std::cout << "Raising All-In" << std::endl;
@@ -83,6 +84,7 @@ std::shared_ptr<Node> Node::doRaise(double raiseAmount) {
 		raiseAmount = std::min(game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment(),
 				game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment());
 	}
+	setIsFirst(false);
 	if (game.getPlayerTurn() == 0) {
 		Player tempPlayer = game.getBotPlayer();
 		tempPlayer.setChips(tempPlayer.getChips() - (raiseAmount - tempPlayer.getPotInvestment()) );

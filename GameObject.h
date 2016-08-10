@@ -12,7 +12,7 @@ class GameObject {
 		std::vector<int> boardCards;
 		Player botPlayer;
 		Player oppPlayer;
-		const int playerTurn;
+		int playerTurn;
 
 	public:
 		// Constructors
@@ -38,6 +38,7 @@ class GameObject {
 
 		// Setter; Note: be careful about changing boardCards
 		void setBoardCards(std::vector<int> boardCards) { this->boardCards = boardCards; }
+		void setPlayerTurn(int turn) { this->playerTurn = turn; }
 };
 
 #endif //GameObject.h

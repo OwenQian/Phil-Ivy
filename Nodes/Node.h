@@ -19,8 +19,9 @@ class Node: public std::enable_shared_from_this<Node> {
 		//the expected value derived from choosing this node action 
 		//updated through backprop
 		double currentRaise;                   //the current raise
-		bool isFolded;	        //whether or not Node is Folded
-		bool isAllIn;				//only true when accepted
+		bool isFolded = false;	        //whether or not Node is Folded
+		bool isAllIn = false;				//only true when accepted
+		bool firstAction;
 
 		// Action functions implementations
 		// Note, if we're not using different implementations of these functions for c-o/node
@@ -42,11 +43,13 @@ class Node: public std::enable_shared_from_this<Node> {
 		bool getIsFolded() const { return isFolded; }
 		double const & getCurrentRaise() const { return currentRaise; }
 		bool getIsAllIn() const { return isAllIn; }
+		bool getIsFirst() const { return firstAction; }
 
 		// Setters
 		void setCurrentRaise(double amount) { currentRaise = amount; }
 		void setIsAllIn(bool status) { isAllIn = status; }
-
+		void setIsFirst(bool a) { firstAction = a; }
+		
 		// Constructors
 		Node(	int                    state,
 				double                 pot,
