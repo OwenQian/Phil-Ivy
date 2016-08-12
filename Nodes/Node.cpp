@@ -29,7 +29,6 @@ Node::Node(int              state,
 	}
 
 std::shared_ptr<Node> Node::doCall() {
-	std::cout << "isfirst?: " << getIsFirst() << std::endl;
 	//creates a temporary playerlist and updates the player's potinvestment and chip count
 	if (game.getPlayerTurn() == 0) {
 		Player tempPlayer = game.getBotPlayer();
@@ -37,7 +36,6 @@ std::shared_ptr<Node> Node::doCall() {
 		tempPlayer.setChips(tempPlayer.getChips() - (currentRaise - tempPlayer.getPotInvestment()) );
 		tempPlayer.setPotInvestment(currentRaise);
 		std::cout << "current raise: " << currentRaise << std::endl;
-		std::cout << "botplayer chips: " << tempPlayer.getChips() << std::endl;
 		bool tempAllIn = false;
 		if (game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment() <= currentRaise ||
 				game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment() <= currentRaise) {
@@ -82,7 +80,6 @@ std::shared_ptr<Node> Node::doRaise(double raiseAmount) {
 				game.getOppPlayer().getChips() <= currentRaise) {
 			return doCall();
 		}
-	std::cout << "isfirst?: " << getIsFirst() << std::endl;
 	if (raiseAmount >= game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment() ||
 			raiseAmount >= game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment() ) {
 		std::cout << "Raising All-In" << std::endl;
