@@ -18,8 +18,8 @@ class Node;
 class ChoiceNode;
 class OpponentNode;
 
-static double smallBlind = 25.0;
-static double bigBlind = 50.0;
+static double smallBlind = 500.0;
+static double bigBlind = 999.0;
 static int smallBlindPosition = 0;
 
 void allocateChips(int whoWon, Node &currentNode){
@@ -91,23 +91,56 @@ std::vector<Player> playRound(Player botPlayer, Player oppPlayer){
 	init_deck(deck);
 	botPlayer.setHoleCards(deal(deck, static_cast<int>(Stage::HOLECARDS) ));
 	oppPlayer.setHoleCards(deal(deck, static_cast<int>(Stage::HOLECARDS) ));
+	botPlayer.setPotInvestment(0);
+	oppPlayer.setPotInvestment(0);
 	int currentStage = 1;
 	std::shared_ptr<Node> root;
 	std::cout << "smallblindposition: " << smallBlindPosition << std::endl;
 	if (smallBlindPosition == 0){
 		root = std::make_shared<ChoiceNode>(1, bigBlind + smallBlind, std::vector<int>(),
 		botPlayer, oppPlayer, smallBlindPosition, std::shared_ptr<ChoiceNode> (NULL));
-
+		if (smallBlind >= botPlayer.getChips()){
+			root->getGame().getOppPlayer().setChips(oppPlayer.getChips() - botPlayer.getChips());
+			root->getGame().getBotPlayer().setChips(0);
+			
+			root->getGame().getBotPlayer().setPotInvestment(botPlayer.getChips());
+			root->getGame().getOppPlayer().setPotInvestment(botPlayer.getChips());
+			
+		} else if (bigBlind >= oppPlayer.getChips()) {
+			root->getGame().getOppPlayer().setChips(0);
+			root->getGame().getBotPlayer().setPotInvestment(smallBlind);
+			root->getGame().getOppPlayer().setPotInvestment(oppPlayer.getChips());
+			
+			root->setCurrentRaise(oppPlayer.getChips());
+		} else {
 		// subtract blinds from chip count
 		root->getGame().getBotPlayer().setChips(botPlayer.getChips() - smallBlind);
 		root->getGame().getOppPlayer().setChips(oppPlayer.getChips() - bigBlind);
-
+		std::cout << "asdf: " << root->getGame().getBotPlayer().getChips() << std::endl;
 		// add blinds to potInvestment
 		root->getGame().getBotPlayer().setPotInvestment(smallBlind);
 		root->getGame().getOppPlayer().setPotInvestment(bigBlind);
+		root->setCurrentRaise(bigBlind);
+		//std::cout << "current raise: " << root->getCurrentRaise() << std::endl;
+		}
 	} else if (smallBlindPosition == 1){
 		root = std::make_shared<OpponentNode>(1, bigBlind + smallBlind, std::vector<int>(),
 		botPlayer, oppPlayer, smallBlindPosition, std::shared_ptr<OpponentNode> (NULL));
+		
+		if (smallBlind >= oppPlayer.getChips()){
+			root->getGame().getBotPlayer().setChips(botPlayer.getChips() - oppPlayer.getChips());
+			root->getGame().getOppPlayer().setChips(0);
+			
+			root->getGame().getBotPlayer().setPotInvestment(oppPlayer.getChips());
+			root->getGame().getOppPlayer().setPotInvestment(oppPlayer.getChips());
+			
+		} else if (bigBlind >= oppPlayer.getChips()) {
+			root->getGame().getBotPlayer().setChips(0);
+			root->getGame().getOppPlayer().setPotInvestment(smallBlind);
+			root->getGame().getBotPlayer().setPotInvestment(oppPlayer.getChips());
+			
+			root->setCurrentRaise(botPlayer.getChips());
+		} else {
 		
 		// subtract blinds from chip count
 		root->getGame().getBotPlayer().setChips(botPlayer.getChips() - bigBlind);
@@ -116,18 +149,20 @@ std::vector<Player> playRound(Player botPlayer, Player oppPlayer){
 		// add blinds to potInvestment
 		root->getGame().getBotPlayer().setPotInvestment(bigBlind);
 		root->getGame().getOppPlayer().setPotInvestment(smallBlind);
+		root->setCurrentRaise(bigBlind);
+		}
 	} else {
 		std::cout << "fuck owen, also why is smallblindposition not 1 or 0" << std::endl;
 		return std::vector<Player>();
 	}
-	root->setCurrentRaise(bigBlind - smallBlind);
 	// currentNode infers type of node from root type
 	auto currentNode = root;
 	currentNode->setIsFirst(true);
-	while (currentNode->getIsFolded() == 0 && !currentNode->getIsAllIn()) { 
-		if (currentNode->getGame().getPlayerTurn() == 0)
+	while (currentNode->getIsFolded() == 0) { 
+	std::cout << "is all in?: " << currentNode->getIsAllIn() << std::endl;
+		if (currentNode->getGame().getPlayerTurn() == 0 && currentNode->getIsAllIn() == false)
 			currentNode = playTurn(std::static_pointer_cast<ChoiceNode>(currentNode), deck);
-		else
+		else if (currentNode->getIsAllIn() == false)
 			currentNode = playTurn(std::static_pointer_cast<OpponentNode>(currentNode), deck);
 		if (currentStage != currentNode->getGame().getState()){
 			std::cout << "state changed!" << std::endl;

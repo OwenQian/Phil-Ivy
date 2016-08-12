@@ -33,11 +33,14 @@ std::shared_ptr<Node> Node::doCall() {
 	//creates a temporary playerlist and updates the player's potinvestment and chip count
 	if (game.getPlayerTurn() == 0) {
 		Player tempPlayer = game.getBotPlayer();
+		
 		tempPlayer.setChips(tempPlayer.getChips() - (currentRaise - tempPlayer.getPotInvestment()) );
 		tempPlayer.setPotInvestment(currentRaise);
+		std::cout << "current raise: " << currentRaise << std::endl;
+		std::cout << "botplayer chips: " << tempPlayer.getChips() << std::endl;
 		bool tempAllIn = false;
-		if (game.getBotPlayer().getChips() <= currentRaise ||
-				game.getOppPlayer().getChips() <= currentRaise) {
+		if (game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment() <= currentRaise ||
+				game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment() <= currentRaise) {
 			tempAllIn = true;
 		}
 		auto callNode = std::make_shared<Node>(game.getState() + !getIsFirst(), //only advances state if not first action taken that stage
@@ -54,8 +57,8 @@ std::shared_ptr<Node> Node::doCall() {
 		tempPlayer.setChips(tempPlayer.getChips() - (currentRaise - tempPlayer.getPotInvestment()));
 		tempPlayer.setPotInvestment(currentRaise);
 		bool tempAllIn = false;
-		if (game.getBotPlayer().getChips() <= currentRaise ||
-				game.getOppPlayer().getChips() <= currentRaise) {
+		if (game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment() <= currentRaise ||
+				game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment() <= currentRaise) {
 			tempAllIn = true;
 		}
 		auto callNode = std::make_shared<Node>( game.getState() + !getIsFirst(),
@@ -75,6 +78,10 @@ std::shared_ptr<Node> Node::doCall() {
 // raiseAmount means amount raising to, NOT raising by
 std::shared_ptr<Node> Node::doRaise(double raiseAmount) {
 	// if raise all-in (or more) create AllInNode
+	if (game.getBotPlayer().getChips() <= currentRaise ||
+				game.getOppPlayer().getChips() <= currentRaise) {
+			return doCall();
+		}
 	std::cout << "isfirst?: " << getIsFirst() << std::endl;
 	if (raiseAmount >= game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment() ||
 			raiseAmount >= game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment() ) {
