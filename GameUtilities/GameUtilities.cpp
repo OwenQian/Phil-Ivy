@@ -13,13 +13,12 @@
 #include "../Stage.h"
 #include "Action.h"
 #include "Decision.h"
+#include "../Blinds.h"
 
 class Node;
 class ChoiceNode;
 class OpponentNode;
 
-static double smallBlind = 25.0;
-static double bigBlind = 50.0;
 static int smallBlindPosition = 0;
 
 void allocateChips(int whoWon, Node &currentNode){

@@ -1,4 +1,5 @@
 #include "Node.h"
+#include "../Blinds.h"
 
 #include <memory>
 #include <algorithm>	//std::min/max
@@ -49,6 +50,8 @@ std::shared_ptr<Node> Node::doCall() {
 			!(game.getPlayerTurn()),
 			shared_from_this() );
 		(*callNode).setIsAllIn(tempAllIn);
+        // if first Action, preserve currentRaise, else reset to 0
+        (*callNode).setCurrentRaise(getIsFirst() * currentRaise);
 		callChild = callNode;
 	} else {
 		Player tempPlayer = game.getOppPlayer();
@@ -67,6 +70,8 @@ std::shared_ptr<Node> Node::doCall() {
 			!(game.getPlayerTurn()),
 			shared_from_this() );	
 		(*callNode).setIsAllIn(tempAllIn);
+        // if first Action, preserve currentRaise, else reset to 0
+        (*callNode).setCurrentRaise(getIsFirst() * currentRaise);
 		callChild = callNode;
 	}
 	callChild->setIsFirst(false);
@@ -75,6 +80,9 @@ std::shared_ptr<Node> Node::doCall() {
 
 // raiseAmount means amount raising to, NOT raising by
 std::shared_ptr<Node> Node::doRaise(double raiseAmount) {
+    if (raiseAmount < bigBlind || raiseAmount < 2*currentRaise) {
+        raiseAmount = bigBlind > (2*currentRaise) ? bigBlind : (2*currentRaise);
+    } 
 	// if raise all-in (or more) create AllInNode
 	if (game.getBotPlayer().getChips() <= currentRaise ||
 				game.getOppPlayer().getChips() <= currentRaise) {
