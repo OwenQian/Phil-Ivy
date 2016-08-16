@@ -3,9 +3,13 @@
 
 #include "../GameObject.h"
 #include "../Player.h"
+#include "../GameUtilities/Action.h"
 
 #include <vector>
 #include <memory>
+
+class ChoiceNode;
+class OpponentNode;
 
 class Node: public std::enable_shared_from_this<Node> {
 	protected:
@@ -32,6 +36,15 @@ class Node: public std::enable_shared_from_this<Node> {
 		std::shared_ptr<Node> doRaise(double);
 		std::shared_ptr<Node> doCall();
 		std::shared_ptr<Node> doTerminal();
+
+        // Monte Carlo functions
+        Action monteCarlo(int maxSeconds);
+        Node& runSelection(Node& thisNode);
+        Node& expandTree(Node& treeNode, Node& selectNode);
+        Node& runSimulation(Node& thisNode);
+        void backPropagate(ChoiceNode& nextNode, double botEV, double oppEV);
+        void backPropagate(OpponentNode& nextNode, double botEV, double oppEV);
+
 	public:
 		// Member-accessibility functions
 
