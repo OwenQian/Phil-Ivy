@@ -22,6 +22,8 @@ class Node: public std::enable_shared_from_this<Node> {
 		bool isFolded = false;	        //whether or not Node is Folded
 		bool isAllIn = false;				//only true when accepted
 		bool firstAction;
+        int visitCount = 0;
+        double expectedValue = 0.0;
 
 		// Action functions implementations
 		// Note, if we're not using different implementations of these functions for c-o/node
