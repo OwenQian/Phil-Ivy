@@ -5,6 +5,7 @@
 #include <random>		//for deck shuffling
 #include <chrono>		//for deck shuffling seed
 #include <iostream>
+#include <cmath>        //for sqrt
 
 #include "GameUtilities.h"
 #include "../handEval/helper.h"
@@ -293,3 +294,22 @@ std::shared_ptr<ChoiceNode> playTurn(std::shared_ptr<OpponentNode> currentNode, 
 	return std::shared_ptr<ChoiceNode>(NULL);
 }
 
+double naiveUCT(Node selectNode, double exploreConst) {
+    double explorationTerm;
+    int childVisitSum = 0;
+    childVisitSum += selectNode.getFoldChild()->getVisitCount();
+    childVisitSum += selectNode.getRaiseChild()->getVisitCount();
+    childVisitSum += selectNode.getCallChild()->getVisitCount();
+
+    explorationTerm = std::sqrt(std::log(double (childVisitSum)) / double (selectNode.getVisitCount()) );
+    explorationTerm *= exploreConst;
+    return selectNode.getExpectedValue() + explorationTerm;
+}
+
+void conditionalDeal(Node& thisNode, int refStage, int compareStage, std::vector<int> deck, int stage) {
+    if (refStage != compareStage) {
+        std::vector<int> dealtCards = deal(deck, stage);
+        for (int i: dealtCards)
+            thisNode.getGame().getBoardCards().push_back(i);
+    }
+}

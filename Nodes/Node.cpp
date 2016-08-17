@@ -127,3 +127,5 @@ std::shared_ptr<Node> Node::doRaise(double raiseAmount) {
 	
 	return raiseChild;
 }
+
+

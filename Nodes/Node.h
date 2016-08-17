@@ -3,7 +3,6 @@
 
 #include "../GameObject.h"
 #include "../Player.h"
-#include "../GameUtilities/Action.h"
 
 #include <vector>
 #include <memory>
@@ -28,6 +27,7 @@ class Node: public std::enable_shared_from_this<Node> {
 		bool firstAction;
         int visitCount = 0;
         double expectedValue = 0.0;
+        static double const exploreConst;
 
 		// Action functions implementations
 		// Note, if we're not using different implementations of these functions for c-o/node
@@ -37,15 +37,7 @@ class Node: public std::enable_shared_from_this<Node> {
 		std::shared_ptr<Node> doCall();
 		std::shared_ptr<Node> doTerminal();
 
-        // Monte Carlo functions
-        Action monteCarlo(int maxSeconds);
-        Node& runSelection(Node& thisNode);
-        Node& expandTree(Node& treeNode, Node& selectNode);
-        Node& runSimulation(Node& thisNode);
-        void backPropagate(ChoiceNode& nextNode, double botEV, double oppEV);
-        void backPropagate(OpponentNode& nextNode, double botEV, double oppEV);
-
-	public:
+     	public:
 		// Member-accessibility functions
 
 		// Getters
@@ -59,11 +51,17 @@ class Node: public std::enable_shared_from_this<Node> {
 		double const & getCurrentRaise() const { return currentRaise; }
 		bool getIsAllIn() const { return isAllIn; }
 		bool getIsFirst() const { return firstAction; }
+        int & getVisitCount() { return visitCount; }
+        int const & getVisitCount() const { return visitCount; }
+        double & getExpectedValue() { return expectedValue; }
+        double const & getExpectedValue() const { return expectedValue; }
 
 		// Setters
 		void setCurrentRaise(double amount) { currentRaise = amount; }
 		void setIsAllIn(bool status) { isAllIn = status; }
 		void setIsFirst(bool a) { firstAction = a; }
+        void incrementVisitCount() { ++visitCount; }
+        void setExpectedValue(double EV) { expectedValue = EV; }
 		
 		// Constructors
 		Node(	int                    state,
@@ -75,5 +73,7 @@ class Node: public std::enable_shared_from_this<Node> {
 				std::shared_ptr<Node>  parent);
 
 };
+
+const double Node::exploreConst = 1.0;
 
 #endif	//Node.h
