@@ -28,10 +28,9 @@ class Node: public std::enable_shared_from_this<Node> {
 		// Action functions implementations
 		// Note, if we're not using different implementations of these functions for c-o/node
 		// these don't need to be virtual, but they do if we are
-		std::shared_ptr<Node> doFold();
-		std::shared_ptr<Node> doRaise(double);
-		std::shared_ptr<Node> doCall();
-		std::shared_ptr<Node> doTerminal();
+		//virtual Node& call() = 0;
+		//virtual Node& raise() = 0;
+		//virtual Node& fold() = 0;
 	public:
 		// Member-accessibility functions
 
@@ -51,6 +50,7 @@ class Node: public std::enable_shared_from_this<Node> {
 		void setCurrentRaise(double amount) { currentRaise = amount; }
 		void setIsAllIn(bool status) { isAllIn = status; }
 		void setIsFirst(bool a) { firstAction = a; }
+		void setIsFolded(bool a) { isFolded = a; }
 		
 		// Constructors
 		Node(	int                    state,
