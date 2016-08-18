@@ -2,16 +2,22 @@
 #define OPPONENT_NODE_H
 
 #include "Node.h"
-#include "ChoiceNode.h"
 #include "../GameObject.h"
+#include "../GameUtilities/GameUtilities.h"
+#include "../Stage.h"
+#include "../GameUtilities/Action.h"
 
 #include <memory>
-
 class ChoiceNode;
-
 class OpponentNode: public Node {
 	private:
-
+		Action monteCarlo(int maxSeconds);
+        void runSelection(ChoiceNode& thisNode, std::vector<int> &deck);
+		void runSelection(OpponentNode& thisNode, std::vector<int> &deck);
+        void runSimulation(ChoiceNode& thisNode, std::vector<int> deck);
+		void runSimulation(OpponentNode& thisNode, std::vector<int> deck);
+        void backPropagate(ChoiceNode& nextNode, double botEV, double oppEV);
+        void backPropagate(OpponentNode& nextNode, double botEV, double oppEV);
 	public:
 		//Constructor
 		OpponentNode(	
@@ -43,5 +49,8 @@ class OpponentNode: public Node {
 			return std::static_pointer_cast<ChoiceNode> (doRaise(raiseAmount));
 		}
 };
+
+
+
 
 #endif	//OpponentNode.h

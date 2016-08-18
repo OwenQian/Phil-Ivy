@@ -7,8 +7,6 @@
 #include <vector>
 #include <memory>
 
-class ChoiceNode;
-class OpponentNode;
 
 class Node: public std::enable_shared_from_this<Node> {
 	protected:
