@@ -58,9 +58,9 @@ Node& OpponentNode::callImplementation() {
 			tempPlayer,
 			!(game.getPlayerTurn()),
 			shared_from_this() );
-	(*callNode).setIsAllIn(tempAllIn);
+	callNode->setIsAllIn(tempAllIn);
 	// if first Action, preserve currentRaise, else reset to 0
-	(*callNode).setCurrentRaise(getIsFirst() * currentRaise);
+	callNode->setCurrentRaise(getIsFirst() * currentRaise);
 	//callChild = callNode;
 	callChild->setIsFirst(false);
 	return *callNode;
@@ -96,7 +96,7 @@ Node& OpponentNode::raiseImplementation(double raiseAmount) {
 			tempPlayer,
 			!(game.getPlayerTurn()),
 			shared_from_this() );
-	(*raiseNode).setCurrentRaise(raiseAmount);
+	raiseNode->setCurrentRaise(raiseAmount);
 	return *raiseNode;
 }
 

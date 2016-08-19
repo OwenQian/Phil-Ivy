@@ -94,7 +94,7 @@ Node& ChoiceNode::raiseImplementation(double raiseAmount) {
 			game.getOppPlayer(),
 			!(game.getPlayerTurn()),
 			shared_from_this() );
-	(*raiseNode).setCurrentRaise(raiseAmount);
+	raiseNode->setCurrentRaise(raiseAmount);
 	//raiseChild = raiseNode;
 	return *raiseNode;
 }
