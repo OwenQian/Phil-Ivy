@@ -9,9 +9,9 @@
 
 class Node: public std::enable_shared_from_this<Node> {
 	private:
-		virtual Node& callImplementation();
-		virtual Node& foldImplementation();
-		virtual Node& raiseImplementation(double);
+		virtual Node& callImplementation() = 0;
+		virtual Node& foldImplementation()= 0;
+		virtual Node& raiseImplementation(double) = 0;
 	protected:
 		std::shared_ptr<Node> foldChild;
 		std::shared_ptr<Node> callChild;

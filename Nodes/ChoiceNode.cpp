@@ -25,18 +25,18 @@ class Node;
 				playerTurn,
 				parent) { }
 
-	Node& ChoiceNode::foldImplementation() {
-		//create child foldNode
-		auto foldNode = std::make_shared<OpponentNode>(game.getState(),
-														game.getPot(),
-														game.getBoardCards(),
-														game.getBotPlayer(),
-														game.getOppPlayer(),
-														game.getPlayerTurn(),
-														this->parent);
-		foldNode->setIsFolded(true);
-		return *foldNode;
-	}
+Node& ChoiceNode::foldImplementation() {
+    //create child foldNode
+    auto foldNode = std::make_shared<OpponentNode>(game.getState(),
+                                                    game.getPot(),
+                                                    game.getBoardCards(),
+                                                    game.getBotPlayer(),
+                                                    game.getOppPlayer(),
+                                                    game.getPlayerTurn(),
+                                                    this->parent);
+    foldNode->setIsFolded(true);
+    return *foldNode;
+}
 
 Node& ChoiceNode::callImplementation() {
 	//creates a temporary playerlist and updates the player's potinvestment and chip count
