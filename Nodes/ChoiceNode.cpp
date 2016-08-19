@@ -43,12 +43,12 @@ void ChoiceNode::runSelection(ChoiceNode &thisNode, std::vector<int> &deck) {
         runSimulation (thisNode, deck);
 
     // Expansion
-    if (thisNode.callChild == nullptr)
+    if (!thisNode.callChild)
          runSimulation(*(thisNode.call()), deck);
-    else if (thisNode.raiseChild == nullptr) {
+    else if (!thisNode.raiseChild) {
         // raise function should make this a min raise
          runSimulation(*(thisNode.raise(1)), deck);
-    } else if (thisNode.foldChild == nullptr)
+    } else if (!thisNode.foldChild)
          runSimulation(*(thisNode.fold()), deck);
 
     // Calculate UCT score
