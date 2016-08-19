@@ -8,6 +8,10 @@
 #include <memory>
 
 class Node: public std::enable_shared_from_this<Node> {
+	private:
+		virtual Node& callImplementation();
+		virtual Node& foldImplementation();
+		virtual Node& raiseImplementation(double);
 	protected:
 		std::shared_ptr<Node> foldChild;
 		std::shared_ptr<Node> callChild;
@@ -28,9 +32,9 @@ class Node: public std::enable_shared_from_this<Node> {
 		// Action functions implementations
 		// Note, if we're not using different implementations of these functions for c-o/node
 		// these don't need to be virtual, but they do if we are
-		//virtual Node& call() = 0;
-		//virtual Node& raise() = 0;
-		//virtual Node& fold() = 0;
+		Node& call() { return callImplementation(); }
+		Node& raise(double raiseAmount) { return raiseImplementation(raiseAmount); }
+		Node& fold() { return foldImplementation(); }
 	public:
 		// Member-accessibility functions
 

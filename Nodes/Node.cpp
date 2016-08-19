@@ -19,5 +19,3 @@ Node::Node(int              state,
 			oppPlayer,
 			playerTurn),
 	parent(parent){ }
-
-	// Action function implementation

@@ -25,7 +25,7 @@ class Node;
 				playerTurn,
 				parent) { }
 
-	OpponentNode& ChoiceNode::fold() {
+	Node& ChoiceNode::foldImplementation() {
 		//create child foldNode
 		auto foldNode = std::make_shared<OpponentNode>(game.getState(),
 														game.getPot(),
@@ -38,7 +38,7 @@ class Node;
 		return *foldNode;
 	}
 
-OpponentNode& ChoiceNode::call() {
+Node& ChoiceNode::callImplementation() {
 	//creates a temporary playerlist and updates the player's potinvestment and chip count
 	Player tempPlayer = game.getBotPlayer();
 	tempPlayer.setChips(tempPlayer.getChips() - (currentRaise - tempPlayer.getPotInvestment()) );
@@ -56,16 +56,16 @@ OpponentNode& ChoiceNode::call() {
 			game.getOppPlayer(),
 			!(game.getPlayerTurn()),
 			shared_from_this() );
-	(*callNode).setIsAllIn(tempAllIn);
+	callNode->setIsAllIn(tempAllIn);
 	// if first Action, preserve currentRaise, else reset to 0
-	(*callNode).setCurrentRaise(getIsFirst() * currentRaise);
+	callNode->setCurrentRaise(getIsFirst() * currentRaise);
 	//callChild = callNode;
 	callChild->setIsFirst(false);
 	return *callNode;
 }
 
 // raiseAmount means amount raising to, NOT raising by
-OpponentNode& ChoiceNode::raise(double raiseAmount) {
+Node& ChoiceNode::raiseImplementation(double raiseAmount) {
 	// if inadequate raise amount, set to min-raise(2*currentRaise or by bigBlind)
 	if (raiseAmount < bigBlind || raiseAmount < 2*currentRaise) {
 		raiseAmount = bigBlind > (2*currentRaise) ? bigBlind : (2*currentRaise);
@@ -97,4 +97,16 @@ OpponentNode& ChoiceNode::raise(double raiseAmount) {
 	(*raiseNode).setCurrentRaise(raiseAmount);
 	//raiseChild = raiseNode;
 	return *raiseNode;
+}
+
+OpponentNode& ChoiceNode::call() {
+	return dynamic_cast<OpponentNode&>(callImplementation());
+}
+
+OpponentNode& ChoiceNode::raise(double raiseAmount) {
+	return dynamic_cast<OpponentNode&>(raiseImplementation(raiseAmount));
+}
+
+OpponentNode& ChoiceNode::fold() {
+	return dynamic_cast<OpponentNode&>(foldImplementation());
 }

@@ -10,7 +10,9 @@ class ChoiceNode;
 
 class OpponentNode: public Node {
 	private:
-
+		Node& callImplementation() override;
+		Node& foldImplementation() override;
+		Node& raiseImplementation(double) override;
 	public:
 		//Constructor
 		OpponentNode(	
