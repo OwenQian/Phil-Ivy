@@ -8,10 +8,12 @@
 #include "../GameUtilities/Action.h"
 
 #include <memory>
+
 class ChoiceNode;
 class OpponentNode: public Node {
 	private:
-		Action monteCarlo(int maxSeconds);
+        // Monte Carlo
+        //
         void runSelection(ChoiceNode& thisNode, std::vector<int> &deck);
 		void runSelection(OpponentNode& thisNode, std::vector<int> &deck);
         void runSimulation(ChoiceNode& thisNode, std::vector<int> deck);

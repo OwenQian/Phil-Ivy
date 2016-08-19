@@ -3,6 +3,7 @@
 
 #include "../GameObject.h"
 #include "../Player.h"
+#include "../Blinds.h"
 
 #include <vector>
 #include <memory>
@@ -25,7 +26,6 @@ class Node: public std::enable_shared_from_this<Node> {
 		bool firstAction;
         int visitCount = 0;
         double expectedValue = 0.0;
-        static double const exploreConst;
 
 		// Action functions implementations
 		// Note, if we're not using different implementations of these functions for c-o/node
@@ -71,7 +71,5 @@ class Node: public std::enable_shared_from_this<Node> {
 				std::shared_ptr<Node>  parent);
 
 };
-
-const double Node::exploreConst = 1.0;
 
 #endif	//Node.h

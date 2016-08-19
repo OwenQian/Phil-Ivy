@@ -11,9 +11,10 @@
 
 class OpponentNode;
 class ChoiceNode: public Node {	//inheriting from Node class
+    public:
+        Action monteCarlo(int maxSeconds, std::vector<int>);
 	private:
         // Monte Carlo functions
-        Action monteCarlo(int maxSeconds);
         void runSelection(ChoiceNode& thisNode, std::vector<int> &deck);
 		void runSelection(OpponentNode& thisNode, std::vector<int> &deck);
         void runSimulation(ChoiceNode& thisNode, std::vector<int> deck);
