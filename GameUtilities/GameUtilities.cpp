@@ -96,14 +96,14 @@ std::vector<Player> playRound(Player botPlayer, Player oppPlayer){
 	botPlayer.setPotInvestment(0);
 	oppPlayer.setPotInvestment(0);
 	int currentStage = 1;
-	std::shared_ptr<Node> root;
+    std::shared_ptr<Node> root;
 	std::cout << "smallblindposition: " << smallBlindPosition << std::endl;
 	assert(smallBlindPosition == 0 || smallBlindPosition == 1);
 	if (smallBlindPosition == 0){
 		root = std::make_shared<ChoiceNode>(1, bigBlind + smallBlind, std::vector<int>(),
-				botPlayer, oppPlayer, smallBlindPosition, std::shared_ptr<ChoiceNode> (NULL));
+				botPlayer, oppPlayer, smallBlindPosition, nullptr);
 		// if the smallBlind puts the bot allIn
-		if (smallBlind >= botPlayer.getChips()){
+		if (smallBlind >= botPlayer.getChips()) {
 			root->getGame().getOppPlayer().setChips(oppPlayer.getChips() - botPlayer.getChips());
 			root->getGame().getBotPlayer().setChips(0);
 
@@ -159,13 +159,13 @@ std::vector<Player> playRound(Player botPlayer, Player oppPlayer){
 		}
 	} 
 	// currentNode infers type of node from root type
-	auto currentNode = root;
+    auto currentNode = root;
 	currentNode->setIsFirst(true);
 	while (currentNode->getIsFolded() == 0) { 
-		if (currentNode->getGame().getPlayerTurn() == 0 && currentNode->getIsAllIn() == false)
-			currentNode = playTurn(std::static_pointer_cast<ChoiceNode>(currentNode), deck);
-		else if (currentNode->getIsAllIn() == false)
-			currentNode = playTurn(std::static_pointer_cast<OpponentNode>(currentNode), deck);
+		if (!currentNode->getIsAllIn() && currentNode->getGame().getPlayerTurn() == 0)
+			currentNode = playTurn(std::dynamic_pointer_cast<ChoiceNode>(currentNode), deck);
+        else if (!currentNode->getIsAllIn())
+            currentNode = playTurn(std::dynamic_pointer_cast<OpponentNode>(currentNode), deck);
 		if (currentStage != currentNode->getGame().getState() || currentNode->getIsAllIn()){
 			std::vector<int> updateBoard = currentNode->getGame().getBoardCards();
 			std::vector<int> newCards = deal(deck, currentStage);
@@ -207,7 +207,7 @@ std::vector<Player> playRound(Player botPlayer, Player oppPlayer){
 						currentNode->getGame().getBoardCards());
 				allocateChips(winner, (*currentNode));
 				std::cout << "Winner: " << winner << std::endl;
-				currentNode = std::static_pointer_cast<ChoiceNode>(currentNode)->fold();
+				currentNode = std::shared_ptr<Node>(&currentNode->fold());
 			}
 
 			currentNode->setIsFirst(true);
@@ -224,22 +224,19 @@ std::shared_ptr<OpponentNode> playTurn(std::shared_ptr<ChoiceNode> currentNode, 
 	assert(currentNode->getIsFolded() == false);
 	if (stageInt != static_cast<int>(Stage::SHOWDOWN)
 			&& !currentNode->getIsFolded()) {
-		Decision decision = Decision::makeDecision(currentNode);
+		Decision decision = Decision::makeDecision(*currentNode);
 		switch(decision.action) {
 			case Action::CALL: {
-								   auto returnNode = currentNode->call();
-								   return returnNode;
+								   return std::shared_ptr<OpponentNode>(&currentNode->call());
 								   break; 
 							   }
 			case Action::RAISE:{
-								   auto returnNode = currentNode->raise(decision.raiseAmount);
-								   return returnNode;
+								   return std::shared_ptr<OpponentNode>(&currentNode->raise(decision.raiseAmount));
 								   break;
 							   }
 			case Action::FOLD:{
-								  allocateChips(1, (*currentNode));
-								  auto returnNode = currentNode->fold();
-								  return returnNode;
+								  allocateChips(1, *currentNode);
+                                  return std::shared_ptr<OpponentNode>(&currentNode->fold());
 								  break;
 							  }
 			default:
@@ -249,11 +246,9 @@ std::shared_ptr<OpponentNode> playTurn(std::shared_ptr<ChoiceNode> currentNode, 
 		int winner = showdown(currentNode->getGame().getBotPlayer().getHoleCards(),
 				currentNode->getGame().getOppPlayer().getHoleCards(),
 				currentNode->getGame().getBoardCards());
-		allocateChips(winner, (*currentNode));
-		auto returnNode = currentNode->fold();
-		return returnNode;
+		allocateChips(winner, *currentNode);
+	return std::shared_ptr<OpponentNode>(&currentNode->fold());
 	} 
-	return std::shared_ptr<OpponentNode>(NULL);
 }
 
 std::shared_ptr<ChoiceNode> playTurn(std::shared_ptr<OpponentNode> currentNode, std::vector<int> deck) {
@@ -261,22 +256,19 @@ std::shared_ptr<ChoiceNode> playTurn(std::shared_ptr<OpponentNode> currentNode, 
 	assert(currentNode->getIsFolded() == false);
 	if (stateInt != static_cast<int>(Stage::SHOWDOWN)
 			&& !currentNode->getIsFolded()) {
-		Decision decision = Decision::makeDecision(currentNode);
+		Decision decision = Decision::makeDecision(*currentNode);
 		switch(decision.action) {
 			case Action::CALL: {
-								   auto returnNode = currentNode->call();
-								   return returnNode;
+								   return std::shared_ptr<ChoiceNode>(&currentNode->call());
 								   break; 
 							   }
 			case Action::RAISE:{
-								   auto returnNode = currentNode->raise(decision.raiseAmount);
-								   return returnNode;
+								   return std::shared_ptr<ChoiceNode>(&currentNode->raise(decision.raiseAmount));
 								   break;
 							   }
 			case Action::FOLD:{
-								  allocateChips(0, (*currentNode));
-								  auto returnNode = currentNode->fold();
-								  return returnNode;
+								  allocateChips(0, *currentNode);
+								  return std::shared_ptr<ChoiceNode>(&currentNode->fold());
 								  break;
 							  }
 			default:
@@ -286,10 +278,7 @@ std::shared_ptr<ChoiceNode> playTurn(std::shared_ptr<OpponentNode> currentNode, 
 		int winner = showdown(currentNode->getGame().getBotPlayer().getHoleCards(),
 				currentNode->getGame().getOppPlayer().getHoleCards(),
 				currentNode->getGame().getBoardCards());
-		allocateChips(winner, (*currentNode));
-		auto returnNode = currentNode->fold();
-		return returnNode;
+		allocateChips(winner, *currentNode);
+		return std::shared_ptr<ChoiceNode>(&currentNode->fold());
 	} 
-	return std::shared_ptr<ChoiceNode>(NULL);
 }
-

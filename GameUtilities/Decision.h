@@ -13,8 +13,8 @@ class Decision {
 		Action action;
 		double raiseAmount;
 		
-		static Decision makeDecision(std::shared_ptr<ChoiceNode> currentNode);
-		static Decision makeDecision(std::shared_ptr<OpponentNode> currentNode);
+		static Decision makeDecision(ChoiceNode currentNode);
+		static Decision makeDecision(OpponentNode currentNode);
 };
 
 #endif

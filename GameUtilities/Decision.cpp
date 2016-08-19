@@ -1,11 +1,12 @@
-#include "Decision.h"
-#include "Action.h"
-
 #include <memory>
 #include <iostream>
 
+#include "Decision.h"
+#include "Action.h"
+#include "../Nodes/ChoiceNode.h"
+#include "../Nodes/OpponentNode.h"
 
-Decision Decision::makeDecision(std::shared_ptr<ChoiceNode> currentNode) {
+Decision Decision::makeDecision(ChoiceNode currentNode) {
 	std::cout << "Enter Action bot: Call(0), Raise(1), Fold(2)" << std::endl;
 	Decision decision;
 	int temp;
@@ -20,7 +21,7 @@ Decision Decision::makeDecision(std::shared_ptr<ChoiceNode> currentNode) {
 	return decision;
 }
 
-Decision Decision::makeDecision(std::shared_ptr<OpponentNode> currentNode) {
+Decision Decision::makeDecision(OpponentNode currentNode) {
 	std::cout << "Enter Action opp: Call(0), Raise(1), Fold(2)" << std::endl;
 	Decision decision;
 	int temp;

@@ -34,8 +34,8 @@ class Node: public std::enable_shared_from_this<Node> {
 		// these don't need to be virtual, but they do if we are
 		Node& call() { return callImplementation(); }
 		Node& raise(double raiseAmount) { return raiseImplementation(raiseAmount); }
-		Node& fold() { return foldImplementation(); }
 	public:
+		Node& fold() { return foldImplementation(); }
 		// Member-accessibility functions
 
 		// Getters
