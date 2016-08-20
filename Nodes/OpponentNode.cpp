@@ -35,17 +35,25 @@ OpponentNode::OpponentNode(
 
 			
 void OpponentNode::runSelection(ChoiceNode &thisNode, std::vector<int> &deck) {
-    if (thisNode.getGame().getState() == static_cast<int>(Stage::SHOWDOWN)) 
+    if (thisNode.getGame().getState() == static_cast<int>(Stage::SHOWDOWN)) {
         runSimulation(thisNode, deck);
+        return;
+    }
 
     // Expansion
-    if (!thisNode.getCallChild())
+    if (!thisNode.getCallChild()) {
          runSimulation(*(thisNode.call()), deck);
-    else if (!thisNode.getRaiseChild()) {
+         return;
+    }
+    if (!thisNode.getRaiseChild()) {
         // raise function should make this a min raise
          runSimulation(*(thisNode.raise(1)), deck);
-    } else if (!thisNode.getFoldChild())
+         return;
+    } 
+    if (!thisNode.getFoldChild()) {
          runSimulation(*(thisNode.fold()), deck);
+         return;
+    }
 
     // Calculate UCT score
     double callScore = naiveUCT(*(thisNode.getCallChild()), exploreConst);
@@ -75,17 +83,25 @@ void OpponentNode::runSelection(ChoiceNode &thisNode, std::vector<int> &deck) {
 }
 
 void OpponentNode::runSelection(OpponentNode &thisNode, std::vector<int> &deck) {
-    if (thisNode.game.getState() == static_cast<int>(Stage::SHOWDOWN)) 
+    if (thisNode.game.getState() == static_cast<int>(Stage::SHOWDOWN)) {
         runSimulation(thisNode, deck);
+        return;
+    }
 
     // Expansion
-    if (!thisNode.getCallChild())
+    if (!thisNode.getCallChild()) {
          runSimulation(*(thisNode.call()), deck);
-    else if (!thisNode.getRaiseChild()) {
+         return;
+    }
+    if (!thisNode.getRaiseChild()) {
         // raise function should make this a min raise
          runSimulation(*(thisNode.raise(1)), deck);
-    } else if (!thisNode.getFoldChild())
+         return;
+    }
+    if (!thisNode.getFoldChild()) {
          runSimulation(*(thisNode.fold()), deck);
+         return;
+    }
 
     // Calculate UCT score
     double callScore = naiveUCT(*(thisNode.getCallChild()), exploreConst);
