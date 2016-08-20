@@ -3,8 +3,8 @@
 // Default Constructor
 Player::Player() :
 	chips(0),
-	potInvestment(0),
-	isFolded(false) { }
+	potInvestment(0)
+	{ }
 
 Player::Player(std::vector<int> hcards, double chip, double pi) : 
 	holeCards(hcards),

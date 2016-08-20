@@ -14,7 +14,7 @@ Decision Decision::makeDecision(std::shared_ptr<ChoiceNode> currentNode) {
 	//std::cin >> temp;
     std::vector<int> deck;
     init_deck(deck);
-	decision.action = currentNode->monteCarlo(5, deck);
+	decision.action = currentNode->monteCarlo(10, deck);
 	if (decision.action == Action::RAISE) {
 		std::cout << "Enter Raise amount" << std::endl;
 		double amount;

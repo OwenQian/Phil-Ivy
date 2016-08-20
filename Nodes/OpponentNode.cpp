@@ -39,12 +39,12 @@ void OpponentNode::runSelection(ChoiceNode &thisNode, std::vector<int> &deck) {
         runSimulation(thisNode, deck);
 
     // Expansion
-    if (thisNode.getCallChild() == nullptr)
+    if (!thisNode.getCallChild())
          runSimulation(*(thisNode.call()), deck);
-    else if (thisNode.getRaiseChild() == nullptr) {
+    else if (!thisNode.getRaiseChild()) {
         // raise function should make this a min raise
          runSimulation(*(thisNode.raise(1)), deck);
-    } else if (thisNode.getFoldChild() == nullptr)
+    } else if (!thisNode.getFoldChild())
          runSimulation(*(thisNode.fold()), deck);
 
     // Calculate UCT score
@@ -79,12 +79,12 @@ void OpponentNode::runSelection(OpponentNode &thisNode, std::vector<int> &deck) 
         runSimulation(thisNode, deck);
 
     // Expansion
-    if (thisNode.callChild == nullptr)
+    if (!thisNode.getCallChild())
          runSimulation(*(thisNode.call()), deck);
-    else if (thisNode.raiseChild == nullptr) {
+    else if (!thisNode.getRaiseChild()) {
         // raise function should make this a min raise
          runSimulation(*(thisNode.raise(1)), deck);
-    } else if (thisNode.foldChild == nullptr)
+    } else if (!thisNode.getFoldChild())
          runSimulation(*(thisNode.fold()), deck);
 
     // Calculate UCT score
@@ -134,7 +134,7 @@ void OpponentNode::runSimulation(OpponentNode &thisNode, std::vector<int> deck) 
 			
 void OpponentNode::backPropagate(ChoiceNode& nextNode, double botEV, double oppEV) {
     nextNode.getExpectedValue() = (nextNode.getExpectedValue() * nextNode.getVisitCount() + botEV) / ++(nextNode.getVisitCount());
-    if (nextNode.getParent() != nullptr) {
+    if (nextNode.getParent()) {
         if (nextNode.getParent()->getGame().getPlayerTurn() == 0)
             backPropagate(*std::static_pointer_cast<ChoiceNode>(nextNode.getParent()), nextNode.getExpectedValue(), oppEV);
         else
@@ -144,7 +144,7 @@ void OpponentNode::backPropagate(ChoiceNode& nextNode, double botEV, double oppE
 
 void OpponentNode::backPropagate(OpponentNode& nextNode, double botEV, double oppEV) {
     nextNode.getExpectedValue() = (nextNode.getExpectedValue() * nextNode.getVisitCount() + oppEV) / ++(nextNode.getVisitCount());
-    if (nextNode.getParent() != nullptr) {
+    if (nextNode.getParent()) {
         if (nextNode.getParent()->getGame().getPlayerTurn() == 0)
             backPropagate(*std::static_pointer_cast<ChoiceNode>(nextNode.getParent()), botEV, nextNode.getExpectedValue());
         else
