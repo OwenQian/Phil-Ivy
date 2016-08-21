@@ -143,16 +143,26 @@ void ChoiceNode::runSelection(OpponentNode &thisNode, std::vector<int> &deck) {
 }
  
 void ChoiceNode::runSimulation(ChoiceNode &thisNode, std::vector<int> deck) {
-                    auto copyNode(thisNode);
-        while (thisNode.game.getState() != static_cast<int>(Stage::SHOWDOWN)) {
-                    auto copyNodeCall = copyNode.call();
-                    conditionalDeal(*copyNodeCall, thisNode.game.getState(), copyNodeCall->getGame().getState(), deck, copyNodeCall->getGame().getState());
-                                }
-         backPropagate(copyNode, copyNode.getGame().getBotPlayer().getChips(), copyNode.getGame().getOppPlayer().getChips());
+    std::shared_ptr<Node> copyNode = std::make_shared<ChoiceNode>(thisNode);
+        while (copyNode->getGame().getState() != static_cast<int>(Stage::SHOWDOWN)) {
+            if (copyNode->getGame().getPlayerTurn() == 0) {
+                auto copyNodeCall = std::static_pointer_cast<ChoiceNode>(copyNode)->call();
+                conditionalDeal(*copyNodeCall, copyNode->getGame().getState(), copyNodeCall->getGame().getState(), deck, copyNodeCall->getGame().getState());
+                copyNode = copyNodeCall;
+            } else {
+                auto copyNodeCall = std::static_pointer_cast<OpponentNode>(copyNode)->call();
+                conditionalDeal(*copyNodeCall, copyNode->getGame().getState(), copyNodeCall->game.getState(), deck, copyNodeCall->game.getState());
+                copyNode = copyNodeCall;
+            }
+                                                    }
+    if (copyNode->getGame().getPlayerTurn() == 0)
+        backPropagate(*(std::static_pointer_cast<ChoiceNode>(copyNode)), copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());
+    else
+        backPropagate(*(std::static_pointer_cast<OpponentNode>(copyNode)), copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());
 }
 
 void ChoiceNode::runSimulation(OpponentNode &thisNode, std::vector<int> deck) {
-    std::shared_ptr<Node> copyNode = std::shared_ptr<OpponentNode>(&thisNode);
+    std::shared_ptr<Node> copyNode = std::make_shared<OpponentNode>(thisNode);
         while (copyNode->getGame().getState() != static_cast<int>(Stage::SHOWDOWN)) {
             if (copyNode->getGame().getPlayerTurn() == 0) {
                 auto copyNodeCall = std::static_pointer_cast<ChoiceNode>(copyNode)->call();

@@ -140,22 +140,22 @@ void OpponentNode::runSelection(OpponentNode &thisNode, std::vector<int> &deck) 
 }
  
 void OpponentNode::runSimulation(ChoiceNode &thisNode, std::vector<int> deck) {
-                    auto copyNode(thisNode);
-        while (thisNode.getGame().getState() != static_cast<int>(Stage::SHOWDOWN)) {
-                    auto copyNodeCall = copyNode.call();
-                    conditionalDeal(*copyNodeCall, thisNode.getGame().getState(), copyNodeCall->game.getState(), deck, copyNodeCall->game.getState());
-                                }
-         backPropagate(copyNode, copyNode.getGame().getBotPlayer().getChips(), copyNode.getGame().getOppPlayer().getChips());
-}
-
-void OpponentNode::runSimulation(OpponentNode &thisNode, std::vector<int> deck) {
-                    auto copyNode(thisNode);
-        while (thisNode.game.getState() != static_cast<int>(Stage::SHOWDOWN)) {
-                    auto copyNodeCall = copyNode.call();
-                    conditionalDeal(*copyNodeCall, thisNode.game.getState(), copyNodeCall->getGame().getState(), deck, copyNodeCall->getGame().getState());
-                                }
-         backPropagate(copyNode, copyNode.getGame().getBotPlayer().getChips(), copyNode.getGame().getOppPlayer().getChips());
-}
+    std::shared_ptr<Node> copyNode = std::make_shared<ChoiceNode>(thisNode);
+        while (copyNode->getGame().getState() != static_cast<int>(Stage::SHOWDOWN)) {
+            if (copyNode->getGame().getPlayerTurn() == 0) {
+                auto copyNodeCall = std::static_pointer_cast<ChoiceNode>(copyNode)->call();
+                conditionalDeal(*copyNodeCall, copyNode->getGame().getState(), copyNodeCall->getGame().getState(), deck, copyNodeCall->getGame().getState());
+                copyNode = copyNodeCall;
+            } else {
+                auto copyNodeCall = std::static_pointer_cast<OpponentNode>(copyNode)->call();
+                conditionalDeal(*copyNodeCall, copyNode->getGame().getState(), copyNodeCall->getGame().getState(), deck, copyNodeCall->getGame().getState());
+                copyNode = copyNodeCall;
+            }
+                                                    }
+    if (copyNode->getGame().getPlayerTurn() == 0)
+        backPropagate(*(std::static_pointer_cast<ChoiceNode>(copyNode)), copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());
+    else
+        backPropagate(*(std::static_pointer_cast<OpponentNode>(copyNode)), copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());}
 			
 void OpponentNode::backPropagate(ChoiceNode& nextNode, double botEV, double oppEV) {
     nextNode.getExpectedValue() = (nextNode.getExpectedValue() * nextNode.getVisitCount() + botEV) / ++(nextNode.getVisitCount());
@@ -167,6 +167,25 @@ void OpponentNode::backPropagate(ChoiceNode& nextNode, double botEV, double oppE
     }
 }
 
+void OpponentNode::runSimulation(OpponentNode &thisNode, std::vector<int> deck) {
+    std::shared_ptr<Node> copyNode = std::make_shared<OpponentNode>(thisNode);
+        while (copyNode->getGame().getState() != static_cast<int>(Stage::SHOWDOWN)) {
+            if (copyNode->getGame().getPlayerTurn() == 0) {
+                auto copyNodeCall = std::static_pointer_cast<ChoiceNode>(copyNode)->call();
+                conditionalDeal(*copyNodeCall, copyNode->getGame().getState(), copyNodeCall->getGame().getState(), deck, copyNodeCall->getGame().getState());
+                copyNode = copyNodeCall;
+            } else {
+                auto copyNodeCall = std::static_pointer_cast<OpponentNode>(copyNode)->call();
+                conditionalDeal(*copyNodeCall, copyNode->getGame().getState(), copyNodeCall->getGame().getState(), deck, copyNodeCall->getGame().getState());
+                copyNode = copyNodeCall;
+            }
+                                                    }
+    if (copyNode->getGame().getPlayerTurn() == 0)
+        backPropagate(*(std::static_pointer_cast<ChoiceNode>(copyNode)), copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());
+    else
+        backPropagate(*(std::static_pointer_cast<OpponentNode>(copyNode)), copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());
+}
+
 void OpponentNode::backPropagate(OpponentNode& nextNode, double botEV, double oppEV) {
     nextNode.getExpectedValue() = (nextNode.getExpectedValue() * nextNode.getVisitCount() + oppEV) / ++(nextNode.getVisitCount());
     if (nextNode.getParent()) {
@@ -176,25 +195,3 @@ void OpponentNode::backPropagate(OpponentNode& nextNode, double botEV, double op
             backPropagate(*std::static_pointer_cast<OpponentNode>(nextNode.getParent()), botEV, nextNode.getExpectedValue());
     }
 }
-
-//Action OpponentNode::monteCarlo(int maxSeconds, std::vector<int> deck) {
-//    time_t startTime;
-//	time(&startTime);
-//	Node copyNode = *this;
-//	std::vector<int> copyDeck = deck;
-//	while (time(0) - startTime < maxSeconds){
-//	 ChoiceNode::runSelection(copyNode, copyDeck);
-//	}
-//	double maxScore = copyNode.getCallChild()->getExpectedValue();
-//	maxScore = maxScore >= copyNode.getRaiseChild()->getExpectedValue() ? maxScore : copyNode.getRaiseChild()->getExpectedValue();
-//	maxScore = maxScore >= copyNode.getFoldChild()->getExpectedValue() ? maxScore : copyNode.getFoldChild()->getExpectedValue();
-//		if (maxScore == copyNode.getCallChild()->getExpectedValue()) {
-//			return Action::CALL;
-//		} else if (maxScore == copyNode.getRaiseChild()->getExpectedValue()) {
-//			// Need to handle how much to raise here
-//			return Action::RAISE;
-//		} else {
-//			return Action::FOLD;
-//		}
-//
-//}
