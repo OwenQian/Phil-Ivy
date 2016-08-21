@@ -3,7 +3,6 @@
 
 #include "../GameObject.h"
 #include "../Player.h"
-#include "../Blinds.h"
 
 #include <vector>
 #include <memory>
@@ -34,6 +33,7 @@ class Node: public std::enable_shared_from_this<Node> {
 		std::shared_ptr<Node> doRaise(double);
 		std::shared_ptr<Node> doCall();
 		std::shared_ptr<Node> doTerminal();
+        void naiveUCT(std::vector<double>& selectionScores, double exploreConst);
 
      	public:
 		// Member-accessibility functions

@@ -1,9 +1,11 @@
 #include "Node.h"
-#include "../Blinds.h"
+#include "../Config.h"
 
 #include <memory>
+#include <cassert>
 #include <algorithm>	//std::min/max
 #include <iostream>
+#include <cmath>        //for sqrt
 
 Node::Node(int              state,
 		double              pot,
@@ -36,7 +38,6 @@ std::shared_ptr<Node> Node::doCall() {
 		
 		tempPlayer.setChips(tempPlayer.getChips() - (currentRaise - tempPlayer.getPotInvestment()) );
 		tempPlayer.setPotInvestment(currentRaise);
-		std::cout << "current raise: " << currentRaise << std::endl;
 		bool tempAllIn = false;
 		if (game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment() <= currentRaise ||
 				game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment() <= currentRaise) {
@@ -128,4 +129,33 @@ std::shared_ptr<Node> Node::doRaise(double raiseAmount) {
 	return raiseChild;
 }
 
+void Node::naiveUCT(std::vector<double>& selectionScores, double exploreConst) {
+    assert(selectionScores.size() == 3);
+    std::vector<double> explorationTerm;
+    explorationTerm.resize(3);
+    int childVisitSum = 0;
+    childVisitSum += this->getCallChild()->getVisitCount();
+    childVisitSum += this->getFoldChild()->getVisitCount();
+    childVisitSum += this->getRaiseChild()->getVisitCount();
 
+    // Order here is important; call, fold, raise (CFR)
+    // Set the selectionScore and explorationTerm for call
+    selectionScores[0] = this->getCallChild()->getExpectedValue();
+    explorationTerm[0] = std::sqrt(
+            std::log(double (this->getCallChild()->getVisitCount())/double (childVisitSum)));
+
+    // Set the selectionScore and explorationTerm for raise
+    selectionScores[1] = this->getRaiseChild()->getExpectedValue();
+    explorationTerm[1] = std::sqrt(
+            std::log(double (this->getRaiseChild()->getVisitCount())/double (childVisitSum)));
+
+    // Set the selectionScore and explorationTerm for fold
+    selectionScores[2] = this->getFoldChild()->getExpectedValue();
+    explorationTerm[2] = std::sqrt(
+            std::log(double (this->getFoldChild()->getVisitCount())/double (childVisitSum)));
+
+    for (size_t i = 0; i < selectionScores.size(); ++i) {
+        explorationTerm[i] *= exploreConst;
+        selectionScores[i] += explorationTerm[i]; 
+    }
+}
