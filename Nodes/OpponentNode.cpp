@@ -1,6 +1,8 @@
 #include "ChoiceNode.h"
 #include "OpponentNode.h"
 #include "../Config.h"
+#include "../handEval/helper.h"
+#include "../GameUtilities/GameUtilities.h"
 
 OpponentNode::OpponentNode(		
         int							state,
@@ -163,6 +165,12 @@ void OpponentNode::runSimulation(ChoiceNode &thisNode, std::vector<int> deck) {
                 conditionalDeal(*copyNodeCall, copyNode->getGame().getState(), copyNodeCall->getGame().getState(), deck, copyNode->getGame().getState());
                 copyNode = copyNodeCall;
         }
+		
+		int winner = showdown(copyNode->getGame().getBotPlayer().getHoleCards(),
+				copyNode->getGame().getOppPlayer().getHoleCards(),
+				copyNode->getGame().getBoardCards());
+		allocateChips(winner, (*copyNode));
+		
         if (copyNode->getGame().getPlayerTurn() == 0)
             backPropagate(*(std::static_pointer_cast<ChoiceNode>(copyNode)), copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());
         else
@@ -170,6 +178,7 @@ void OpponentNode::runSimulation(ChoiceNode &thisNode, std::vector<int> deck) {
     } else {
         backPropagate(thisNode, thisNode.getGame().getBotPlayer().getChips(), thisNode.getGame().getOppPlayer().getChips());
     }
+	
 }
 
 void OpponentNode::backPropagate(ChoiceNode& nextNode, double botEV, double oppEV) {
@@ -206,6 +215,10 @@ void OpponentNode::runSimulation(OpponentNode &thisNode, std::vector<int> deck) 
                 conditionalDeal(*copyNodeCall, copyNode->getGame().getState(), copyNodeCall->getGame().getState(), deck, copyNode->getGame().getState());
                 copyNode = copyNodeCall;
         }
+		int winner = showdown(copyNode->getGame().getBotPlayer().getHoleCards(),
+				copyNode->getGame().getOppPlayer().getHoleCards(),
+				copyNode->getGame().getBoardCards());
+		allocateChips(winner, (*copyNode));
         if (copyNode->getGame().getPlayerTurn() == 0)
             backPropagate(*(std::static_pointer_cast<ChoiceNode>(copyNode)), copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());
         else

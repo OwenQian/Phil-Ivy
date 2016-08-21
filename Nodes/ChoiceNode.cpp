@@ -2,6 +2,8 @@
 #include "OpponentNode.h"
 #include "../Stage.h"
 #include "../Config.h"
+#include "../handEval/helper.h"
+#include "../GameUtilities/GameUtilities.h"
 
 #include <memory>
 #include <iostream>
@@ -171,6 +173,10 @@ void ChoiceNode::runSimulation(ChoiceNode &thisNode, std::vector<int> deck) {
                 conditionalDeal(*copyNodeCall, copyNode->getGame().getState(), copyNodeCall->getGame().getState(), deck, copyNode->getGame().getState());
                 copyNode = copyNodeCall;
         }
+		int winner = showdown(copyNode->getGame().getBotPlayer().getHoleCards(),
+				copyNode->getGame().getOppPlayer().getHoleCards(),
+				copyNode->getGame().getBoardCards());
+		allocateChips(winner, (*copyNode));
         if (copyNode->getGame().getPlayerTurn() == 0)
             backPropagate(*(std::static_pointer_cast<ChoiceNode>(copyNode)), copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());
         else
@@ -204,6 +210,10 @@ void ChoiceNode::runSimulation(OpponentNode &thisNode, std::vector<int> deck) {
                 conditionalDeal(*copyNodeCall, copyNode->getGame().getState(), copyNodeCall->getGame().getState(), deck, copyNode->getGame().getState());
                 copyNode = copyNodeCall;
         }
+		int winner = showdown(copyNode->getGame().getBotPlayer().getHoleCards(),
+				copyNode->getGame().getOppPlayer().getHoleCards(),
+				copyNode->getGame().getBoardCards());
+		allocateChips(winner, (*copyNode));
         if (copyNode->getGame().getPlayerTurn() == 0)
             backPropagate(*(std::static_pointer_cast<ChoiceNode>(copyNode)), copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());
         else
