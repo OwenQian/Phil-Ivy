@@ -56,14 +56,16 @@ void OpponentNode::runSelection(ChoiceNode &thisNode, std::vector<int> &deck) {
     }
 
     // Calculate UCT score
-    double callScore = naiveUCT(*(thisNode.getCallChild()), exploreConst);
-    double raiseScore = naiveUCT(*(thisNode.getRaiseChild()), exploreConst);
-    double foldScore = naiveUCT(*(thisNode.getFoldChild()), exploreConst);
+    // Calculate UCT score
+    std::vector<double> selectionScores{0,0,0};
+    naiveUCT(selectionScores, exploreConst);
 
-    // Pick highest score
-    double maxScore = callScore;
-    maxScore = maxScore <= raiseScore ? maxScore : raiseScore;
-    maxScore = maxScore < foldScore ? maxScore : foldScore;
+     // Pick highest score
+    double maxScore = 0;
+    for (size_t i = 0; i < selectionScores.size(); ++i) {
+        maxScore = maxScore > selectionScores[i] ? maxScore : selectionScores[i];
+    }
+
     if (maxScore == callScore) {
         if (thisNode.getCallChild()->getGame().getPlayerTurn() == 0)
             runSelection(*std::static_pointer_cast<ChoiceNode>(thisNode.getCallChild()), deck);
@@ -104,14 +106,16 @@ void OpponentNode::runSelection(OpponentNode &thisNode, std::vector<int> &deck) 
     }
 
     // Calculate UCT score
-    double callScore = naiveUCT(*(thisNode.getCallChild()), exploreConst);
-    double raiseScore = naiveUCT(*(thisNode.getRaiseChild()), exploreConst);
-    double foldScore = naiveUCT(*(thisNode.getFoldChild()), exploreConst);
+    // Calculate UCT score
+    std::vector<double> selectionScores{0,0,0};
+    naiveUCT(selectionScores, exploreConst);
+	
+     // Pick highest score
+    double maxScore = 0;
+    for (size_t i = 0; i < selectionScores.size(); ++i) {
+        maxScore = maxScore > selectionScores[i] ? maxScore : selectionScores[i];
+    }
 
-    // Pick highest score
-    double maxScore = callScore;
-    maxScore = maxScore <= raiseScore ? maxScore : raiseScore;
-    maxScore = maxScore < foldScore ? maxScore : foldScore;
     if (maxScore == callScore) {
         if (thisNode.getCallChild()->getGame().getPlayerTurn() == 0)
             runSelection(*std::static_pointer_cast<ChoiceNode>(thisNode.getCallChild()), deck);
