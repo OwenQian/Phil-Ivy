@@ -56,7 +56,7 @@ void ChoiceNode::runSelection(ChoiceNode &thisNode, std::vector<int> &deck) {
          runSimulation(*(thisNode.raise(1)), deck);
          return;
     } 
-    if (!thisNode.foldChild) {
+    if (!thisNode.getFoldChild()) {
          runSimulation(*(thisNode.fold()), deck);
          return;
     }
@@ -64,7 +64,9 @@ void ChoiceNode::runSelection(ChoiceNode &thisNode, std::vector<int> &deck) {
     // Calculate UCT score
     std::vector<double> selectionScores{0,0,0};
     thisNode.naiveUCT(selectionScores, exploreConst);
-
+std::cout << "call score: " << selectionScores[0] << std::endl;
+	std::cout << "raise score: " << selectionScores[1] << std::endl;
+	std::cout << "fold score: " << selectionScores[2] << std::endl;
     // Pick highest score
     double maxScore = 0;
     for (size_t i = 0; i < selectionScores.size(); ++i) {
@@ -115,6 +117,9 @@ void ChoiceNode::runSelection(OpponentNode &thisNode, std::vector<int> &deck) {
     std::vector<double> selectionScores{0,0,0};
     thisNode.naiveUCT(selectionScores, exploreConst);
 
+	std::cout << "call score: " << selectionScores[0] << std::endl;
+	std::cout << "raise score: " << selectionScores[1] << std::endl;
+	std::cout << "fold score: " << selectionScores[2] << std::endl;
     // Pick highest score
     double maxScore = 0;
     for (size_t i = 0; i < selectionScores.size(); ++i) {
@@ -143,6 +148,7 @@ void ChoiceNode::runSelection(OpponentNode &thisNode, std::vector<int> &deck) {
 }
  
 void ChoiceNode::runSimulation(ChoiceNode &thisNode, std::vector<int> deck) {
+	if (!thisNode.getIsFolded()){
     std::shared_ptr<Node> copyNode = std::make_shared<ChoiceNode>(thisNode);
         while (copyNode->getGame().getState() != static_cast<int>(Stage::SHOWDOWN)) {
             if (copyNode->getGame().getPlayerTurn() == 0) {
@@ -159,9 +165,13 @@ void ChoiceNode::runSimulation(ChoiceNode &thisNode, std::vector<int> deck) {
         backPropagate(*(std::static_pointer_cast<ChoiceNode>(copyNode)), copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());
     else
         backPropagate(*(std::static_pointer_cast<OpponentNode>(copyNode)), copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());
+	} else {
+		backPropagate(thisNode, thisNode.getGame().getBotPlayer().getChips(), thisNode.getGame().getOppPlayer().getChips());
+	}
 }
 
 void ChoiceNode::runSimulation(OpponentNode &thisNode, std::vector<int> deck) {
+	if (!thisNode.getIsFolded()){
     std::shared_ptr<Node> copyNode = std::make_shared<OpponentNode>(thisNode);
         while (copyNode->getGame().getState() != static_cast<int>(Stage::SHOWDOWN)) {
             if (copyNode->getGame().getPlayerTurn() == 0) {
@@ -178,6 +188,9 @@ void ChoiceNode::runSimulation(OpponentNode &thisNode, std::vector<int> deck) {
         backPropagate(*(std::static_pointer_cast<ChoiceNode>(copyNode)), copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());
     else
         backPropagate(*(std::static_pointer_cast<OpponentNode>(copyNode)), copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());
+	} else {
+		backPropagate(thisNode, thisNode.getGame().getBotPlayer().getChips(), thisNode.getGame().getOppPlayer().getChips());
+	}
 }
     
 void ChoiceNode::backPropagate(ChoiceNode& nextNode, double botEV, double oppEV) {

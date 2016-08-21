@@ -140,6 +140,7 @@ void OpponentNode::runSelection(OpponentNode &thisNode, std::vector<int> &deck) 
 }
  
 void OpponentNode::runSimulation(ChoiceNode &thisNode, std::vector<int> deck) {
+	if (thisNode.getIsFolded()){
     std::shared_ptr<Node> copyNode = std::make_shared<ChoiceNode>(thisNode);
         while (copyNode->getGame().getState() != static_cast<int>(Stage::SHOWDOWN)) {
             if (copyNode->getGame().getPlayerTurn() == 0) {
@@ -155,7 +156,11 @@ void OpponentNode::runSimulation(ChoiceNode &thisNode, std::vector<int> deck) {
     if (copyNode->getGame().getPlayerTurn() == 0)
         backPropagate(*(std::static_pointer_cast<ChoiceNode>(copyNode)), copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());
     else
-        backPropagate(*(std::static_pointer_cast<OpponentNode>(copyNode)), copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());}
+        backPropagate(*(std::static_pointer_cast<OpponentNode>(copyNode)), copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());
+	} else {
+		backPropagate(thisNode, thisNode.getGame().getBotPlayer().getChips(), thisNode.getGame().getOppPlayer().getChips());
+	}
+}
 			
 void OpponentNode::backPropagate(ChoiceNode& nextNode, double botEV, double oppEV) {
     nextNode.getExpectedValue() = (nextNode.getExpectedValue() * nextNode.getVisitCount() + botEV) / ++(nextNode.getVisitCount());
@@ -168,6 +173,7 @@ void OpponentNode::backPropagate(ChoiceNode& nextNode, double botEV, double oppE
 }
 
 void OpponentNode::runSimulation(OpponentNode &thisNode, std::vector<int> deck) {
+	if (thisNode.getIsFolded()){
     std::shared_ptr<Node> copyNode = std::make_shared<OpponentNode>(thisNode);
         while (copyNode->getGame().getState() != static_cast<int>(Stage::SHOWDOWN)) {
             if (copyNode->getGame().getPlayerTurn() == 0) {
@@ -184,6 +190,9 @@ void OpponentNode::runSimulation(OpponentNode &thisNode, std::vector<int> deck) 
         backPropagate(*(std::static_pointer_cast<ChoiceNode>(copyNode)), copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());
     else
         backPropagate(*(std::static_pointer_cast<OpponentNode>(copyNode)), copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());
+} else {
+	backPropagate(thisNode, thisNode.getGame().getBotPlayer().getChips(), thisNode.getGame().getOppPlayer().getChips());
+}
 }
 
 void OpponentNode::backPropagate(OpponentNode& nextNode, double botEV, double oppEV) {
