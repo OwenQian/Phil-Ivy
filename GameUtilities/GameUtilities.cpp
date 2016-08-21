@@ -19,7 +19,6 @@ class Node;
 class ChoiceNode;
 class OpponentNode;
 
-static int smallBlindPosition = 0;
 
 void allocateChips(int whoWon, Node &currentNode){
 	if (whoWon == 0) { //when bot player wins
