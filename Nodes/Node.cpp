@@ -138,7 +138,7 @@ void Node::naiveUCT(std::vector<double>& selectionScores, double exploreConst) {
     childVisitSum += this->getFoldChild()->getVisitCount();
     childVisitSum += this->getRaiseChild()->getVisitCount();
 
-    // Order here is important; call, fold, raise (CFR)
+    // Order here is important; call, raise, fold (CRF)
     // Set the selectionScore and explorationTerm for call
     selectionScores[0] = this->getCallChild()->getExpectedValue();
     explorationTerm[0] = std::sqrt(

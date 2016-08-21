@@ -1,5 +1,6 @@
 #include "ChoiceNode.h"
 #include "OpponentNode.h"
+#include "../Config.h"
 
 OpponentNode::OpponentNode(		
 								int							state,
@@ -56,9 +57,8 @@ void OpponentNode::runSelection(ChoiceNode &thisNode, std::vector<int> &deck) {
     }
 
     // Calculate UCT score
-    // Calculate UCT score
     std::vector<double> selectionScores{0,0,0};
-    naiveUCT(selectionScores, exploreConst);
+    thisNode.naiveUCT(selectionScores, exploreConst);
 
      // Pick highest score
     double maxScore = 0;
@@ -66,16 +66,19 @@ void OpponentNode::runSelection(ChoiceNode &thisNode, std::vector<int> &deck) {
         maxScore = maxScore > selectionScores[i] ? maxScore : selectionScores[i];
     }
 
+    // Call
     if (maxScore == selectionScores[0]) {
         if (thisNode.getCallChild()->getGame().getPlayerTurn() == 0)
             runSelection(*std::static_pointer_cast<ChoiceNode>(thisNode.getCallChild()), deck);
         else
             runSelection(*std::static_pointer_cast<OpponentNode>(thisNode.getCallChild()), deck);
+    // Raise
     } else if (maxScore == selectionScores[1]) {
         if (thisNode.getRaiseChild()->getGame().getPlayerTurn() == 0)
             runSelection(*std::static_pointer_cast<ChoiceNode>(thisNode.getRaiseChild()), deck);
         else
             runSelection(*std::static_pointer_cast<OpponentNode>(thisNode.getRaiseChild()), deck);
+    // Fold
     } else {
         if (thisNode.getFoldChild()->getGame().getPlayerTurn() == 0)
             runSelection(*std::static_pointer_cast<ChoiceNode>(thisNode.getFoldChild()), deck);
@@ -106,9 +109,8 @@ void OpponentNode::runSelection(OpponentNode &thisNode, std::vector<int> &deck) 
     }
 
     // Calculate UCT score
-    // Calculate UCT score
     std::vector<double> selectionScores{0,0,0};
-    naiveUCT(selectionScores, exploreConst);
+    thisNode.naiveUCT(selectionScores, exploreConst);
 	
      // Pick highest score
     double maxScore = 0;
@@ -116,16 +118,19 @@ void OpponentNode::runSelection(OpponentNode &thisNode, std::vector<int> &deck) 
         maxScore = maxScore > selectionScores[i] ? maxScore : selectionScores[i];
     }
 
+    // Call
     if (maxScore == selectionScores[0]) {
         if (thisNode.getCallChild()->getGame().getPlayerTurn() == 0)
             runSelection(*std::static_pointer_cast<ChoiceNode>(thisNode.getCallChild()), deck);
         else
             runSelection(*std::static_pointer_cast<OpponentNode>(thisNode.getCallChild()), deck);
-    } else ifif (maxScore == selectionScores[1]) {
+    // Raise
+    } else if (maxScore == selectionScores[1]) {
         if (thisNode.getRaiseChild()->getGame().getPlayerTurn() == 0)
             runSelection(*std::static_pointer_cast<ChoiceNode>(thisNode.getRaiseChild()), deck);
         else
             runSelection(*std::static_pointer_cast<OpponentNode>(thisNode.getRaiseChild()), deck);
+    // Fold
     } else {
         if (thisNode.getFoldChild()->getGame().getPlayerTurn() == 0)
             runSelection(*std::static_pointer_cast<ChoiceNode>(thisNode.getFoldChild()), deck);

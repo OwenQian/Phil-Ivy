@@ -63,7 +63,7 @@ void ChoiceNode::runSelection(ChoiceNode &thisNode, std::vector<int> &deck) {
 
     // Calculate UCT score
     std::vector<double> selectionScores{0,0,0};
-    naiveUCT(selectionScores, exploreConst);
+    thisNode.naiveUCT(selectionScores, exploreConst);
 
     // Pick highest score
     double maxScore = 0;
@@ -76,11 +76,13 @@ void ChoiceNode::runSelection(ChoiceNode &thisNode, std::vector<int> &deck) {
             runSelection(*std::static_pointer_cast<ChoiceNode>(thisNode.getCallChild()), deck);
         else
             runSelection(*std::static_pointer_cast<OpponentNode>(thisNode.getCallChild()), deck);
+    // Raise
     } else if (maxScore == selectionScores[1]) {
         if (thisNode.getRaiseChild()->getGame().getPlayerTurn() == 0)
             runSelection(*std::static_pointer_cast<ChoiceNode>(thisNode.getRaiseChild()), deck);
         else
             runSelection(*std::static_pointer_cast<OpponentNode>(thisNode.getRaiseChild()), deck);
+    // Fold
     } else {
         if (thisNode.getFoldChild()->getGame().getPlayerTurn() == 0)
             runSelection(*std::static_pointer_cast<ChoiceNode>(thisNode.getFoldChild()), deck);
@@ -111,7 +113,7 @@ void ChoiceNode::runSelection(OpponentNode &thisNode, std::vector<int> &deck) {
     }
     // Calculate UCT score
     std::vector<double> selectionScores{0,0,0};
-    naiveUCT(selectionScores, exploreConst);
+    thisNode.naiveUCT(selectionScores, exploreConst);
 
     // Pick highest score
     double maxScore = 0;
@@ -194,7 +196,6 @@ Action ChoiceNode::monteCarlo(int maxSeconds, std::vector<int> deck) {
     std::shared_ptr<ChoiceNode> copyNode = std::make_shared<ChoiceNode>(*this);
 	std::vector<int> copyDeck = deck;
 	while (time(0) - startTime < maxSeconds){
-        std::cout << "runningSelect" << std::endl;
         runSelection(*copyNode, deck);
 	}
 	double maxScore = copyNode->getCallChild()->getExpectedValue();

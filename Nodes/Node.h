@@ -33,7 +33,6 @@ class Node: public std::enable_shared_from_this<Node> {
 		std::shared_ptr<Node> doRaise(double);
 		std::shared_ptr<Node> doCall();
 		std::shared_ptr<Node> doTerminal();
-        void naiveUCT(std::vector<double>& selectionScores, double exploreConst);
 
      	public:
 		// Member-accessibility functions
@@ -70,6 +69,8 @@ class Node: public std::enable_shared_from_this<Node> {
 				int                    playerTurn,
 				std::shared_ptr<Node>  parent);
 
+        // Monte Carlo functions
+        void naiveUCT(std::vector<double>& selectionScores, double exploreConst);
 };
 
 #endif	//Node.h
