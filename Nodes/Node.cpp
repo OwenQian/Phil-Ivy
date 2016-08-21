@@ -142,17 +142,17 @@ void Node::naiveUCT(std::vector<double>& selectionScores, double exploreConst) {
     // Set the selectionScore and explorationTerm for call
     selectionScores[0] = this->getCallChild()->getExpectedValue();
     explorationTerm[0] = std::sqrt(
-            std::log(double (this->getCallChild()->getVisitCount())/double (childVisitSum)));
+            std::log(double (this->getCallChild()->getVisitCount()))/double (childVisitSum));
 
     // Set the selectionScore and explorationTerm for raise
     selectionScores[1] = this->getRaiseChild()->getExpectedValue();
     explorationTerm[1] = std::sqrt(
-            std::log(double (this->getRaiseChild()->getVisitCount())/double (childVisitSum)));
+            std::log(double (this->getRaiseChild()->getVisitCount()))/double (childVisitSum));
 
     // Set the selectionScore and explorationTerm for fold
     selectionScores[2] = this->getFoldChild()->getExpectedValue();
     explorationTerm[2] = std::sqrt(
-            std::log(double (this->getFoldChild()->getVisitCount())/double (childVisitSum)));
+            std::log(double (this->getFoldChild()->getVisitCount()))/double (childVisitSum));
 
     for (size_t i = 0; i < selectionScores.size(); ++i) {
         explorationTerm[i] *= exploreConst;

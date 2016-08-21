@@ -169,15 +169,14 @@ void OpponentNode::runSimulation(ChoiceNode &thisNode, std::vector<int> deck) {
                 copyNode = copyNodeCall;
         }
 		
+        // Determining winner at showdown
 		int winner = showdown(copyNode->getGame().getBotPlayer().getHoleCards(),
 				copyNode->getGame().getOppPlayer().getHoleCards(),
 				copyNode->getGame().getBoardCards());
 		allocateChips(winner, (*copyNode));
-		
-        if (copyNode->getGame().getPlayerTurn() == 0)
-            backPropagate(*(std::static_pointer_cast<ChoiceNode>(copyNode)), copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());
-        else
-            backPropagate(*(std::static_pointer_cast<OpponentNode>(copyNode)), copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());
+
+        // Updating thisNode
+        backPropagate(thisNode, copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());
     } else {
         backPropagate(thisNode, thisNode.getGame().getBotPlayer().getChips(), thisNode.getGame().getOppPlayer().getChips());
     }
@@ -225,10 +224,8 @@ void OpponentNode::runSimulation(OpponentNode &thisNode, std::vector<int> deck) 
 				copyNode->getGame().getOppPlayer().getHoleCards(),
 				copyNode->getGame().getBoardCards());
 		allocateChips(winner, (*copyNode));
-        if (copyNode->getGame().getPlayerTurn() == 0)
-            backPropagate(*(std::static_pointer_cast<ChoiceNode>(copyNode)), copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());
-        else
-            backPropagate(*(std::static_pointer_cast<OpponentNode>(copyNode)), copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());
+
+        backPropagate(thisNode, copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());
     } else {
         backPropagate(thisNode, thisNode.getGame().getBotPlayer().getChips(), thisNode.getGame().getOppPlayer().getChips());
     }

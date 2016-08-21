@@ -15,7 +15,7 @@ class Node: public std::enable_shared_from_this<Node> {
 		std::shared_ptr<Node> raiseChild;
 		GameObject game;
 		//the parent of this node in the game tree
-		std::shared_ptr<Node> const parent; 
+		std::shared_ptr<Node> parent; 
 		//number of times a node has been visited/simulated on
 		//the expected value derived from choosing this node action 
 		//updated through backprop
@@ -59,6 +59,7 @@ class Node: public std::enable_shared_from_this<Node> {
 		void setIsFirst(bool a) { firstAction = a; }
         void incrementVisitCount() { ++visitCount; }
         void setExpectedValue(double EV) { expectedValue = EV; }
+        void setParent(std::shared_ptr<Node> newParent) { parent = newParent; }
 		
 		// Constructors
 		Node(	int                    state,
