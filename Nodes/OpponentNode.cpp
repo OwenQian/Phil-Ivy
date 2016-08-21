@@ -146,11 +146,14 @@ void OpponentNode::runSimulation(ChoiceNode &thisNode, std::vector<int> deck) {
         std::shared_ptr<Node> copyNode = std::make_shared<ChoiceNode>(thisNode);
         while (copyNode->getGame().getState() != static_cast<int>(Stage::SHOWDOWN)) {
             // hacky implementation to make copyNodeCall the right type of Node
-            std::shared_ptr<Node> tempCopyNodeCall = std::static_pointer_cast<ChoiceNode>(copyNode)->call();
             std::shared_ptr<Node> copyNodeCall;
+            if (copyNode->getGame().getPlayerTurn() == 0)
+                copyNodeCall = std::static_pointer_cast<ChoiceNode>(copyNode)->call();
+            else
+                copyNodeCall = std::static_pointer_cast<OpponentNode>(copyNode)->call();
             
             // if the state changes, reset Node type, isFirst and playerTurn
-            if (tempCopyNodeCall->getGame().getState() != copyNode->getGame().getState()) {
+            if (copyNodeCall->getGame().getState() != copyNode->getGame().getState()) {
                 if (smallBlindPosition == 0) {
                     // set it to call the OpponentNode version of call, returning a ChoiceNode
                     copyNodeCall = std::static_pointer_cast<OpponentNode>(copyNode)->call();
@@ -196,11 +199,14 @@ void OpponentNode::runSimulation(OpponentNode &thisNode, std::vector<int> deck) 
         std::shared_ptr<Node> copyNode = std::make_shared<OpponentNode>(thisNode);
         while (copyNode->getGame().getState() != static_cast<int>(Stage::SHOWDOWN)) {
             // hacky implementation to make copyNodeCall the right type of Node
-            std::shared_ptr<Node> tempCopyNodeCall = std::static_pointer_cast<ChoiceNode>(copyNode)->call();
             std::shared_ptr<Node> copyNodeCall;
+            if (copyNode->getGame().getPlayerTurn() == 0)
+                copyNodeCall = std::static_pointer_cast<ChoiceNode>(copyNode)->call();
+            else
+                copyNodeCall = std::static_pointer_cast<OpponentNode>(copyNode)->call();
             
             // if the state changes, reset Node type, isFirst and playerTurn
-            if (tempCopyNodeCall->getGame().getState() != copyNode->getGame().getState()) {
+            if (copyNodeCall->getGame().getState() != copyNode->getGame().getState()) {
                 if (smallBlindPosition == 0) {
                     // set it to call the OpponentNode version of call, returning a ChoiceNode
                     copyNodeCall = std::static_pointer_cast<OpponentNode>(copyNode)->call();
