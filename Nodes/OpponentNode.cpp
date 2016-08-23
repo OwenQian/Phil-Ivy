@@ -4,6 +4,8 @@
 #include "../handEval/helper.h"
 #include "../GameUtilities/GameUtilities.h"
 
+#include <iostream>
+
 OpponentNode::OpponentNode(		
         int							state,
         double						pot,
@@ -60,6 +62,7 @@ OpponentNode::OpponentNode(
 
             // Calculate UCT score
             std::vector<double> selectionScores{0,0,0};
+            std::cout << "fold visit: " << thisNode.getFoldChild()->getVisitCount() << std::endl;
             thisNode.naiveUCT(selectionScores, exploreConst);
 
             // Pick highest score
@@ -112,6 +115,7 @@ void OpponentNode::runSelection(OpponentNode &thisNode, std::vector<int> &deck) 
 
     // Calculate UCT score
     std::vector<double> selectionScores{0,0,0};
+    std::cout << "fold visit: " << thisNode.getFoldChild()->getVisitCount() << std::endl;
     thisNode.naiveUCT(selectionScores, exploreConst);
 
     // Pick highest score
@@ -142,7 +146,7 @@ void OpponentNode::runSelection(OpponentNode &thisNode, std::vector<int> &deck) 
 }
 
 void OpponentNode::runSimulation(ChoiceNode &thisNode, std::vector<int> deck) {
-    if (!thisNode.getIsFolded()){
+    if (!thisNode.getIsFolded()) {
         std::shared_ptr<Node> copyNode = std::make_shared<ChoiceNode>(thisNode);
         while (copyNode->getGame().getState() != static_cast<int>(Stage::SHOWDOWN)) {
             // hacky implementation to make copyNodeCall the right type of Node
@@ -178,6 +182,7 @@ void OpponentNode::runSimulation(ChoiceNode &thisNode, std::vector<int> deck) {
         // Updating thisNode
         backPropagate(thisNode, copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());
     } else {
+        allocateChips(1, thisNode);
         backPropagate(thisNode, thisNode.getGame().getBotPlayer().getChips(), thisNode.getGame().getOppPlayer().getChips());
     }
 	
@@ -227,6 +232,7 @@ void OpponentNode::runSimulation(OpponentNode &thisNode, std::vector<int> deck) 
 
         backPropagate(thisNode, copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());
     } else {
+        allocateChips(0, thisNode);
         backPropagate(thisNode, thisNode.getGame().getBotPlayer().getChips(), thisNode.getGame().getOppPlayer().getChips());
     }
 }

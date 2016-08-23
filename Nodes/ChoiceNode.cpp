@@ -66,6 +66,7 @@ ChoiceNode::ChoiceNode(
             // Calculate UCT score
             std::vector<double> selectionScores{0,0,0};
             thisNode.naiveUCT(selectionScores, exploreConst);
+            std::cout << "fold visit: " << thisNode.getFoldChild()->getVisitCount() << std::endl;
             std::cout << "call score: " << selectionScores[0] << std::endl;
             std::cout << "raise score: " << selectionScores[1] << std::endl;
             std::cout << "fold score: " << selectionScores[2] << std::endl;
@@ -117,6 +118,7 @@ void ChoiceNode::runSelection(OpponentNode &thisNode, std::vector<int> &deck) {
     }
     // Calculate UCT score
     std::vector<double> selectionScores{0,0,0};
+    std::cout << "fold visit: " << thisNode.getFoldChild()->getVisitCount() << std::endl;
     thisNode.naiveUCT(selectionScores, exploreConst);
 
     std::cout << "call score: " << selectionScores[0] << std::endl;
@@ -183,6 +185,7 @@ void ChoiceNode::runSimulation(ChoiceNode &thisNode, std::vector<int> deck) {
 
         backPropagate(thisNode, copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());
     } else {
+        allocateChips(1, thisNode);
         backPropagate(thisNode, thisNode.getGame().getBotPlayer().getChips(), thisNode.getGame().getOppPlayer().getChips());
     }
 }
@@ -208,6 +211,9 @@ void ChoiceNode::runSimulation(OpponentNode &thisNode, std::vector<int> deck) {
                     // otherwise call the ChoiceNode version, returning OpponentNode
                     copyNodeCall = std::static_pointer_cast<ChoiceNode>(copyNode)->call();
                 }
+                copyNodeCall->getGame().getBotPlayer().setPotInvestment(0);
+                copyNodeCall->getGame().getOppPlayer().setPotInvestment(0);
+                copyNodeCall->setCurrentRaise(0);
                 copyNodeCall->setIsFirst(true);
                 copyNodeCall->getGame().setPlayerTurn(smallBlindPosition);
             }
@@ -222,6 +228,7 @@ void ChoiceNode::runSimulation(OpponentNode &thisNode, std::vector<int> deck) {
 
         backPropagate(thisNode, copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());
     } else {
+        allocateChips(1, thisNode);
         backPropagate(thisNode, thisNode.getGame().getBotPlayer().getChips(), thisNode.getGame().getOppPlayer().getChips());
     }
 }
