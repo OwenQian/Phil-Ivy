@@ -228,7 +228,7 @@ void ChoiceNode::runSimulation(OpponentNode &thisNode, std::vector<int> deck) {
 
         backPropagate(thisNode, copyNode->getGame().getBotPlayer().getChips(), copyNode->getGame().getOppPlayer().getChips());
     } else {
-        allocateChips(1, thisNode);
+        allocateChips(0, thisNode);
         backPropagate(thisNode, thisNode.getGame().getBotPlayer().getChips(), thisNode.getGame().getOppPlayer().getChips());
     }
 }
@@ -264,6 +264,9 @@ Action ChoiceNode::monteCarlo(int maxSeconds, std::vector<int> deck) {
     double maxScore = copyNode->getCallChild()->getExpectedValue();
     maxScore = maxScore >= copyNode->getRaiseChild()->getExpectedValue() ? maxScore : copyNode->getRaiseChild()->getExpectedValue();
     maxScore = maxScore >= copyNode->getFoldChild()->getExpectedValue() ? maxScore : copyNode->getFoldChild()->getExpectedValue();
+	std::cout << "call score: " << copyNode->getCallChild()->getExpectedValue() << std::endl;
+	std::cout << "raise score: " << copyNode->getRaiseChild()->getExpectedValue() << std::endl;
+	std::cout << "fold score: " << copyNode->getFoldChild()->getExpectedValue() << std::endl;
     if (maxScore == copyNode->getCallChild()->getExpectedValue()) {
         return Action::CALL;
     } else if (maxScore == copyNode->getRaiseChild()->getExpectedValue()) {
