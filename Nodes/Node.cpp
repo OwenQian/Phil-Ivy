@@ -44,15 +44,20 @@ std::shared_ptr<Node> Node::doCall() {
 			tempAllIn = true;
 		}
 		auto callNode = std::make_shared<Node>(game.getState() + !getIsFirst(), //only advances state if not first action taken that stage
-			tempPlayer.getPotInvestment() + game.getOppPlayer().getPotInvestment(),
+			initialChips * 2 - tempPlayer.getChips() - game.getOppPlayer().getChips(),
 			game.getBoardCards(),
 			tempPlayer,
 			game.getOppPlayer(),
 			!(game.getPlayerTurn()),
 			shared_from_this() );
-		(*callNode).setIsAllIn(tempAllIn);
-        // if first Action, preserve currentRaise, else reset to 0
-        (*callNode).setCurrentRaise(getIsFirst() * currentRaise);
+		callNode->setIsAllIn(tempAllIn);
+        // if first Action, preserve currentRaise and potInv, else reset to 0
+        callNode->setCurrentRaise(getIsFirst() * currentRaise);
+        callNode->getGame().getBotPlayer().setPotInvestment(getIsFirst() * 
+                callNode->getGame().getBotPlayer().getPotInvestment());
+        callNode->getGame().getOppPlayer().setPotInvestment(getIsFirst() * 
+                callNode->getGame().getOppPlayer().getPotInvestment());
+		callChild = callNode;
 		callChild = callNode;
 	} else {
 		Player tempPlayer = game.getOppPlayer();
@@ -64,15 +69,19 @@ std::shared_ptr<Node> Node::doCall() {
 			tempAllIn = true;
 		}
 		auto callNode = std::make_shared<Node>( game.getState() + !getIsFirst(),
-			game.getBotPlayer().getPotInvestment() + tempPlayer.getPotInvestment(),
+			initialChips * 2 - tempPlayer.getChips() - game.getBotPlayer().getChips(),
 			game.getBoardCards(),
 			game.getBotPlayer(),
 			tempPlayer,
 			!(game.getPlayerTurn()),
 			shared_from_this() );	
-		(*callNode).setIsAllIn(tempAllIn);
-        // if first Action, preserve currentRaise, else reset to 0
-        (*callNode).setCurrentRaise(getIsFirst() * currentRaise);
+		callNode->setIsAllIn(tempAllIn);
+        // if first Action, preserve currentRaise and potInv, else reset to 0
+        callNode->setCurrentRaise(getIsFirst() * currentRaise);
+        callNode->getGame().getBotPlayer().setPotInvestment(getIsFirst() * 
+                callNode->getGame().getBotPlayer().getPotInvestment());
+        callNode->getGame().getOppPlayer().setPotInvestment(getIsFirst() * 
+                callNode->getGame().getOppPlayer().getPotInvestment());
 		callChild = callNode;
 	}
 	callChild->setIsFirst(false);
@@ -84,7 +93,7 @@ std::shared_ptr<Node> Node::doRaise(double raiseAmount) {
     if (raiseAmount < bigBlind || raiseAmount < 2*currentRaise) {
         raiseAmount = bigBlind > (2*currentRaise) ? bigBlind : (2*currentRaise);
     } 
-	// if raise all-in (or more) create AllInNode
+	// if raise all-in (or more) create AllInNode, handled by call
 	if (game.getBotPlayer().getChips() <= currentRaise ||
 				game.getOppPlayer().getChips() <= currentRaise) {
 			return doCall();
@@ -103,26 +112,26 @@ std::shared_ptr<Node> Node::doRaise(double raiseAmount) {
 		tempPlayer.setChips(tempPlayer.getChips() - (raiseAmount - tempPlayer.getPotInvestment()) );
 		tempPlayer.setPotInvestment(raiseAmount);
 		auto raiseNode = std::make_shared<Node>( game.getState(),
-			tempPlayer.getPotInvestment() + game.getOppPlayer().getPotInvestment(),
+			initialChips * 2 - tempPlayer.getChips() - game.getOppPlayer().getChips(),
 			game.getBoardCards(),
 			tempPlayer,
 			game.getOppPlayer(),
 			!(game.getPlayerTurn()),
 			shared_from_this() );
-		(*raiseNode).setCurrentRaise(raiseAmount);
+		raiseNode->setCurrentRaise(raiseAmount);
 		raiseChild = raiseNode;
 	} else {
 		Player tempPlayer = game.getOppPlayer();
 		tempPlayer.setChips(tempPlayer.getChips() - (raiseAmount - tempPlayer.getPotInvestment()));
 		tempPlayer.setPotInvestment(raiseAmount);
 		auto raiseNode = std::make_shared<Node>( game.getState(),
-			game.getBotPlayer().getPotInvestment() + tempPlayer.getPotInvestment(),
+			initialChips * 2 - tempPlayer.getChips() - game.getBotPlayer().getChips(),
 			game.getBoardCards(),
 			game.getBotPlayer(),
 			tempPlayer,
 			!(game.getPlayerTurn()),
 			shared_from_this());
-		(*raiseNode).setCurrentRaise(raiseAmount);
+		raiseNode->setCurrentRaise(raiseAmount);
 		raiseChild = raiseNode;
 	}
 	

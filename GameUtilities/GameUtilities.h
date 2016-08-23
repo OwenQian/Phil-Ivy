@@ -15,6 +15,7 @@ class Node;
 std::vector<int> deal(
 						std::vector<int>	&previousDeck,
 						int					state);
+void printBoardCards(std::vector<int>);
 //initializes deck array to appropriate hex values
 void init_deck(std::vector<int>& deck);
 void allocateChips (int whoWon, Node &currentNode);
