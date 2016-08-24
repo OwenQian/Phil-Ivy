@@ -66,10 +66,9 @@ ChoiceNode::ChoiceNode(
             // Calculate UCT score
             std::vector<double> selectionScores{0,0,0};
             thisNode.naiveUCT(selectionScores, exploreConst);
-            std::cout << "fold visit: " << thisNode.getFoldChild()->getVisitCount() << std::endl;
-            std::cout << "call score: " << selectionScores[0] << std::endl;
-            std::cout << "raise score: " << selectionScores[1] << std::endl;
-            std::cout << "fold score: " << selectionScores[2] << std::endl;
+            //std::cout << "call score: " << selectionScores[0] << std::endl;
+            //std::cout << "raise score: " << selectionScores[1] << std::endl;
+            //std::cout << "fold score: " << selectionScores[2] << std::endl;
             // Pick highest score
             double maxScore = 0;
             for (size_t i = 0; i < selectionScores.size(); ++i) {
@@ -118,12 +117,12 @@ void ChoiceNode::runSelection(OpponentNode &thisNode, std::vector<int> &deck) {
     }
     // Calculate UCT score
     std::vector<double> selectionScores{0,0,0};
-    std::cout << "fold visit: " << thisNode.getFoldChild()->getVisitCount() << std::endl;
+    //std::cout << "fold visit: " << thisNode.getFoldChild()->getVisitCount() << std::endl;
     thisNode.naiveUCT(selectionScores, exploreConst);
 
-    std::cout << "call score: " << selectionScores[0] << std::endl;
-    std::cout << "raise score: " << selectionScores[1] << std::endl;
-    std::cout << "fold score: " << selectionScores[2] << std::endl;
+    //std::cout << "call score: " << selectionScores[0] << std::endl;
+    //std::cout << "raise score: " << selectionScores[1] << std::endl;
+    //std::cout << "fold score: " << selectionScores[2] << std::endl;
     // Pick highest score
     double maxScore = 0;
     for (size_t i = 0; i < selectionScores.size(); ++i) {
@@ -258,15 +257,21 @@ Action ChoiceNode::monteCarlo(int maxSeconds, std::vector<int> deck) {
     time(&startTime);
     std::shared_ptr<ChoiceNode> copyNode = std::make_shared<ChoiceNode>(*this);
     std::vector<int> copyDeck = deck;
+    int simCount = 0;
     while (time(0) - startTime < maxSeconds){
         runSelection(*copyNode, deck);
+        ++simCount;
     }
+    std::cout << "callCount " << copyNode->getCallChild()->getVisitCount();
+    std::cout << "\nraiseCount " << copyNode->getRaiseChild()->getVisitCount();
+    std::cout << "\nfoldCount " << copyNode->getFoldChild()->getVisitCount() << std::endl;
+    std::cout << "simulate # " << simCount << std::endl;
     double maxScore = copyNode->getCallChild()->getExpectedValue();
     maxScore = maxScore >= copyNode->getRaiseChild()->getExpectedValue() ? maxScore : copyNode->getRaiseChild()->getExpectedValue();
     maxScore = maxScore >= copyNode->getFoldChild()->getExpectedValue() ? maxScore : copyNode->getFoldChild()->getExpectedValue();
-	std::cout << "call score: " << copyNode->getCallChild()->getExpectedValue() << std::endl;
-	std::cout << "raise score: " << copyNode->getRaiseChild()->getExpectedValue() << std::endl;
-	std::cout << "fold score: " << copyNode->getFoldChild()->getExpectedValue() << std::endl;
+	std::cout << "call score: " << copyNode->getCallChild()->getExpectedValue();
+	std::cout << "\nraise score: " << copyNode->getRaiseChild()->getExpectedValue();
+	std::cout << "\nfold score: " << copyNode->getFoldChild()->getExpectedValue() << std::endl;
     if (maxScore == copyNode->getCallChild()->getExpectedValue()) {
         return Action::CALL;
     } else if (maxScore == copyNode->getRaiseChild()->getExpectedValue()) {

@@ -62,7 +62,7 @@ OpponentNode::OpponentNode(
 
             // Calculate UCT score
             std::vector<double> selectionScores{0,0,0};
-            std::cout << "fold visit: " << thisNode.getFoldChild()->getVisitCount() << std::endl;
+            //std::cout << "fold visit: " << thisNode.getFoldChild()->getVisitCount() << std::endl;
             thisNode.naiveUCT(selectionScores, exploreConst);
 
             // Pick highest score
@@ -115,7 +115,7 @@ void OpponentNode::runSelection(OpponentNode &thisNode, std::vector<int> &deck) 
 
     // Calculate UCT score
     std::vector<double> selectionScores{0,0,0};
-    std::cout << "fold visit: " << thisNode.getFoldChild()->getVisitCount() << std::endl;
+    //std::cout << "fold visit: " << thisNode.getFoldChild()->getVisitCount() << std::endl;
     thisNode.naiveUCT(selectionScores, exploreConst);
 
     // Pick highest score

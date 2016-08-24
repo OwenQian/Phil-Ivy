@@ -23,7 +23,7 @@ void printBoardCards(std::vector<int> boardCards) {
     std::cout << "Board Cards: ";
     for (auto i = boardCards.begin(); i != boardCards.end(); ++i)
         std::cout << hexToCard(*i) << " ";
-    std::cout << std::endl;
+    //std::cout << std::endl;
 }
 
 void allocateChips(int whoWon, Node &currentNode){
@@ -90,10 +90,10 @@ void playGame(){
 }
 
 std::vector<Player> playRound(Player botPlayer, Player oppPlayer){
-	std::cout << "########################################" << std::endl;
-	std::cout << "Small Blind: " << smallBlind << "\nBig Blind : " << bigBlind << std::endl;
-	std::cout << "bot player chips: " << botPlayer.getChips() << std::endl;
-	std::cout << "opp player chips: " << oppPlayer.getChips() << std::endl;
+	std::cout << "########################################";
+	std::cout << "\nSmall Blind: " << smallBlind << "\nBig Blind : " << bigBlind;
+	std::cout << "\nbot player chips: " << botPlayer.getChips();
+	std::cout << "\nopp player chips: " << oppPlayer.getChips() << std::endl;
 
     // creating the deck
 	std::vector<int> deck;
@@ -102,6 +102,9 @@ std::vector<Player> playRound(Player botPlayer, Player oppPlayer){
     // dealing player hole cards
 	botPlayer.setHoleCards(deal(deck, static_cast<int>(Stage::HOLECARDS) ));
 	oppPlayer.setHoleCards(deal(deck, static_cast<int>(Stage::HOLECARDS) ));
+    
+    std::cout << "Bot Cards: " << hexToCard(botPlayer.getHoleCards()[0]) << " " << hexToCard(botPlayer.getHoleCards()[1]);
+    std::cout << "\nOpp Cards: " << hexToCard(oppPlayer.getHoleCards()[0]) << " " << hexToCard(oppPlayer.getHoleCards()[1]) << std::endl;
 
 	int currentStage = 1;       // preflop stage
 
@@ -198,13 +201,13 @@ std::vector<Player> playRound(Player botPlayer, Player oppPlayer){
 					currentNode->getGame().setBoardCards(updateBoard);
 				}
                 printBoardCards(currentNode->getGame().getBoardCards());
-				std::cout << "botCards: " << hexToCard(currentNode->getGame().getBotPlayer().getHoleCards()[0]) << " " << hexToCard(currentNode->getGame().getBotPlayer().getHoleCards()[1]) << std::endl;
-				std::cout << "oppCards: " << hexToCard(currentNode->getGame().getOppPlayer().getHoleCards()[0]) << " " << hexToCard(currentNode->getGame().getOppPlayer().getHoleCards()[1]) << std::endl;
+				std::cout << "botCards: " << hexToCard(currentNode->getGame().getBotPlayer().getHoleCards()[0]) << " " << hexToCard(currentNode->getGame().getBotPlayer().getHoleCards()[1]);
+				std::cout << "\noppCards: " << hexToCard(currentNode->getGame().getOppPlayer().getHoleCards()[0]) << " " << hexToCard(currentNode->getGame().getOppPlayer().getHoleCards()[1]);
 				int winner = showdown(currentNode->getGame().getBotPlayer().getHoleCards(),
 						currentNode->getGame().getOppPlayer().getHoleCards(),
 						currentNode->getGame().getBoardCards());
 				allocateChips(winner, (*currentNode));
-				std::cout << "Winner: " << winner << std::endl;
+				std::cout << "\nWinner: " << winner << std::endl;
 				currentNode = std::static_pointer_cast<ChoiceNode>(currentNode)->fold();
 			}
 
@@ -240,7 +243,7 @@ std::shared_ptr<OpponentNode> playTurn(std::shared_ptr<ChoiceNode> currentNode, 
 								  break;
 							  }
 			default:
-							  std::cout << "Invalid action" << std::endl;
+							  std::cout << "Invalid action";
 		}
 	} else if (stageInt == static_cast<int> (Stage::SHOWDOWN)) {
 		int winner = showdown(currentNode->getGame().getBotPlayer().getHoleCards(),
@@ -276,7 +279,7 @@ std::shared_ptr<ChoiceNode> playTurn(std::shared_ptr<OpponentNode> currentNode, 
 								  break;
 							  }
 			default:
-							  std::cout << "Invalid action" << std::endl;
+							  std::cout << "Invalid action";
 		}
 	} else if (stateInt == static_cast<int> (Stage::SHOWDOWN)) {
 		int winner = showdown(currentNode->getGame().getBotPlayer().getHoleCards(),

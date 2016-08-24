@@ -58,6 +58,7 @@ class Node: public std::enable_shared_from_this<Node> {
 		void setIsAllIn(bool status) { isAllIn = status; }
 		void setIsFirst(bool a) { firstAction = a; }
         void incrementVisitCount() { ++visitCount; }
+        void setVisitCount(int c) { visitCount = c; }
         void setExpectedValue(double EV) { expectedValue = EV; }
         void setParent(std::shared_ptr<Node> newParent) { parent = newParent; }
 		

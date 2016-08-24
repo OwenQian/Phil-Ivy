@@ -26,6 +26,7 @@ Node::Node(int              state,
 	std::shared_ptr<Node> Node::doFold() {
 		//create child foldNode
 		auto foldNode = std::make_shared<Node>(*this);
+        foldNode->setVisitCount(0);
 		foldNode->isFolded = true;
 		foldChild = foldNode;
 		return foldNode;
@@ -143,6 +144,9 @@ void Node::naiveUCT(std::vector<double>& selectionScores, double exploreConst) {
     std::vector<double> explorationTerm;
     explorationTerm.resize(3);
     int childVisitSum = 0;
+    //std::cout << "foldCount: " << this->getFoldChild()->getVisitCount();
+    //std::cout << "\ncallCount: " << this->getCallChild()->getVisitCount();
+    //std::cout << "\nraiseCount: " << this->getRaiseChild()->getVisitCount() << std::endl;
     childVisitSum += this->getCallChild()->getVisitCount();
     childVisitSum += this->getFoldChild()->getVisitCount();
     childVisitSum += this->getRaiseChild()->getVisitCount();
