@@ -138,7 +138,7 @@ std::vector<Player> playRound(Player botPlayer, Player oppPlayer){
 			root->getGame().getOppPlayer().setPotInvestment(bigBlind);
 			root->setCurrentRaise(bigBlind);
 		}
-	} else if (smallBlindPosition == 1) {
+	} else {
 		root = std::make_shared<OpponentNode>(1, bigBlind + smallBlind, std::vector<int>(),
 				botPlayer, oppPlayer, smallBlindPosition, std::shared_ptr<OpponentNode> (NULL));
 		// if the smallBlind puts the opp allIn

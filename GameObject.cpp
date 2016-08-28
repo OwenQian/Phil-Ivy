@@ -1,5 +1,10 @@
 #include "GameObject.h"
 
+GameObject::GameObject() : 
+    state(0),
+    pot(0.0),
+    playerTurn(0) { }
+
 GameObject::GameObject(
 		int                 state,
 		double              pot,

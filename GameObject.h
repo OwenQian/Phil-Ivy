@@ -7,8 +7,8 @@
 
 class GameObject {
 	protected:
-		const int state;
-		const double pot;
+		int state;
+		double pot;
 		std::vector<int> boardCards;
 		Player botPlayer;
 		Player oppPlayer;
@@ -16,7 +16,7 @@ class GameObject {
 
 	public:
 		// Constructors
-		// Doesn't make sense to have default constructor
+        GameObject();
 		GameObject( int                     state,
 				double                  pot,
 				std::vector<int>        boardCards,

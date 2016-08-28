@@ -7,30 +7,109 @@
 #include <iostream>
 #include <cmath>        //for sqrt
 
+Node::Node() :
+    parent(nullptr),
+    foldChild(nullptr),
+    callChild(nullptr),
+    raiseChild(nullptr),
+    game(0, 0.0, std::vector<int>(), Player(), Player(), 0),
+    visitCount(0),
+    expectedValue(0.0),
+    currentRaise(0.0),
+    isFolded(false),
+    isAllIn(false),
+    firstAction(true) { }
+
 Node::Node(int              state,
 		double              pot,
 		std::vector<int>    boardCards,
 		Player				botPlayer,
 		Player				oppPlayer,
 		int                 playerTurn,
-		std::shared_ptr<Node> parent) :
+		Node* parent) :
+	parent(parent),
+    foldChild(nullptr),
+    callChild(nullptr),
+    raiseChild(nullptr),
 	game(state,
 			pot,
 			boardCards,
 			botPlayer,
 			oppPlayer,
 			playerTurn),
-	parent(parent){ }
+    visitCount(0),
+    expectedValue(0.0),
+    currentRaise(0.0),
+    isFolded(false),
+    isAllIn(false) { }
 
-	// Action function implementation
-	std::shared_ptr<Node> Node::doFold() {
-		//create child foldNode
-		auto foldNode = std::make_shared<Node>(*this);
-        foldNode->setVisitCount(0);
-		foldNode->isFolded = true;
-		foldChild = foldNode;
-		return foldNode;
-	}
+// Copy Constructor
+Node::Node(const Node& obj) :
+    Node()
+{
+    // share the same parent
+    parent = obj.parent;
+
+    foldChild.reset(new Node);
+    foldChild->expectedValue = obj.foldChild->expectedValue;
+    foldChild->visitCount = obj.foldChild->visitCount;
+
+    raiseChild.reset(new Node);
+    raiseChild->expectedValue = obj.raiseChild->expectedValue;
+    raiseChild->visitCount = obj.raiseChild->visitCount;
+
+    callChild.reset(new Node);
+    callChild->expectedValue = obj.callChild->expectedValue;
+    callChild->visitCount = obj.callChild->visitCount;
+}
+
+// Destructor
+Node::~Node() {
+    foldChild.reset();
+    raiseChild.reset();
+    callChild.reset();
+}
+
+// Assignment operaor
+Node& Node::operator=(const Node& rhs) {
+    // self-assignment check
+    if (&rhs == this)
+        return *this;
+    delete this;
+    parent = rhs.parent;
+    foldChild.reset(new Node);
+    foldChild->expectedValue = rhs.foldChild->expectedValue;
+    foldChild->visitCount = rhs.foldChild->visitCount;
+
+    raiseChild.reset(new Node);
+    raiseChild->expectedValue = rhs.raiseChild->expectedValue;
+    raiseChild->visitCount = rhs.raiseChild->visitCount;
+
+    callChild.reset(new Node);
+    callChild->expectedValue = rhs.callChild->expectedValue;
+    callChild->visitCount = rhs.callChild->visitCount;
+    
+    game = rhs.game;
+    visitCount = rhs.visitCount;
+    expectedValue = rhs.expectedValue;
+    currentRaise = rhs.currentRaise;
+    isFolded = rhs.isFolded;
+    isAllIn = rhs.isAllIn;
+    firstAction = rhs.firstAction;
+
+    return *this;
+}
+
+std::unique_ptr<Node>& Node::fold() {
+    foldChild.reset(new Node(*this));
+    foldChild->isFolded=true;
+    foldChild->visitCount = 0;
+    return foldChild;
+}
+
+std::unique_ptr<Node>& Node::call() {
+    
+}
 
 std::shared_ptr<Node> Node::doCall() {
 	//creates a temporary playerlist and updates the player's potinvestment and chip count
