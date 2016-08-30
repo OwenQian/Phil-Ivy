@@ -45,11 +45,14 @@ Node::Node(int              state,
 
 // Copy Constructor
 Node::Node(const Node& obj) :
-    Node()
+    Node(obj.game.getState(),
+            obj.game.getPot(),
+            obj.game.getBoardCard(),
+            obj.game.getBotPlayer(),
+            obj.game.getOppPlayer(),
+            obj.game.getPlayerTurn(),
+            obj.parent)
 {
-    // share the same parent
-    parent = obj.parent;
-
     foldChild.reset(new Node);
     foldChild->expectedValue = obj.foldChild->expectedValue;
     foldChild->visitCount = obj.foldChild->visitCount;
