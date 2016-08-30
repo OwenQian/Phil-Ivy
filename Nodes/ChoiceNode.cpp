@@ -63,3 +63,40 @@ std::unique_ptr<Node>& ChoiceNode::call() {
         callChild->setIsFirst(false);
         return callChild;
 }
+
+std::unique_ptr<Node>& ChoiceNode::fold(){
+	return Node::fold();
+}
+
+std::unique_ptr<Node>& ChoiceNode::raise(double raiseAmount) {
+    if (raiseAmount < bigBlind || raiseAmount < 2*currentRaise) {
+        raiseAmount = bigBlind > (2*currentRaise) ? bigBlind : (2*currentRaise);
+    } 
+	// if raise all-in (or more) create AllInNode, handled by call
+	if (game.getBotPlayer().getChips() <= currentRaise ||
+				game.getOppPlayer().getChips() <= currentRaise) {
+			return call();
+		}
+	if (raiseAmount >= game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment() ||
+			raiseAmount >= game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment() ) {
+		std::cout << "Raising All-In" << std::endl;
+
+		// set raiseAmount to lesser of chip amounts
+		raiseAmount = std::min(game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment(),
+				game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment());
+	}
+	setIsFirst(false);
+		Player tempPlayer = game.getBotPlayer();
+		tempPlayer.setChips(tempPlayer.getChips() - (raiseAmount - tempPlayer.getPotInvestment()) );
+		tempPlayer.setPotInvestment(raiseAmount);
+		raiseChild.reset(new OpponentNode( game.getState(),
+			initialChips * 2 - tempPlayer.getChips() - game.getOppPlayer().getChips(),
+			game.getBoardCards(),
+			tempPlayer,
+			game.getOppPlayer(),
+			!(game.getPlayerTurn()),
+			this ));
+		raiseChild->setCurrentRaise(raiseAmount);
+	
+	return raiseChild;
+}
