@@ -31,13 +31,13 @@ class Node {
         Node();
         Node(int, double, std::vector<int>, Player, Player, int, Node*);
         Node(const Node& obj);
-        Node& operator= (const Node& rhs);
-        ~Node();
+        Node& operator= (Node& rhs);
+        virtual ~Node();
 
         // Action functions
-        std::unique_ptr<Node>& call();
-        std::unique_ptr<Node>& raise(double);
-        std::unique_ptr<Node>& fold();
+        virtual std::unique_ptr<Node>& call() = 0;
+        virtual std::unique_ptr<Node>& raise(double) = 0;
+        virtual std::unique_ptr<Node>& fold() = 0;
 
         // Getters
         GameObject & getGame() { return game; }

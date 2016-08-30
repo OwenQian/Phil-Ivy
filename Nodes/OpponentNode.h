@@ -11,17 +11,7 @@
 
 class ChoiceNode;
 class OpponentNode: public Node {
-	private:
-        // Monte Carlo
-        //
-        void runSelection(ChoiceNode& thisNode, std::vector<int> &deck);
-		void runSelection(OpponentNode& thisNode, std::vector<int> &deck);
-        void runSimulation(ChoiceNode& thisNode, std::vector<int> deck);
-		void runSimulation(OpponentNode& thisNode, std::vector<int> deck);
-        void backPropagate(ChoiceNode& nextNode, double botEV, double oppEV);
-        void backPropagate(OpponentNode& nextNode, double botEV, double oppEV);
-	public:
-		//Constructor
+    public:
 		OpponentNode(	
 						int								state,
 						double							pot,
@@ -29,30 +19,11 @@ class OpponentNode: public Node {
 						Player							botPlayer,
 						Player							oppPlayer,
 						int								playerTurn,
-						std::shared_ptr<OpponentNode>	const parent);
+						Node*	                    	const parent);
 
-		OpponentNode(	
-						int								state,
-						double							pot,
-						std::vector<int>				boardCards,
-						Player							botPlayer,
-						Player							oppPlayer,
-						int								playerTurn,
-						std::shared_ptr<ChoiceNode>		const parent);
-
-		// Wrapper for Action functions to return correct type
-		std::shared_ptr<ChoiceNode> fold() {
-			return std::static_pointer_cast<ChoiceNode> (doFold());
-		}
-		std::shared_ptr<ChoiceNode> call() {
-			return std::static_pointer_cast<ChoiceNode> (doCall());
-		}
-		std::shared_ptr<ChoiceNode> raise(double raiseAmount) {
-			return std::static_pointer_cast<ChoiceNode> (doRaise(raiseAmount));
-		}
+        virtual std::unique_ptr<Node>& call();
+        virtual std::unique_ptr<Node>& raise(double);
+        virtual std::unique_ptr<Node>& fold();
 };
-
-
-
 
 #endif	//OpponentNode.h

@@ -2,6 +2,7 @@
 #include "../Config.h"
 
 #include <memory>
+#include <utility>
 #include <cassert>
 #include <algorithm>	//std::min/max
 #include <iostream>
@@ -47,7 +48,7 @@ Node::Node(int              state,
 Node::Node(const Node& obj) :
     Node(obj.game.getState(),
             obj.game.getPot(),
-            obj.game.getBoardCard(),
+            obj.game.getBoardCards(),
             obj.game.getBotPlayer(),
             obj.game.getOppPlayer(),
             obj.game.getPlayerTurn(),
@@ -74,23 +75,16 @@ Node::~Node() {
 }
 
 // Assignment operaor
-Node& Node::operator=(const Node& rhs) {
+Node& Node::operator= (Node& rhs) {
     // self-assignment check
     if (&rhs == this)
         return *this;
-    delete this;
+
     parent = rhs.parent;
-    foldChild.reset(new Node);
-    foldChild->expectedValue = rhs.foldChild->expectedValue;
-    foldChild->visitCount = rhs.foldChild->visitCount;
 
-    raiseChild.reset(new Node);
-    raiseChild->expectedValue = rhs.raiseChild->expectedValue;
-    raiseChild->visitCount = rhs.raiseChild->visitCount;
-
-    callChild.reset(new Node);
-    callChild->expectedValue = rhs.callChild->expectedValue;
-    callChild->visitCount = rhs.callChild->visitCount;
+    foldChild = std::move(rhs.foldChild);
+    raiseChild = std::move(rhs.raiseChild);
+    callChild = std::move(rhs.callChild);
     
     game = rhs.game;
     visitCount = rhs.visitCount;
@@ -110,38 +104,11 @@ std::unique_ptr<Node>& Node::fold() {
     return foldChild;
 }
 
-std::unique_ptr<Node>& Node::call() {
-    
-}
+
 
 std::shared_ptr<Node> Node::doCall() {
 	//creates a temporary playerlist and updates the player's potinvestment and chip count
 	if (game.getPlayerTurn() == 0) {
-		Player tempPlayer = game.getBotPlayer();
-		
-		tempPlayer.setChips(tempPlayer.getChips() - (currentRaise - tempPlayer.getPotInvestment()) );
-		tempPlayer.setPotInvestment(currentRaise);
-		bool tempAllIn = false;
-		if (game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment() <= currentRaise ||
-				game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment() <= currentRaise) {
-			tempAllIn = true;
-		}
-		auto callNode = std::make_shared<Node>(game.getState() + !getIsFirst(), //only advances state if not first action taken that stage
-			initialChips * 2 - tempPlayer.getChips() - game.getOppPlayer().getChips(),
-			game.getBoardCards(),
-			tempPlayer,
-			game.getOppPlayer(),
-			!(game.getPlayerTurn()),
-			shared_from_this() );
-		callNode->setIsAllIn(tempAllIn);
-        // if first Action, preserve currentRaise and potInv, else reset to 0
-        callNode->setCurrentRaise(getIsFirst() * currentRaise);
-        callNode->getGame().getBotPlayer().setPotInvestment(getIsFirst() * 
-                callNode->getGame().getBotPlayer().getPotInvestment());
-        callNode->getGame().getOppPlayer().setPotInvestment(getIsFirst() * 
-                callNode->getGame().getOppPlayer().getPotInvestment());
-		callChild = callNode;
-		callChild = callNode;
 	} else {
 		Player tempPlayer = game.getOppPlayer();
 		tempPlayer.setChips(tempPlayer.getChips() - (currentRaise - tempPlayer.getPotInvestment()));
