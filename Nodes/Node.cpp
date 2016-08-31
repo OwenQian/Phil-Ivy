@@ -42,7 +42,8 @@ Node::Node(int              state,
     expectedValue(0.0),
     currentRaise(0.0),
     isFolded(false),
-    isAllIn(false) { }
+    isAllIn(false), 
+    firstAction(true) { }
 
 // Copy Constructor
 Node::Node(const Node& obj) :

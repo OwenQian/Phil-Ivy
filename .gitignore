@@ -17,3 +17,4 @@
 /obj
 *.DS_Store
 *.gch
+*.dSYM

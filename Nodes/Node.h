@@ -31,7 +31,7 @@ class Node {
         Node();
         Node(int, double, std::vector<int>, Player, Player, int, Node*);
         Node(const Node& obj);
-        Node& operator= (Node& rhs);
+        Node& operator= (const Node& rhs);
         virtual ~Node();
 
         // Action functions
