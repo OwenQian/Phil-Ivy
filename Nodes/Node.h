@@ -38,6 +38,10 @@ class Node {
         virtual std::unique_ptr<Node>& call() = 0;
         virtual std::unique_ptr<Node>& raise(double) = 0;
         virtual std::unique_ptr<Node>& fold() = 0;
+		
+		//Game functions
+		static void playGame();
+		static void playRound(Player& BotPlayer, Player& OppPlayer);
 
         // Getters
         GameObject & getGame() { return game; }
@@ -61,6 +65,7 @@ class Node {
         void setVisitCount(int c) { visitCount = c; }
         void setExpectedValue(double EV) { expectedValue = EV; }
         void setParent(Node* newParent) { parent = newParent; }
+		
 };
 
 #endif	//Node.h
