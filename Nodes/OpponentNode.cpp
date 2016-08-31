@@ -4,10 +4,7 @@
 
 #include "ChoiceNode.h"
 #include "OpponentNode.h"
-#include "../Stage.h"
 #include "../Config.h"
-#include "../handEval/helper.h"
-#include "../GameUtilities/GameUtilities.h"
 
 OpponentNode::OpponentNode() :
     Node() { }
@@ -29,6 +26,13 @@ OpponentNode::OpponentNode(int state,
 
 OpponentNode::OpponentNode(const OpponentNode& obj) :
     Node(obj) { }
+
+std::unique_ptr<Node>& OpponentNode::fold() {
+    foldChild.reset(new OpponentNode(*this));
+    foldChild->setIsFolded(true);
+    foldChild->setVisitCount(0);
+    return foldChild;
+}
 
 std::unique_ptr<Node>& OpponentNode::call() {
     Player tempPlayer = game.getOppPlayer();
@@ -62,10 +66,6 @@ std::unique_ptr<Node>& OpponentNode::call() {
         callChild->getGame().getOppPlayer().setPotInvestment( firstAction * callChild->getGame().getOppPlayer().getPotInvestment());
         callChild->setIsFirst(false);
         return callChild;
-}
-
-std::unique_ptr<Node>& OpponentNode::fold(){
-	return Node::fold();
 }
 
 std::unique_ptr<Node>& OpponentNode::raise(double raiseAmount) {

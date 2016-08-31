@@ -1,12 +1,12 @@
 #include "Node.h"
+#include "ChoiceNode.h"
+#include "OpponentNode.h"
 #include "../Config.h"
 
 #include <memory>
 #include <utility>
 #include <cassert>
-#include <algorithm>	//std::min/max
 #include <iostream>
-#include <cmath>        //for sqrt
 
 Node::Node() :
     parent(nullptr),
@@ -52,20 +52,7 @@ Node::Node(const Node& obj) :
             obj.game.getBotPlayer(),
             obj.game.getOppPlayer(),
             obj.game.getPlayerTurn(),
-            obj.parent)
-{
-    foldChild.reset(new Node);
-    foldChild->expectedValue = obj.foldChild->expectedValue;
-    foldChild->visitCount = obj.foldChild->visitCount;
-
-    raiseChild.reset(new Node);
-    raiseChild->expectedValue = obj.raiseChild->expectedValue;
-    raiseChild->visitCount = obj.raiseChild->visitCount;
-
-    callChild.reset(new Node);
-    callChild->expectedValue = obj.callChild->expectedValue;
-    callChild->visitCount = obj.callChild->visitCount;
-}
+            obj.parent) { }
 
 // Destructor
 Node::~Node() {
@@ -75,17 +62,13 @@ Node::~Node() {
 }
 
 // Assignment operaor
-Node& Node::operator= (Node& rhs) {
+Node& Node::operator= (const Node& rhs) {
     // self-assignment check
     if (&rhs == this)
         return *this;
-
+    
     parent = rhs.parent;
 
-    foldChild = std::move(rhs.foldChild);
-    raiseChild = std::move(rhs.raiseChild);
-    callChild = std::move(rhs.callChild);
-    
     game = rhs.game;
     visitCount = rhs.visitCount;
     expectedValue = rhs.expectedValue;
@@ -94,12 +77,10 @@ Node& Node::operator= (Node& rhs) {
     isAllIn = rhs.isAllIn;
     firstAction = rhs.firstAction;
 
+    foldChild.reset();
+    callChild.reset();
+    raiseChild.reset();
+
     return *this;
 }
 
-std::unique_ptr<Node>& Node::fold() {
-    foldChild.reset(new Node(*this));
-    foldChild->isFolded=true;
-    foldChild->visitCount = 0;
-    return foldChild;
-}

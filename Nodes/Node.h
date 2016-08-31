@@ -54,6 +54,7 @@ class Node {
 
         // Setters
         void setCurrentRaise(double amount) { currentRaise = amount; }
+        void setIsFolded(bool v) { isFolded = v; }
         void setIsAllIn(bool status) { isAllIn = status; }
         void setIsFirst(bool a) { firstAction = a; }
         void incrementVisitCount() { ++visitCount; }

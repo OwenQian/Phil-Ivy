@@ -1,17 +1,20 @@
 #ifndef OPPONENT_NODE_H
 #define OPPONENT_NODE_H
 
+#include <memory>
+
 #include "Node.h"
 #include "../GameObject.h"
-#include "../GameUtilities/GameUtilities.h"
-#include "../Stage.h"
-#include "../GameUtilities/Action.h"
-
-#include <memory>
 
 class ChoiceNode;
 class OpponentNode: public Node {
     public:
+        virtual std::unique_ptr<Node>& call();
+        virtual std::unique_ptr<Node>& raise(double);
+        virtual std::unique_ptr<Node>& fold();
+
+        // Contructors
+        OpponentNode();
 		OpponentNode(	
 						int								state,
 						double							pot,
@@ -20,10 +23,7 @@ class OpponentNode: public Node {
 						Player							oppPlayer,
 						int								playerTurn,
 						Node*	                    	const parent);
-
-        virtual std::unique_ptr<Node>& call();
-        virtual std::unique_ptr<Node>& raise(double);
-        virtual std::unique_ptr<Node>& fold();
+        OpponentNode(const OpponentNode&);
 };
 
 #endif	//OpponentNode.h

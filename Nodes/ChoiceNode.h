@@ -1,13 +1,10 @@
 #ifndef CHOICE_NODE_H
 #define CHOICE_NODE_H
 
+#include <memory>		//smart pointer
+
 #include "Node.h"
 #include "../GameObject.h"
-#include "../GameUtilities/GameUtilities.h"
-#include "../Stage.h"
-#include "../GameUtilities/Action.h"
-
-#include <memory>		//smart pointer
 
 class ChoiceNode: public Node {	//inheriting from Node class
     public:
