@@ -5,9 +5,13 @@
 
 #include "Node.h"
 #include "../GameObject.h"
+#include "../Action.h"
+#include "../GameUtilities/Decision.h"
 
 class ChoiceNode;
 class OpponentNode: public Node {
+    private:
+        virtual Decision makeDecision();
     public:
         virtual std::unique_ptr<Node>& call();
         virtual std::unique_ptr<Node>& raise(double);

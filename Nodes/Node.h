@@ -1,12 +1,13 @@
 #ifndef NODE_H
 #define NODE_H
 
-#include "../GameObject.h"
-#include "../Player.h"
-
 #include <vector>
 #include <memory>
 
+#include "../GameObject.h"
+#include "../Player.h"
+#include "../Action.h"
+#include "../GameUtilities/Decision.h"
 
 class Node {
     protected:
@@ -24,9 +25,6 @@ class Node {
         bool isAllIn;
         bool firstAction;
 
-        // Monte Carlo functions
-        void naiveUCT(std::vector<double>& selectionScores, double exploreConst);
-
     public:
         Node();
         Node(int, double, std::vector<int>, Player, Player, int, Node*);
@@ -42,6 +40,8 @@ class Node {
 		//Game functions
 		static void playGame();
 		static void playRound(Player& BotPlayer, Player& OppPlayer);
+        std::unique_ptr<Node>& playTurn();
+        virtual Decision makeDecision() = 0;
 
         // Getters
         GameObject & getGame() { return game; }

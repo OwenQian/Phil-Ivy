@@ -4,9 +4,12 @@
 #include <memory>		//smart pointer
 
 #include "Node.h"
+#include "../Action.h"
 #include "../GameObject.h"
 
 class ChoiceNode: public Node {	//inheriting from Node class
+    private: 
+        virtual Decision makeDecision();
     public:
         virtual std::unique_ptr<Node>& call();
         virtual std::unique_ptr<Node>& raise(double);
@@ -25,4 +28,4 @@ class ChoiceNode: public Node {	//inheriting from Node class
         ChoiceNode(const ChoiceNode&);
 };
 
-#endif //Node.h
+#endif //ChoiceNode.h

@@ -13,7 +13,7 @@
 #include <iostream>
 
 int main() {
-	playGame();
+    Node::playGame();
 
 	return 0;
 }

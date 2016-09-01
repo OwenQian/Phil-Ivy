@@ -5,9 +5,11 @@
 #include "ChoiceNode.h"
 #include "OpponentNode.h"
 #include "../Config.h"
+#include "../GameUtilities/Decision.h"
+#include "../GameUtilities/GameUtilities.h"
 
 ChoiceNode::ChoiceNode() :
-    Node() { }
+    Node::Node() { }
 
 ChoiceNode::ChoiceNode(int state,
         double pot,
@@ -16,7 +18,7 @@ ChoiceNode::ChoiceNode(int state,
         Player oppPlayer,
         int playerTurn,
         Node* const parent) :
-    Node(state,
+    Node::Node(state,
             pot,
             boardCards,
             botPlayer,
@@ -99,4 +101,22 @@ std::unique_ptr<Node>& ChoiceNode::raise(double raiseAmount) {
 		raiseChild->setCurrentRaise(raiseAmount);
 	
 	return raiseChild;
+}
+
+Decision ChoiceNode::makeDecision() {
+    std::cout << "Enter Action bot: Call(0), Raise(1), Fold(2)" << std::endl;
+    Decision decision;
+    int temp;
+    std::cin >> temp;
+    std::vector<int> deck;
+    init_deck(deck);
+    decision.action = static_cast<Action>(temp);
+    std::cout << "Bot Decision: " << static_cast<int>(decision.action) << std::endl;
+    if (decision.action == Action::RAISE) {
+        std::cout << "Enter Raise amount" << std::endl;
+        double amount;
+        std::cin >> amount;
+        decision.raiseAmount = amount;
+    }
+    return decision;
 }

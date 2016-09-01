@@ -1,7 +1,7 @@
 #ifndef DECISION_H
 #define DECISION_H
 
-#include "Action.h"
+#include "../Action.h"
 
 #include <memory>
 

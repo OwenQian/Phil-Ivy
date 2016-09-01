@@ -5,6 +5,7 @@
 #include "../GameObject.h"
 
 #include <vector>
+#include <utility>
 
 int main() {
 	int myState = 0;
@@ -20,5 +21,9 @@ int main() {
 			Owen,
 			pTurn,
 			nullptr);
-	n.call();
+	auto c = std::move(n.call());
+    auto r = std::move(c->raise(4.0));
+    auto f = std::move(r->fold());
+
+    return 0;
 }

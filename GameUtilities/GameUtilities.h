@@ -2,7 +2,7 @@
 #define __GAME_UTILITIES_H
 
 #include "Decision.h"
-#include "Action.h"
+#include "../Action.h"
 
 #include <vector>
 #include <memory>

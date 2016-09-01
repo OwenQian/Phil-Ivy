@@ -1,12 +1,15 @@
-#include "Node.h"
-#include "ChoiceNode.h"
-#include "OpponentNode.h"
-#include "../Config.h"
-
 #include <memory>
 #include <utility>
 #include <cassert>
 #include <iostream>
+
+#include "Node.h"
+#include "ChoiceNode.h"
+#include "OpponentNode.h"
+#include "../Config.h"
+#include "../Stage.h"
+#include "../GameUtilities/GameUtilities.h"
+#include "../handEval/helper.h"
 
 Node::Node() :
     parent(nullptr),
@@ -123,8 +126,8 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
     // if smallBlindPosition == 0, node should be a ChoiceNode
 	assert(smallBlindPosition == 0 || smallBlindPosition == 1);
 	if (smallBlindPosition == 0){
-		root = std::make_shared<ChoiceNode>(1, bigBlind + smallBlind, std::vector<int>(),
-				botPlayer, oppPlayer, smallBlindPosition, std::shared_ptr<ChoiceNode> (NULL));
+		root.reset( new ChoiceNode(1, bigBlind + smallBlind, std::vector<int>(),
+				botPlayer, oppPlayer, smallBlindPosition, nullptr));
 		// if the smallBlind puts the bot allIn
 		if (smallBlind >= botPlayer.getChips()){
 			root->getGame().getOppPlayer().setChips(oppPlayer.getChips() - botPlayer.getChips());
@@ -149,8 +152,8 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
 			root->setCurrentRaise(bigBlind);
 		}
 	} else {
-		root = std::make_shared<OpponentNode>(1, bigBlind + smallBlind, std::vector<int>(),
-				botPlayer, oppPlayer, smallBlindPosition, std::shared_ptr<OpponentNode> (NULL));
+		root.reset( new OpponentNode(1, bigBlind + smallBlind, std::vector<int>(),
+				botPlayer, oppPlayer, smallBlindPosition, nullptr) );
 		// if the smallBlind puts the opp allIn
 		if (smallBlind >= oppPlayer.getChips()){
 			root->getGame().getBotPlayer().setChips(botPlayer.getChips() - oppPlayer.getChips());
@@ -176,11 +179,11 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
 			root->setCurrentRaise(bigBlind);
 		}
 	} 
-	std::unique_ptr<Node> currentNode(std::move(root
+	std::unique_ptr<Node> currentNode(std::move(root));
 	
 	while(!currentNode->getIsAllIn() && !currentNode->getIsFolded()
-		&& (currentNode->getGame().getState() != Stage::SHOWDOWN)){
-			currentNode.playTurn();
+		&& (currentNode->getGame().getState() != static_cast<int>(Stage::SHOWDOWN)) ){
+			currentNode = std::move(currentNode->playTurn());
 			if (currentNode->getGame().getState() != currentStage){
 				std::vector<int> updateBoard = currentNode->getGame().getBoardCards();
 				std::vector<int> newCards = deal(deck, currentStage);
@@ -193,13 +196,13 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
 			}
 	}
 	if (currentNode->getIsFolded()){
-		if (currentNode->getPlayerTurn() == 0) {
+		if (currentNode->getGame().getPlayerTurn() == 0) {
 			allocateChips(1, (*currentNode));
 		} else {
 			allocateChips(0, (*currentNode));
 		}
 	}
-	if (currentNode->getGame().getState() == Stage::SHOWDOWN){
+	if (currentNode->getGame().getState() == static_cast<int>(Stage::SHOWDOWN) ){
 		int winner = showdown(currentNode->getGame().getBotPlayer().getHoleCards(),
 				currentNode->getGame().getOppPlayer().getHoleCards(),
 				currentNode->getGame().getBoardCards());
@@ -226,4 +229,29 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
 				allocateChips(winner, (*currentNode));
 				std::cout << "\nWinner: " << winner << std::endl;
 	}
+}
+
+std::unique_ptr<Node>& Node::playTurn() {
+    assert(!isFolded);
+    Decision decision = makeDecision();
+    switch(decision.action) {
+        case Action::CALL: {
+                               return call();
+                               break;
+                           }
+        case Action::RAISE: {
+                                return raise(decision.raiseAmount);
+                                break;
+                            }
+        case Action::FOLD: {
+                               if (game.getPlayerTurn() == 0)
+                                   allocateChips(1, *this);
+                               else
+                                   allocateChips(0, *this);
+                               return fold();
+                               break;
+                           }
+        default:
+                           std::cout << "Invalid decision" << std::endl;
+    }
 }
