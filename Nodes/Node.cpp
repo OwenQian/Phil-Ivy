@@ -60,9 +60,12 @@ Node::Node(const Node& obj) :
 
 // Destructor
 Node::~Node() {
-    foldChild.reset();
-    raiseChild.reset();
-    callChild.reset();
+    if (foldChild)
+        foldChild->parent = nullptr;
+    if (raiseChild)
+        raiseChild->parent = nullptr;
+    if (callChild)
+        callChild->parent = nullptr;
 }
 
 // Assignment operaor
@@ -80,10 +83,6 @@ Node& Node::operator= (const Node& rhs) {
     isFolded = rhs.isFolded;
     isAllIn = rhs.isAllIn;
     firstAction = rhs.firstAction;
-
-    foldChild.reset();
-    callChild.reset();
-    raiseChild.reset();
 
     return *this;
 }
@@ -104,9 +103,9 @@ void Node::playGame(){
 
 void Node::playRound(Player& botPlayer, Player& oppPlayer){
 	std::cout << "########################################";
-	std::cout << "\nSmall Blind: " << smallBlind << "\nBig Blind : " << bigBlind;
-	std::cout << "\nbot player chips: " << botPlayer.getChips();
-	std::cout << "\nopp player chips: " << oppPlayer.getChips() << std::endl;
+	//std::cout << "\nSmall Blind: " << smallBlind << "\nBig Blind : " << bigBlind;
+	//std::cout << "\nbot player chips: " << botPlayer.getChips();
+	//std::cout << "\nopp player chips: " << oppPlayer.getChips() << std::endl;
 
     // creating the deck
 	std::vector<int> deck;
@@ -229,6 +228,8 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
 				allocateChips(winner, (*currentNode));
 				std::cout << "\nWinner: " << winner << std::endl;
 	}
+    botPlayer = currentNode->getGame().getBotPlayer();
+    oppPlayer = currentNode->getGame().getOppPlayer();
 }
 
 std::unique_ptr<Node>& Node::playTurn() {
@@ -244,10 +245,6 @@ std::unique_ptr<Node>& Node::playTurn() {
                                 break;
                             }
         case Action::FOLD: {
-                               if (game.getPlayerTurn() == 0)
-                                   allocateChips(1, *this);
-                               else
-                                   allocateChips(0, *this);
                                return fold();
                                break;
                            }
