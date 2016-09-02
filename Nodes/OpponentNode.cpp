@@ -67,7 +67,6 @@ std::unique_ptr<Node>& OpponentNode::call() {
         callChild->setCurrentRaise(firstAction * currentRaise);
         callChild->getGame().getBotPlayer().setPotInvestment( firstAction * callChild->getGame().getBotPlayer().getPotInvestment());
         callChild->getGame().getOppPlayer().setPotInvestment( firstAction * callChild->getGame().getOppPlayer().getPotInvestment());
-        callChild->setIsFirst(false);
         return callChild;
 }
 
@@ -88,7 +87,6 @@ std::unique_ptr<Node>& OpponentNode::raise(double raiseAmount) {
 		raiseAmount = std::min(game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment(),
 				game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment());
 	}
-	setIsFirst(false);
 		Player tempPlayer = game.getOppPlayer();
 		tempPlayer.setChips(tempPlayer.getChips() - (raiseAmount - tempPlayer.getPotInvestment()) );
 		tempPlayer.setPotInvestment(raiseAmount);
@@ -112,7 +110,7 @@ Decision OpponentNode::makeDecision() {
     std::vector<int> deck;
     init_deck(deck);
     decision.action = static_cast<Action>(temp);
-    std::cout << "Bot Decision: " << static_cast<int>(decision.action) << std::endl;
+    std::cout << "Opp Decision: " << static_cast<int>(decision.action) << std::endl;
     if (decision.action == Action::RAISE) {
         std::cout << "Enter Raise amount" << std::endl;
         double amount;

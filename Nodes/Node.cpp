@@ -22,7 +22,7 @@ Node::Node() :
     currentRaise(0.0),
     isFolded(false),
     isAllIn(false),
-    firstAction(true) { }
+    firstAction(false) { }
 	
 Node::Node(int              state,
 		double              pot,
@@ -46,7 +46,7 @@ Node::Node(int              state,
     currentRaise(0.0),
     isFolded(false),
     isAllIn(false), 
-    firstAction(true) { }
+    firstAction(false) { }
 
 // Copy Constructor
 Node::Node(const Node& obj) :
@@ -179,9 +179,10 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
 		}
 	} 
 	std::unique_ptr<Node> currentNode(std::move(root));
-	
+	currentNode->setIsFirst(true);
 	while(!currentNode->getIsAllIn() && !currentNode->getIsFolded()
 		&& (currentNode->getGame().getState() != static_cast<int>(Stage::SHOWDOWN)) ){
+			std::cout << "is this first?: " << currentNode->getIsFirst() << std::endl;
 			currentNode = std::move(currentNode->playTurn());
 			if (currentNode->getGame().getState() != currentStage){
 				std::vector<int> updateBoard = currentNode->getGame().getBoardCards();
@@ -192,6 +193,7 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
 				for (auto i = newCards.begin(); i != newCards.end(); ++i){
 					updateBoard.push_back(*i);
 				}
+				currentNode->setIsFirst(true);
 			}
 	}
 	if (currentNode->getIsFolded()){
