@@ -172,14 +172,13 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
 			root->setCurrentRaise(bigBlind);
 		}
 	} 
-	std::unique_ptr<Node> currentNode(std::move(root));
-	currentNode->setIsFirst(true);
-	while(!currentNode->getIsAllIn() && !currentNode->getIsFolded()
-		&& (currentNode->getGame().getState() != static_cast<int>(Stage::SHOWDOWN)) ){
-			std::cout << "is this first?: " << currentNode->getIsFirst() << std::endl;
-			currentNode = std::move(currentNode->playTurn());
-			if (currentNode->getGame().getState() != currentStage){
-				std::vector<int> updateBoard = currentNode->getGame().getBoardCards();
+	root->setIsFirst(true);
+	while(!root->getIsAllIn() && !root->getIsFolded()
+		&& (root->getGame().getState() != static_cast<int>(Stage::SHOWDOWN)) ){
+			std::cout << "is this first?: " << root->getIsFirst() << std::endl;
+			root = std::move(root->playTurn());
+			if (root->getGame().getState() != currentStage){
+				std::vector<int> updateBoard = root->getGame().getBoardCards();
 				std::vector<int> newCards = deal(deck, currentStage);
 				currentStage++;
 				//adding current board cards to newly dealt cards
@@ -187,25 +186,25 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
 				for (auto i = newCards.begin(); i != newCards.end(); ++i){
 					updateBoard.push_back(*i);
 				}
-				currentNode->setIsFirst(true);
+				root->setIsFirst(true);
 			}
 	}
-	if (currentNode->getIsFolded()){
-		if (currentNode->getGame().getPlayerTurn() == 0) {
-			allocateChips(1, (*currentNode));
+	if (root->getIsFolded()){
+		if (root->getGame().getPlayerTurn() == 0) {
+			allocateChips(1, (*root));
 		} else {
-			allocateChips(0, (*currentNode));
+			allocateChips(0, (*root));
 		}
 	}
-	if (currentNode->getGame().getState() == static_cast<int>(Stage::SHOWDOWN) ){
-		int winner = showdown(currentNode->getGame().getBotPlayer().getHoleCards(),
-				currentNode->getGame().getOppPlayer().getHoleCards(),
-				currentNode->getGame().getBoardCards());
-		allocateChips(winner, (*currentNode));
+	if (root->getGame().getState() == static_cast<int>(Stage::SHOWDOWN) ){
+		int winner = showdown(root->getGame().getBotPlayer().getHoleCards(),
+				root->getGame().getOppPlayer().getHoleCards(),
+				root->getGame().getBoardCards());
+		allocateChips(winner, (*root));
 	}
-	if (currentNode->getIsAllIn()){
-		for (int i = currentNode->getGame().getState() - 1; i < static_cast<int>(Stage::SHOWDOWN); ++i) {
-				std::vector<int> updateBoard = currentNode->getGame().getBoardCards();
+	if (root->getIsAllIn()){
+		for (int i = root->getGame().getState() - 1; i < static_cast<int>(Stage::SHOWDOWN); ++i) {
+				std::vector<int> updateBoard = root->getGame().getBoardCards();
 				std::vector<int> newCards = deal(deck, i);
 				//adding current board cards to newly dealt cards
 				assert(newCards.size() <= 3);
@@ -213,19 +212,19 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
 					updateBoard.push_back(*j);
 				}
 				assert(updateBoard.size() <=5);
-				currentNode->getGame().setBoardCards(updateBoard);
+				root->getGame().setBoardCards(updateBoard);
 				}
-                printBoardCards(currentNode->getGame().getBoardCards());
-				std::cout << "botCards: " << hexToCard(currentNode->getGame().getBotPlayer().getHoleCards()[0]) << " " << hexToCard(currentNode->getGame().getBotPlayer().getHoleCards()[1]);
-				std::cout << "\noppCards: " << hexToCard(currentNode->getGame().getOppPlayer().getHoleCards()[0]) << " " << hexToCard(currentNode->getGame().getOppPlayer().getHoleCards()[1]);
-				int winner = showdown(currentNode->getGame().getBotPlayer().getHoleCards(),
-						currentNode->getGame().getOppPlayer().getHoleCards(),
-						currentNode->getGame().getBoardCards());
-				allocateChips(winner, (*currentNode));
+                printBoardCards(root->getGame().getBoardCards());
+				std::cout << "botCards: " << hexToCard(root->getGame().getBotPlayer().getHoleCards()[0]) << " " << hexToCard(root->getGame().getBotPlayer().getHoleCards()[1]);
+				std::cout << "\noppCards: " << hexToCard(root->getGame().getOppPlayer().getHoleCards()[0]) << " " << hexToCard(root->getGame().getOppPlayer().getHoleCards()[1]);
+				int winner = showdown(root->getGame().getBotPlayer().getHoleCards(),
+						root->getGame().getOppPlayer().getHoleCards(),
+						root->getGame().getBoardCards());
+				allocateChips(winner, (*root));
 				std::cout << "\nWinner: " << winner << std::endl;
 	}
-    botPlayer = currentNode->getGame().getBotPlayer();
-    oppPlayer = currentNode->getGame().getOppPlayer();
+    botPlayer = root->getGame().getBotPlayer();
+    oppPlayer = root->getGame().getOppPlayer();
 }
 
 std::unique_ptr<Node>& Node::playTurn() {
