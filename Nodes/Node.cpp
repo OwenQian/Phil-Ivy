@@ -60,12 +60,6 @@ Node::Node(const Node& obj) :
 
 // Destructor
 Node::~Node() {
-    if (foldChild)
-        foldChild->parent = nullptr;
-    if (raiseChild)
-        raiseChild->parent = nullptr;
-    if (callChild)
-        callChild->parent = nullptr;
 }
 
 // Assignment operaor
@@ -103,9 +97,9 @@ void Node::playGame(){
 
 void Node::playRound(Player& botPlayer, Player& oppPlayer){
 	std::cout << "########################################";
-	//std::cout << "\nSmall Blind: " << smallBlind << "\nBig Blind : " << bigBlind;
-	//std::cout << "\nbot player chips: " << botPlayer.getChips();
-	//std::cout << "\nopp player chips: " << oppPlayer.getChips() << std::endl;
+	std::cout << "\nSmall Blind: " << smallBlind << "\nBig Blind : " << bigBlind;
+	std::cout << "\nbot player chips: " << botPlayer.getChips();
+	std::cout << "\nopp player chips: " << oppPlayer.getChips() << std::endl;
 
     // creating the deck
 	std::vector<int> deck;
@@ -210,7 +204,7 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
 		allocateChips(winner, (*currentNode));
 	}
 	if (currentNode->getIsAllIn()){
-		for (int i = currentNode->getGame().getState(); i < static_cast<int>(Stage::SHOWDOWN); ++i) {
+		for (int i = currentNode->getGame().getState() - 1; i < static_cast<int>(Stage::SHOWDOWN); ++i) {
 				std::vector<int> updateBoard = currentNode->getGame().getBoardCards();
 				std::vector<int> newCards = deal(deck, i);
 				//adding current board cards to newly dealt cards
