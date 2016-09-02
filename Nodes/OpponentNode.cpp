@@ -46,8 +46,8 @@ std::unique_ptr<Node>& OpponentNode::call() {
 				game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment() <= currentRaise) {
 			tempAllIn = true;
 		}
-        if (getIsFirst() || smallBlindPosition == 1) {
-        callChild.reset( new OpponentNode(game.getState() + !getIsFirst(),
+        if (getIsFirst() || smallBlindPosition == 0) {
+        callChild.reset( new ChoiceNode(game.getState() + !getIsFirst(),
                     initialChips * 2 - tempPlayer.getChips() - game.getBotPlayer().getChips(),
                     game.getBoardCards(),
                     game.getBotPlayer(),
@@ -55,7 +55,7 @@ std::unique_ptr<Node>& OpponentNode::call() {
                     !(game.getPlayerTurn()),
                     this) );
         } else {
-             callChild.reset( new ChoiceNode(game.getState() + !getIsFirst(),
+             callChild.reset( new OpponentNode(game.getState() + !getIsFirst(),
                     initialChips * 2 - tempPlayer.getChips() - game.getBotPlayer().getChips(),
                     game.getBoardCards(),
                     game.getBotPlayer(),
