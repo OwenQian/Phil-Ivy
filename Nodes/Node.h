@@ -12,9 +12,6 @@
 class Node {
     protected:
         Node* parent; 
-        std::unique_ptr<Node> foldChild;
-        std::unique_ptr<Node> callChild;
-        std::unique_ptr<Node> raiseChild;
 
         GameObject game;
         int visitCount;
@@ -26,11 +23,19 @@ class Node {
         bool firstAction;
 
     public:
+        std::unique_ptr<Node> foldChild;
+        std::unique_ptr<Node> callChild;
+        std::unique_ptr<Node> raiseChild;
         Node();
         Node(int, double, std::vector<int>, Player, Player, int, Node*);
         Node(const Node& obj);
         Node& operator= (const Node& rhs);
         virtual ~Node();
+
+        // Monte Carlo
+        Action monteCarlo(int);
+        void runSelection();
+        void runSimulation();
 
         // Action functions
         virtual std::unique_ptr<Node>& call() = 0;

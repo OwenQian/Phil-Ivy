@@ -2,6 +2,7 @@
 #include <utility>
 #include <cassert>
 #include <iostream>
+#include <chrono>   // Monte carlo shit
 
 #include "Node.h"
 #include "ChoiceNode.h"
@@ -246,4 +247,55 @@ std::unique_ptr<Node>& Node::playTurn() {
         default:
                            std::cout << "Invalid decision" << std::endl;
     }
+}
+
+Action Node::monteCarlo(int maxSeconds) {
+    time_t startTime;
+    time(&startTime);
+    std::unique_ptr<Node> copyNode;
+    if (getGame().getPlayerTurn() == 0) {
+        copyNode.reset(new ChoiceNode(*dynamic_cast<ChoiceNode*>(this)));
+    } else {
+        copyNode.reset(new OpponentNode(*dynamic_cast<OpponentNode*>(this)));
+    }
+    while (time(0) - startTime < maxSeconds) {
+        copyNode->runSelection();
+    }
+    double maxScore = copyNode->callChild->getExpectedValue();
+    maxScore = maxScore >= copyNode->raiseChild->getExpectedValue() ? maxScore : copyNode->raiseChild->getExpectedValue();
+    maxScore = maxScore >= copyNode->foldChild->getExpectedValue() ? maxScore : copyNode->foldChild->getExpectedValue();
+    if (maxScore == copyNode->callChild->getExpectedValue()) {
+        return Action::CALL;
+    } else if (maxScore == copyNode->raiseChild->getExpectedValue()) {
+        // Need to handle how much to raise here
+        return Action::RAISE;
+    } else {
+        return Action::FOLD;
+    }
+}
+
+void Node::runSelection() {
+    if (!callChild) {
+        (call())->runSimulation();
+        return;
+    } else if (!raiseChild) {
+        (raise(1))->runSimulation();
+        return;
+    } else if (!foldChild) {
+        (fold())->runSimulation();
+    }
+}
+
+void Node::runSimulation() {
+    std::unique_ptr<Node> copyNode;
+    if (getGame().getPlayerTurn() == 0) {
+        copyNode.reset(new ChoiceNode(*dynamic_cast<ChoiceNode*>(this)));
+    } else {
+        copyNode.reset(new OpponentNode(*dynamic_cast<OpponentNode*>(this)));
+    }
+
+    while (getGame().getState() != static_cast<int>(Stage::SHOWDOWN)) {
+        call();
+    }
+
 }
