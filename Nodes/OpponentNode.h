@@ -13,9 +13,9 @@ class OpponentNode: public Node {
     private:
         virtual Decision makeDecision();
     public:
-        virtual std::unique_ptr<Node>& call();
-        virtual std::unique_ptr<Node>& raise(double);
-        virtual std::unique_ptr<Node>& fold();
+        virtual void call();
+        virtual void raise(double);
+        virtual void fold();
 
         // Contructors
         OpponentNode();

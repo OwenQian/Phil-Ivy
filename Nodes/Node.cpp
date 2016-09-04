@@ -14,16 +14,16 @@
 
 Node::Node() :
     parent(nullptr),
-    foldChild(nullptr),
-    callChild(nullptr),
-    raiseChild(nullptr),
     game(0, 0.0, std::vector<int>(), Player(), Player(), 0),
     visitCount(0),
     expectedValue(0.0),
     currentRaise(0.0),
     isFolded(false),
     isAllIn(false),
-    firstAction(false) { }
+    firstAction(false),
+    foldChild(nullptr),
+    callChild(nullptr),
+    raiseChild(nullptr) { }
 	
 Node::Node(int              state,
 		double              pot,
@@ -33,9 +33,6 @@ Node::Node(int              state,
 		int                 playerTurn,
 		Node* parent) :
 	parent(parent),
-    foldChild(nullptr),
-    callChild(nullptr),
-    raiseChild(nullptr),
 	game(state,
 			pot,
 			boardCards,
@@ -47,7 +44,10 @@ Node::Node(int              state,
     currentRaise(0.0),
     isFolded(false),
     isAllIn(false), 
-    firstAction(false) { }
+    firstAction(false),
+    foldChild(nullptr),
+    callChild(nullptr),
+    raiseChild(nullptr) { }
 
 // Copy Constructor
 Node::Node(const Node& obj) :
@@ -116,6 +116,7 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
 	int currentStage = 1;       // preflop 
 	
 	std::unique_ptr<Node> root;
+    Node* currentNode;
 	std::cout << "smallblindposition: " << smallBlindPosition << std::endl;
     // if smallBlindPosition == 0, node should be a ChoiceNode
 	assert(smallBlindPosition == 0 || smallBlindPosition == 1);
@@ -174,12 +175,23 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
 		}
 	} 
 	root->setIsFirst(true);
-	while(!root->getIsAllIn() && !root->getIsFolded()
-		&& (root->getGame().getState() != static_cast<int>(Stage::SHOWDOWN)) ){
-			std::cout << "is this first?: " << root->getIsFirst() << std::endl;
-			root = std::move(root->playTurn());
-			if (root->getGame().getState() != currentStage){
-				std::vector<int> updateBoard = root->getGame().getBoardCards();
+    currentNode = root.get();
+	while(!currentNode->getIsAllIn() && !currentNode->getIsFolded()
+		&& (currentNode->getGame().getState() != static_cast<int>(Stage::SHOWDOWN)) ){
+			std::cout << "is this first?: " << currentNode->getIsFirst() << std::endl;
+            switch(currentNode->playTurn()) {
+                case 0:
+                    currentNode = currentNode->callChild.get();
+                    break;
+                case 1:
+                    currentNode = currentNode->raiseChild.get();
+                    break;
+                case 2:
+                    currentNode = currentNode->foldChild.get();
+                    break;
+            }
+			if (currentNode->getGame().getState() != currentStage){
+				std::vector<int> updateBoard = currentNode->getGame().getBoardCards();
 				std::vector<int> newCards = deal(deck, currentStage);
 				currentStage++;
 				//adding current board cards to newly dealt cards
@@ -187,25 +199,25 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
 				for (auto i = newCards.begin(); i != newCards.end(); ++i){
 					updateBoard.push_back(*i);
 				}
-				root->setIsFirst(true);
+				currentNode->setIsFirst(true);
 			}
 	}
-	if (root->getIsFolded()){
-		if (root->getGame().getPlayerTurn() == 0) {
-			allocateChips(1, (*root));
+	if (currentNode->getIsFolded()){
+		if (currentNode->getGame().getPlayerTurn() == 0) {
+			allocateChips(1, (*currentNode));
 		} else {
-			allocateChips(0, (*root));
+			allocateChips(0, (*currentNode));
 		}
 	}
-	if (root->getGame().getState() == static_cast<int>(Stage::SHOWDOWN) ){
-		int winner = showdown(root->getGame().getBotPlayer().getHoleCards(),
-				root->getGame().getOppPlayer().getHoleCards(),
-				root->getGame().getBoardCards());
-		allocateChips(winner, (*root));
+	if (currentNode->getGame().getState() == static_cast<int>(Stage::SHOWDOWN) ){
+		int winner = showdown(currentNode->getGame().getBotPlayer().getHoleCards(),
+				currentNode->getGame().getOppPlayer().getHoleCards(),
+				currentNode->getGame().getBoardCards());
+		allocateChips(winner, (*currentNode));
 	}
-	if (root->getIsAllIn()){
-		for (int i = root->getGame().getState() - 1; i < static_cast<int>(Stage::SHOWDOWN); ++i) {
-				std::vector<int> updateBoard = root->getGame().getBoardCards();
+	if (currentNode->getIsAllIn()){
+		for (int i = currentNode->getGame().getState() - 1; i < static_cast<int>(Stage::SHOWDOWN); ++i) {
+				std::vector<int> updateBoard = currentNode->getGame().getBoardCards();
 				std::vector<int> newCards = deal(deck, i);
 				//adding current board cards to newly dealt cards
 				assert(newCards.size() <= 3);
@@ -213,35 +225,38 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
 					updateBoard.push_back(*j);
 				}
 				assert(updateBoard.size() <=5);
-				root->getGame().setBoardCards(updateBoard);
+				currentNode->getGame().setBoardCards(updateBoard);
 				}
-                printBoardCards(root->getGame().getBoardCards());
-				std::cout << "botCards: " << hexToCard(root->getGame().getBotPlayer().getHoleCards()[0]) << " " << hexToCard(root->getGame().getBotPlayer().getHoleCards()[1]);
-				std::cout << "\noppCards: " << hexToCard(root->getGame().getOppPlayer().getHoleCards()[0]) << " " << hexToCard(root->getGame().getOppPlayer().getHoleCards()[1]);
-				int winner = showdown(root->getGame().getBotPlayer().getHoleCards(),
-						root->getGame().getOppPlayer().getHoleCards(),
-						root->getGame().getBoardCards());
-				allocateChips(winner, (*root));
+                printBoardCards(currentNode->getGame().getBoardCards());
+				std::cout << "botCards: " << hexToCard(currentNode->getGame().getBotPlayer().getHoleCards()[0]) << " " << hexToCard(currentNode->getGame().getBotPlayer().getHoleCards()[1]);
+				std::cout << "\noppCards: " << hexToCard(currentNode->getGame().getOppPlayer().getHoleCards()[0]) << " " << hexToCard(currentNode->getGame().getOppPlayer().getHoleCards()[1]);
+				int winner = showdown(currentNode->getGame().getBotPlayer().getHoleCards(),
+						currentNode->getGame().getOppPlayer().getHoleCards(),
+						currentNode->getGame().getBoardCards());
+				allocateChips(winner, (*currentNode));
 				std::cout << "\nWinner: " << winner << std::endl;
 	}
-    botPlayer = root->getGame().getBotPlayer();
-    oppPlayer = root->getGame().getOppPlayer();
+    botPlayer = currentNode->getGame().getBotPlayer();
+    oppPlayer = currentNode->getGame().getOppPlayer();
 }
 
-std::unique_ptr<Node>& Node::playTurn() {
+int Node::playTurn() {
     assert(!isFolded);
     Decision decision = makeDecision();
     switch(decision.action) {
         case Action::CALL: {
-                               return call();
+                               call();
+                               return 0;
                                break;
                            }
         case Action::RAISE: {
-                                return raise(decision.raiseAmount);
+                                raise(decision.raiseAmount);
+                                return 1;
                                 break;
                             }
         case Action::FOLD: {
-                               return fold();
+                               fold();
+                               return 2;
                                break;
                            }
         default:
@@ -249,53 +264,53 @@ std::unique_ptr<Node>& Node::playTurn() {
     }
 }
 
-Action Node::monteCarlo(int maxSeconds) {
-    time_t startTime;
-    time(&startTime);
-    std::unique_ptr<Node> copyNode;
-    if (getGame().getPlayerTurn() == 0) {
-        copyNode.reset(new ChoiceNode(*dynamic_cast<ChoiceNode*>(this)));
-    } else {
-        copyNode.reset(new OpponentNode(*dynamic_cast<OpponentNode*>(this)));
-    }
-    while (time(0) - startTime < maxSeconds) {
-        copyNode->runSelection();
-    }
-    double maxScore = copyNode->callChild->getExpectedValue();
-    maxScore = maxScore >= copyNode->raiseChild->getExpectedValue() ? maxScore : copyNode->raiseChild->getExpectedValue();
-    maxScore = maxScore >= copyNode->foldChild->getExpectedValue() ? maxScore : copyNode->foldChild->getExpectedValue();
-    if (maxScore == copyNode->callChild->getExpectedValue()) {
-        return Action::CALL;
-    } else if (maxScore == copyNode->raiseChild->getExpectedValue()) {
-        // Need to handle how much to raise here
-        return Action::RAISE;
-    } else {
-        return Action::FOLD;
-    }
-}
+//Action Node::monteCarlo(int maxSeconds) {
+//    time_t startTime;
+//    time(&startTime);
+//    std::unique_ptr<Node> copyNode;
+//    if (getGame().getPlayerTurn() == 0) {
+//        copyNode.reset(new ChoiceNode(*dynamic_cast<ChoiceNode*>(this)));
+//    } else {
+//        copyNode.reset(new OpponentNode(*dynamic_cast<OpponentNode*>(this)));
+//    }
+//    while (time(0) - startTime < maxSeconds) {
+//        copyNode->runSelection();
+//    }
+//    double maxScore = copyNode->callChild->getExpectedValue();
+//    maxScore = maxScore >= copyNode->raiseChild->getExpectedValue() ? maxScore : copyNode->raiseChild->getExpectedValue();
+//    maxScore = maxScore >= copyNode->foldChild->getExpectedValue() ? maxScore : copyNode->foldChild->getExpectedValue();
+//    if (maxScore == copyNode->callChild->getExpectedValue()) {
+//        return Action::CALL;
+//    } else if (maxScore == copyNode->raiseChild->getExpectedValue()) {
+//        // Need to handle how much to raise here
+//        return Action::RAISE;
+//    } else {
+//        return Action::FOLD;
+//    }
+//}
 
-void Node::runSelection() {
-    if (!callChild) {
-        (call())->runSimulation();
-        return;
-    } else if (!raiseChild) {
-        (raise(1))->runSimulation();
-        return;
-    } else if (!foldChild) {
-        (fold())->runSimulation();
-    }
-}
+//void Node::runSelection() {
+//    if (!callChild) {
+//        (call())->runSimulation();
+//        return;
+//    } else if (!raiseChild) {
+//        (raise(1))->runSimulation();
+//        return;
+//    } else if (!foldChild) {
+//        (fold())->runSimulation();
+//    }
+//}
 
-void Node::runSimulation() {
-    std::unique_ptr<Node> copyNode;
-    if (getGame().getPlayerTurn() == 0) {
-        copyNode.reset(new ChoiceNode(*dynamic_cast<ChoiceNode*>(this)));
-    } else {
-        copyNode.reset(new OpponentNode(*dynamic_cast<OpponentNode*>(this)));
-    }
-
-    while (getGame().getState() != static_cast<int>(Stage::SHOWDOWN)) {
-        call();
-    }
-
-}
+//void Node::runSimulation() {
+//    std::unique_ptr<Node> copyNode;
+//    if (getGame().getPlayerTurn() == 0) {
+//        copyNode.reset(new ChoiceNode(*dynamic_cast<ChoiceNode*>(this)));
+//    } else {
+//        copyNode.reset(new OpponentNode(*dynamic_cast<OpponentNode*>(this)));
+//    }
+//
+//    while (getGame().getState() != static_cast<int>(Stage::SHOWDOWN)) {
+//        call();
+//    }
+//
+//}

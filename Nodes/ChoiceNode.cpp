@@ -29,14 +29,13 @@ ChoiceNode::ChoiceNode(int state,
 ChoiceNode::ChoiceNode(const ChoiceNode& obj) :
     Node(obj) { }
 
-std::unique_ptr<Node>& ChoiceNode::fold() {
+void ChoiceNode::fold() {
     foldChild.reset(new ChoiceNode(*this));
     foldChild->setIsFolded(true);
     foldChild->setVisitCount(0);
-    return foldChild;
 }
 
-std::unique_ptr<Node>& ChoiceNode::call() {
+void ChoiceNode::call() {
     Player tempPlayer = game.getBotPlayer();
     tempPlayer.setChips(tempPlayer.getChips() - (currentRaise - tempPlayer.getPotInvestment()) );
     tempPlayer.setPotInvestment(currentRaise);
@@ -67,10 +66,9 @@ std::unique_ptr<Node>& ChoiceNode::call() {
         callChild->getGame().getBotPlayer().setPotInvestment( firstAction * callChild->getGame().getBotPlayer().getPotInvestment());
         callChild->getGame().getOppPlayer().setPotInvestment( firstAction * callChild->getGame().getOppPlayer().getPotInvestment());
         callChild->setIsFirst(false);
-        return callChild;
 }
 
-std::unique_ptr<Node>& ChoiceNode::raise(double raiseAmount) {
+void ChoiceNode::raise(double raiseAmount) {
     if (raiseAmount < bigBlind || raiseAmount < 2*currentRaise) {
         raiseAmount = bigBlind > (2*currentRaise) ? bigBlind : (2*currentRaise);
     } 
@@ -99,8 +97,6 @@ std::unique_ptr<Node>& ChoiceNode::raise(double raiseAmount) {
 			!(game.getPlayerTurn()),
 			this ));
 		raiseChild->setCurrentRaise(raiseAmount);
-	
-	return raiseChild;
 }
 
 Decision ChoiceNode::makeDecision() {
