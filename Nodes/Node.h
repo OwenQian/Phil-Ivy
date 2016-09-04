@@ -33,19 +33,19 @@ class Node {
         virtual ~Node();
 
         // Monte Carlo
-        Action monteCarlo(int);
-        void runSelection();
-        void runSimulation();
+        //Action monteCarlo(int);
+        //void runSelection();
+        //void runSimulation();
 
         // Action functions
-        virtual std::unique_ptr<Node>& call() = 0;
-        virtual std::unique_ptr<Node>& raise(double) = 0;
-        virtual std::unique_ptr<Node>& fold() = 0;
+        virtual void call() = 0;
+        virtual void raise(double) = 0;
+        virtual void fold() = 0;
 		
 		//Game functions
 		static void playGame();
 		static void playRound(Player& BotPlayer, Player& OppPlayer);
-        std::unique_ptr<Node>& playTurn();
+        int playTurn();
         virtual Decision makeDecision() = 0;
 
         // Getters
