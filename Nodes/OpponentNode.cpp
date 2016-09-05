@@ -30,14 +30,13 @@ OpponentNode::OpponentNode(int state,
 OpponentNode::OpponentNode(const OpponentNode& obj) :
     Node(obj) { }
 
-std::unique_ptr<Node>& OpponentNode::fold() {
+void OpponentNode::fold() {
     foldChild.reset(new OpponentNode(*this));
     foldChild->setIsFolded(true);
     foldChild->setVisitCount(0);
-    return foldChild;
 }
 
-std::unique_ptr<Node>& OpponentNode::call() {
+void OpponentNode::call() {
     Player tempPlayer = game.getOppPlayer();
     tempPlayer.setChips(tempPlayer.getChips() - (currentRaise - tempPlayer.getPotInvestment()) );
     tempPlayer.setPotInvestment(currentRaise);
@@ -46,7 +45,7 @@ std::unique_ptr<Node>& OpponentNode::call() {
 				game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment() <= currentRaise) {
 			tempAllIn = true;
 		}
-        if (getIsFirst() || (smallBlindPosition == 0)) {
+        if (getIsFirst() || smallBlindPosition == 0) {
         callChild.reset( new ChoiceNode(game.getState() + !getIsFirst(),
                     initialChips * 2 - tempPlayer.getChips() - game.getBotPlayer().getChips(),
                     game.getBoardCards(),
@@ -67,11 +66,9 @@ std::unique_ptr<Node>& OpponentNode::call() {
         callChild->setCurrentRaise(firstAction * currentRaise);
         callChild->getGame().getBotPlayer().setPotInvestment( firstAction * callChild->getGame().getBotPlayer().getPotInvestment());
         callChild->getGame().getOppPlayer().setPotInvestment( firstAction * callChild->getGame().getOppPlayer().getPotInvestment());
-        callChild->setIsFirst(false);
-		return callChild;
 }
 
-std::unique_ptr<Node>& OpponentNode::raise(double raiseAmount) {
+void OpponentNode::raise(double raiseAmount) {
     if (raiseAmount < bigBlind || raiseAmount < 2*currentRaise) {
         raiseAmount = bigBlind > (2*currentRaise) ? bigBlind : (2*currentRaise);
     } 
@@ -99,8 +96,6 @@ std::unique_ptr<Node>& OpponentNode::raise(double raiseAmount) {
 			!(game.getPlayerTurn()),
 			this ));
 		raiseChild->setCurrentRaise(raiseAmount);
-	
-	return raiseChild;
 }
 
 Decision OpponentNode::makeDecision() {
