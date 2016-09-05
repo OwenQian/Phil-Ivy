@@ -75,7 +75,15 @@ void ChoiceNode::raise(double raiseAmount) {
 	// if raise all-in (or more) create AllInNode, handled by call
 	if (game.getBotPlayer().getChips() <= currentRaise ||
 				game.getOppPlayer().getChips() <= currentRaise) {
-			return call();
+			call();
+            if (callChild->getGame().getPlayerTurn() == 0) {
+                raiseChild.reset(new ChoiceNode(*static_cast<ChoiceNode*>(callChild.get())));
+            } else {
+                raiseChild.reset(new OpponentNode(*static_cast<OpponentNode*>(callChild.get())));
+            }
+            std::cout << "raiseChild all in? " << raiseChild->getIsAllIn() << std::endl;
+            std::cout << "callChild all in? " <<  callChild->getIsAllIn() << std::endl;
+            return;
 		}
 	if (raiseAmount >= game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment() ||
 			raiseAmount >= game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment() ) {

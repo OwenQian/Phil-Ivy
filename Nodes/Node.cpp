@@ -58,7 +58,9 @@ Node::Node(const Node& obj) :
             obj.game.getBotPlayer(),
             obj.game.getOppPlayer(),
             obj.game.getPlayerTurn(),
-            obj.parent) { }
+            obj.parent) {
+        isAllIn = obj.isAllIn;
+    }
 
 // Destructor
 Node::~Node() {
@@ -344,7 +346,7 @@ void Node::runSimulation(std::vector<int> deck) {
 	int prevStage;
     while (currentNode->getGame().getState() != static_cast<int>(Stage::SHOWDOWN)) {
 		prevStage = currentNode->getGame().getState();
-        call();
+        currentNode->call();
         currentNode = currentNode->callChild.get();
 		conditionalDeal(*currentNode, prevStage, currentNode->getGame().getState(), deck, prevStage);
     }
