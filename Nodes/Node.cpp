@@ -58,7 +58,9 @@ Node::Node(const Node& obj) :
             obj.game.getBotPlayer(),
             obj.game.getOppPlayer(),
             obj.game.getPlayerTurn(),
-            obj.parent) { }
+            obj.parent) {
+        isAllIn = obj.isAllIn;
+    }
 
 // Destructor
 Node::~Node() {
