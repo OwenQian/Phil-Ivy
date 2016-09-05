@@ -180,7 +180,7 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
 	while(!currentNode->getIsAllIn() && !currentNode->getIsFolded()
 		&& (currentNode->getGame().getState() != static_cast<int>(Stage::SHOWDOWN)) ){
 			std::cout << "is this first?: " << currentNode->getIsFirst() << std::endl;
-            switch(currentNode->playTurn()) {
+            switch(currentNode->playTurn(deck)) {
                 case 0:
                     currentNode = currentNode->callChild.get();
                     break;
@@ -241,9 +241,9 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
     oppPlayer = currentNode->getGame().getOppPlayer();
 }
 
-int Node::playTurn() {
+int Node::playTurn(std::vector<int> deck) {
     assert(!isFolded);
-    Decision decision = makeDecision();
+    Decision decision = makeDecision(deck);
     switch(decision.action) {
         case Action::CALL: {
                                call();
@@ -265,7 +265,7 @@ int Node::playTurn() {
     }
 }
 
-Action Node::monteCarlo(int maxSeconds) {
+Action Node::monteCarlo(int maxSeconds, std::vector<int> deck) {
     time_t startTime;
     time(&startTime);
     std::unique_ptr<Node> copyNode;
@@ -275,7 +275,7 @@ Action Node::monteCarlo(int maxSeconds) {
         copyNode.reset(new OpponentNode(*dynamic_cast<OpponentNode*>(this)));
     }
     while (time(0) - startTime < maxSeconds) {
-        copyNode->runSelection();
+        copyNode->runSelection(deck);
     }
     double maxScore = copyNode->callChild->getExpectedValue();
     maxScore = maxScore >= copyNode->raiseChild->getExpectedValue() ? maxScore : copyNode->raiseChild->getExpectedValue();
@@ -290,19 +290,20 @@ Action Node::monteCarlo(int maxSeconds) {
     }
 }
 
-void Node::runSelection() {
+void Node::runSelection(std::vector<int> deck) {
     if (!callChild) {
         call();
-        callChild->runSimulation();
+		conditionalDeal(*this, getGame().getState(), callChild->getGame().getState(), deck, getGame().getState());
+        callChild->runSimulation(deck);
         return;
     } else if (!raiseChild) {
         // TODO use different raise amt?
         raise(1);
-        raiseChild->runSimulation();
+        raiseChild->runSimulation(deck);
         return;
     } else if (!foldChild) {
         fold();
-        foldChild->runSimulation();
+        foldChild->runSimulation(deck);
         return;
     }
 
@@ -314,15 +315,18 @@ void Node::runSelection() {
     }
     
     if (maxScore == selectionScores[0]) {
-        callChild->runSelection();
+		callChild->getGame().getBoardCards() = getGame().getBoardCards();
+		conditionalDeal(*this, getGame().getState(), callChild->getGame().getState(), deck, getGame().getState());
+        callChild->runSelection(deck);
     } else if (maxScore == selectionScores[1]) {
-        raiseChild->runSelection();
+		raiseChild->getGame().getBoardCards() = getGame().getBoardCards();
+        raiseChild->runSelection(deck);
     } else {
-        foldChild->runSelection();
+        foldChild->runSelection(deck);
     }
 }
 
-void Node::runSimulation() {
+void Node::runSimulation(std::vector<int> deck) {
     if (getIsFolded()) {
         switch (getGame().getPlayerTurn()) {
             case 0 :
@@ -337,10 +341,12 @@ void Node::runSimulation() {
     }
 
     Node* currentNode = this;
-
+	int prevStage;
     while (currentNode->getGame().getState() != static_cast<int>(Stage::SHOWDOWN)) {
+		prevStage = currentNode->getGame().getState();
         call();
         currentNode = currentNode->callChild.get();
+		conditionalDeal(*currentNode, prevStage, currentNode->getGame().getState(), deck, prevStage);
     }
     int winner = showdown( 
             currentNode->getGame().getBotPlayer().getHoleCards(),
