@@ -33,9 +33,11 @@ class Node {
         virtual ~Node();
 
         // Monte Carlo
-        //Action monteCarlo(int);
-        //void runSelection();
-        //void runSimulation();
+        Action monteCarlo(int);
+        void runSelection();
+        void runSimulation();
+        void backprop(double, double);
+        void naiveUCT(std::vector<double>&);
 
         // Action functions
         virtual void call() = 0;

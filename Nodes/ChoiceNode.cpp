@@ -40,11 +40,11 @@ void ChoiceNode::call() {
     tempPlayer.setChips(tempPlayer.getChips() - (currentRaise - tempPlayer.getPotInvestment()) );
     tempPlayer.setPotInvestment(currentRaise);
     bool tempAllIn = false;
-		if (game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment() <= currentRaise ||
-				game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment() <= currentRaise) {
-			tempAllIn = true;
-		}
-        if (getIsFirst() || smallBlindPosition == 1) {
+    if (game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment() <= currentRaise ||
+            game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment() <= currentRaise) {
+        tempAllIn = true;
+    }
+    if (getIsFirst() || smallBlindPosition == 1) {
         callChild.reset( new OpponentNode(game.getState() + !getIsFirst(),
                     initialChips * 2 - tempPlayer.getChips() - game.getOppPlayer().getChips(),
                     game.getBoardCards(),
@@ -52,20 +52,20 @@ void ChoiceNode::call() {
                     game.getOppPlayer(),
                     !(game.getPlayerTurn()),
                     this) );
-        } else {
-             callChild.reset( new ChoiceNode(game.getState() + !getIsFirst(),
+    } else {
+        callChild.reset( new ChoiceNode(game.getState() + !getIsFirst(),
                     initialChips * 2 - tempPlayer.getChips() - game.getOppPlayer().getChips(),
                     game.getBoardCards(),
                     tempPlayer,
                     game.getOppPlayer(),
                     !(game.getPlayerTurn()),
                     this) );
-        }
-        callChild->setIsAllIn(tempAllIn);
-        callChild->setCurrentRaise(firstAction * currentRaise);
-        callChild->getGame().getBotPlayer().setPotInvestment( firstAction * callChild->getGame().getBotPlayer().getPotInvestment());
-        callChild->getGame().getOppPlayer().setPotInvestment( firstAction * callChild->getGame().getOppPlayer().getPotInvestment());
-        callChild->setIsFirst(false);
+    }
+    callChild->setIsAllIn(tempAllIn);
+    callChild->setCurrentRaise(firstAction * currentRaise);
+    callChild->getGame().getBotPlayer().setPotInvestment( firstAction * callChild->getGame().getBotPlayer().getPotInvestment());
+    callChild->getGame().getOppPlayer().setPotInvestment( firstAction * callChild->getGame().getOppPlayer().getPotInvestment());
+    callChild->setIsFirst(false);
 }
 
 void ChoiceNode::raise(double raiseAmount) {
@@ -100,13 +100,14 @@ void ChoiceNode::raise(double raiseAmount) {
 }
 
 Decision ChoiceNode::makeDecision() {
-    std::cout << "Enter Action bot: Call(0), Raise(1), Fold(2)" << std::endl;
+    //std::cout << "Enter Action bot: Call(0), Raise(1), Fold(2)" << std::endl;
     Decision decision;
-    int temp;
-    std::cin >> temp;
+    //int temp;
+    //std::cin >> temp;
     std::vector<int> deck;
     init_deck(deck);
-    decision.action = static_cast<Action>(temp);
+    //decision.action = static_cast<Action>(temp);
+    decision.action = currentNode->monteCarlo(monteCarloDuration);
     std::cout << "Bot Decision: " << static_cast<int>(decision.action) << std::endl;
     if (decision.action == Action::RAISE) {
         std::cout << "Enter Raise amount" << std::endl;

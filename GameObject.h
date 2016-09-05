@@ -17,7 +17,7 @@ class GameObject {
 	public:
 		// Constructors
         GameObject();
-		GameObject( int                     state,
+		GameObject( int                 state,
 				double                  pot,
 				std::vector<int>        boardCards,
 				Player					botPlayer,
