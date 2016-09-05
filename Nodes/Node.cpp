@@ -3,6 +3,7 @@
 #include <cassert>
 #include <iostream>
 #include <chrono>   // Monte carlo shit
+#include <cmath>    // naiveUCT log and sqrt
 
 #include "Node.h"
 #include "ChoiceNode.h"
@@ -31,7 +32,7 @@ Node::Node(int              state,
 		Player				botPlayer,
 		Player				oppPlayer,
 		int                 playerTurn,
-		Node* parent) :
+		Node*               parent) :
 	parent(parent),
 	game(state,
 			pot,
@@ -264,53 +265,131 @@ int Node::playTurn() {
     }
 }
 
-//Action Node::monteCarlo(int maxSeconds) {
-//    time_t startTime;
-//    time(&startTime);
-//    std::unique_ptr<Node> copyNode;
-//    if (getGame().getPlayerTurn() == 0) {
-//        copyNode.reset(new ChoiceNode(*dynamic_cast<ChoiceNode*>(this)));
-//    } else {
-//        copyNode.reset(new OpponentNode(*dynamic_cast<OpponentNode*>(this)));
-//    }
-//    while (time(0) - startTime < maxSeconds) {
-//        copyNode->runSelection();
-//    }
-//    double maxScore = copyNode->callChild->getExpectedValue();
-//    maxScore = maxScore >= copyNode->raiseChild->getExpectedValue() ? maxScore : copyNode->raiseChild->getExpectedValue();
-//    maxScore = maxScore >= copyNode->foldChild->getExpectedValue() ? maxScore : copyNode->foldChild->getExpectedValue();
-//    if (maxScore == copyNode->callChild->getExpectedValue()) {
-//        return Action::CALL;
-//    } else if (maxScore == copyNode->raiseChild->getExpectedValue()) {
-//        // Need to handle how much to raise here
-//        return Action::RAISE;
-//    } else {
-//        return Action::FOLD;
-//    }
-//}
+Action Node::monteCarlo(int maxSeconds) {
+    time_t startTime;
+    time(&startTime);
+    std::unique_ptr<Node> copyNode;
+    if (getGame().getPlayerTurn() == 0) {
+        copyNode.reset(new ChoiceNode(*dynamic_cast<ChoiceNode*>(this)));
+    } else {
+        copyNode.reset(new OpponentNode(*dynamic_cast<OpponentNode*>(this)));
+    }
+    while (time(0) - startTime < maxSeconds) {
+        copyNode->runSelection();
+    }
+    double maxScore = copyNode->callChild->getExpectedValue();
+    maxScore = maxScore >= copyNode->raiseChild->getExpectedValue() ? maxScore : copyNode->raiseChild->getExpectedValue();
+    maxScore = maxScore >= copyNode->foldChild->getExpectedValue() ? maxScore : copyNode->foldChild->getExpectedValue();
+    if (maxScore == copyNode->callChild->getExpectedValue()) {
+        return Action::CALL;
+    } else if (maxScore == copyNode->raiseChild->getExpectedValue()) {
+        // Need to handle how much to raise here
+        return Action::RAISE;
+    } else {
+        return Action::FOLD;
+    }
+}
 
-//void Node::runSelection() {
-//    if (!callChild) {
-//        (call())->runSimulation();
-//        return;
-//    } else if (!raiseChild) {
-//        (raise(1))->runSimulation();
-//        return;
-//    } else if (!foldChild) {
-//        (fold())->runSimulation();
-//    }
-//}
+void Node::runSelection() {
+    if (!callChild) {
+        call();
+        callChild->runSimulation();
+        return;
+    } else if (!raiseChild) {
+        // TODO use different raise amt?
+        raise(1);
+        raiseChild->runSimulation();
+        return;
+    } else if (!foldChild) {
+        fold();
+        foldChild->runSimulation();
+        return;
+    }
 
-//void Node::runSimulation() {
-//    std::unique_ptr<Node> copyNode;
-//    if (getGame().getPlayerTurn() == 0) {
-//        copyNode.reset(new ChoiceNode(*dynamic_cast<ChoiceNode*>(this)));
-//    } else {
-//        copyNode.reset(new OpponentNode(*dynamic_cast<OpponentNode*>(this)));
-//    }
-//
-//    while (getGame().getState() != static_cast<int>(Stage::SHOWDOWN)) {
-//        call();
-//    }
-//
-//}
+    std::vector<double> selectionScores {0,0,0};
+    naiveUCT(selectionScores);
+    double maxScore = 0;
+    for (size_t i = 0; i < selectionScores.size(); ++i) {
+        maxScore = maxScore > selectionScores[i] ? maxScore : selectionScores[i];
+    }
+    
+    if (maxScore == selectionScores[0]) {
+        callChild->runSelection();
+    } else if (maxScore == selectionScores[1]) {
+        raiseChild->runSelection();
+    } else {
+        foldChild->runSelection();
+    }
+}
+
+void Node::runSimulation() {
+    if (getIsFolded()) {
+        switch (getGame().getPlayerTurn()) {
+            case 0 :
+                allocateChips(1, *this);
+                break;
+            case 1 :
+                allocateChips(0, *this);
+                break;
+        }
+        backprop(getGame().getBotPlayer().getChips(), getGame().getOppPlayer().getChips());
+        return;
+    }
+
+    Node* currentNode = this;
+
+    while (currentNode->getGame().getState() != static_cast<int>(Stage::SHOWDOWN)) {
+        call();
+        currentNode = currentNode->callChild.get();
+    }
+    int winner = showdown( 
+            currentNode->getGame().getBotPlayer().getHoleCards(),
+            currentNode->getGame().getOppPlayer().getHoleCards(),
+            currentNode->getGame().getBoardCards());
+    allocateChips(winner, *currentNode);
+    currentNode->backprop(currentNode->getGame().getBotPlayer().getChips(),
+            currentNode->getGame().getOppPlayer().getChips());
+}
+
+void Node::backprop(double botChips, double oppChips) {
+    if (parent != nullptr) {
+        if (parent->getGame().getPlayerTurn() == 0) {
+            parent->getExpectedValue() = parent->getExpectedValue() * parent->getVisitCount()
+                + botChips / ++parent->getVisitCount();
+        } else {
+            parent->getExpectedValue() = parent->getExpectedValue() * parent->getVisitCount()
+                + oppChips / ++parent->getVisitCount();
+        }
+        parent->backprop(botChips, oppChips);
+    }
+}
+
+void Node::naiveUCT(std::vector<double>& selectionScores) {
+    assert(selectionScores.size() == 3);
+    std::vector<double> explorationTerm;
+    explorationTerm.resize(3);
+    int childVisitSum = 0;
+    childVisitSum += this->callChild->getVisitCount();
+    childVisitSum += this->raiseChild->getVisitCount();
+    childVisitSum += this->foldChild->getVisitCount();
+
+    // Order here is important; call, raise, fold (CRF)
+    // Set the selectionScore and explorationTerm for call
+    selectionScores[0] = this->callChild->getExpectedValue();
+    explorationTerm[0] = std::sqrt( std::log(double(this->callChild->getVisitCount()) )
+            / double (childVisitSum));
+    // Set the selectionScore and explorationTerm for raise
+    selectionScores[1] = this->raiseChild->getExpectedValue();
+    explorationTerm[1] = std::sqrt( std::log(double(this->raiseChild->getVisitCount()) )
+            / double (childVisitSum));
+
+    // Set the selectionScore and explorationTerm for fold
+    selectionScores[2] = this->foldChild->getExpectedValue();
+    explorationTerm[2] = std::sqrt( std::log(double(this->foldChild->getVisitCount()) )
+            / double (childVisitSum));
+
+    for (size_t i = 0; i < selectionScores.size(); ++i) {
+        explorationTerm[i] *= exploreConst;
+        selectionScores[i] += explorationTerm[i]; 
+    }
+}
