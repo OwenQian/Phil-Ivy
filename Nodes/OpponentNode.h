@@ -11,7 +11,7 @@
 class ChoiceNode;
 class OpponentNode: public Node {
     private:
-        virtual Decision makeDecision();
+        virtual Decision makeDecision(std::vector<int> deck);
     public:
         virtual void call();
         virtual void raise(double);
