@@ -9,7 +9,7 @@
 
 class ChoiceNode: public Node {	//inheriting from Node class
     private: 
-        virtual Decision makeDecision();
+        virtual Decision makeDecision(std::vector<int> deck);
     public:
         virtual void call();
         virtual void raise(double);

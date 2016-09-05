@@ -98,13 +98,11 @@ void OpponentNode::raise(double raiseAmount) {
 		raiseChild->setCurrentRaise(raiseAmount);
 }
 
-Decision OpponentNode::makeDecision() {
+Decision OpponentNode::makeDecision(std::vector<int> deck) {
     std::cout << "Enter Action opp: Call(0), Raise(1), Fold(2)" << std::endl;
     Decision decision;
     int temp;
     std::cin >> temp;
-    std::vector<int> deck;
-    init_deck(deck);
     decision.action = static_cast<Action>(temp);
     std::cout << "Opp Decision: " << static_cast<int>(decision.action) << std::endl;
     if (decision.action == Action::RAISE) {

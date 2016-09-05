@@ -33,9 +33,9 @@ class Node {
         virtual ~Node();
 
         // Monte Carlo
-        Action monteCarlo(int);
-        void runSelection();
-        void runSimulation();
+        Action monteCarlo(int, std::vector<int>);
+        void runSelection(std::vector<int>);
+        void runSimulation(std::vector<int>);
         void backprop(double, double);
         void naiveUCT(std::vector<double>&);
 
@@ -47,8 +47,8 @@ class Node {
 		//Game functions
 		static void playGame();
 		static void playRound(Player& BotPlayer, Player& OppPlayer);
-        int playTurn();
-        virtual Decision makeDecision() = 0;
+        int playTurn(std::vector<int>);
+        virtual Decision makeDecision(std::vector<int>) = 0;
 
         // Getters
         GameObject & getGame() { return game; }
