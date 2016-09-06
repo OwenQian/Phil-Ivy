@@ -108,12 +108,12 @@ void ChoiceNode::raise(double raiseAmount) {
 }
 
 Decision ChoiceNode::makeDecision(std::vector<int> deck) {
-    std::cout << "Enter Action bot: Call(0), Raise(1), Fold(2)" << std::endl;
+    //std::cout << "Enter Action bot: Call(0), Raise(1), Fold(2)" << std::endl;
     Decision decision;
-    int temp;
-    std::cin >> temp;
-    decision.action = static_cast<Action>(temp);
-    //decision.action = monteCarlo(monteCarloDuration, deck);
+    //int temp;
+    //std::cin >> temp;
+    //decision.action = static_cast<Action>(temp);
+    decision.action = monteCarlo(monteCarloDuration, deck);
     std::cout << "Bot Decision: " << static_cast<int>(decision.action) << std::endl;
     if (decision.action == Action::RAISE) {
         if (game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment() <= currentRaise ||
