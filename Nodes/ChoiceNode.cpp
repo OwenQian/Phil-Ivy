@@ -44,7 +44,7 @@ void ChoiceNode::call() {
             game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment() <= currentRaise) {
         tempAllIn = true;
     }
-    if (getIsFirst() || smallBlindPosition == 1) {
+    if (getIsFirst() || (smallBlindPosition == 1)) {
         callChild.reset( new OpponentNode(game.getState() + !getIsFirst(),
                     initialChips * 2 - tempPlayer.getChips() - game.getOppPlayer().getChips(),
                     game.getBoardCards(),
@@ -65,7 +65,7 @@ void ChoiceNode::call() {
     callChild->setCurrentRaise(firstAction * currentRaise);
     callChild->getGame().getBotPlayer().setPotInvestment( firstAction * callChild->getGame().getBotPlayer().getPotInvestment());
     callChild->getGame().getOppPlayer().setPotInvestment( firstAction * callChild->getGame().getOppPlayer().getPotInvestment());
-    callChild->setIsFirst(false);
+    callChild->setIsFirst(!firstAction);
 }
 
 void ChoiceNode::raise(double raiseAmount) {
@@ -81,8 +81,6 @@ void ChoiceNode::raise(double raiseAmount) {
             } else {
                 raiseChild.reset(new OpponentNode(*static_cast<OpponentNode*>(callChild.get())));
             }
-            std::cout << "raiseChild all in? " << raiseChild->getIsAllIn() << std::endl;
-            std::cout << "callChild all in? " <<  callChild->getIsAllIn() << std::endl;
             return;
 		}
 	if (raiseAmount >= game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment() ||
