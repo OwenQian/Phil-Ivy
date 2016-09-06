@@ -45,7 +45,7 @@ void OpponentNode::call() {
 				game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment() <= currentRaise) {
 			tempAllIn = true;
 		}
-        if (getIsFirst() || smallBlindPosition == 0) {
+        if (getIsFirst() || (smallBlindPosition == 0)) {
         callChild.reset( new ChoiceNode(game.getState() + !getIsFirst(),
                     initialChips * 2 - tempPlayer.getChips() - game.getBotPlayer().getChips(),
                     game.getBoardCards(),
@@ -66,6 +66,7 @@ void OpponentNode::call() {
         callChild->setCurrentRaise(firstAction * currentRaise);
         callChild->getGame().getBotPlayer().setPotInvestment( firstAction * callChild->getGame().getBotPlayer().getPotInvestment());
         callChild->getGame().getOppPlayer().setPotInvestment( firstAction * callChild->getGame().getOppPlayer().getPotInvestment());
+        callChild->setIsFirst(!firstAction);
 }
 
 void OpponentNode::raise(double raiseAmount) {

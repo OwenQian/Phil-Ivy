@@ -279,6 +279,9 @@ Action Node::monteCarlo(int maxSeconds, std::vector<int> deck) {
     while (time(0) - startTime < maxSeconds) {
         copyNode->runSelection(deck);
     }
+    std::cout << "callScore: " << copyNode->callChild->getExpectedValue();
+    std::cout << "\nraiseScore: " << copyNode->raiseChild->getExpectedValue();
+    std::cout << "\nfoldScore: " << copyNode->foldChild->getExpectedValue() << std::endl;
     double maxScore = copyNode->callChild->getExpectedValue();
     maxScore = maxScore >= copyNode->raiseChild->getExpectedValue() ? maxScore : copyNode->raiseChild->getExpectedValue();
     maxScore = maxScore >= copyNode->foldChild->getExpectedValue() ? maxScore : copyNode->foldChild->getExpectedValue();
@@ -295,7 +298,7 @@ Action Node::monteCarlo(int maxSeconds, std::vector<int> deck) {
 void Node::runSelection(std::vector<int> deck) {
     if (!callChild) {
         call();
-		conditionalDeal(*this, getGame().getState(), callChild->getGame().getState(), deck, getGame().getState());
+		conditionalDeal(*callChild, getGame().getState(), callChild->getGame().getState(), deck, getGame().getState());
         callChild->runSimulation(deck);
         return;
     } else if (!raiseChild) {
@@ -318,7 +321,7 @@ void Node::runSelection(std::vector<int> deck) {
     
     if (maxScore == selectionScores[0]) {
 		callChild->getGame().getBoardCards() = getGame().getBoardCards();
-		conditionalDeal(*this, getGame().getState(), callChild->getGame().getState(), deck, getGame().getState());
+		conditionalDeal(*callChild, getGame().getState(), callChild->getGame().getState(), deck, getGame().getState());
         callChild->runSelection(deck);
     } else if (maxScore == selectionScores[1]) {
 		raiseChild->getGame().getBoardCards() = getGame().getBoardCards();
@@ -362,11 +365,11 @@ void Node::runSimulation(std::vector<int> deck) {
 void Node::backprop(double botChips, double oppChips) {
     if (parent != nullptr) {
         if (parent->getGame().getPlayerTurn() == 0) {
-            parent->getExpectedValue() = parent->getExpectedValue() * parent->getVisitCount()
-                + botChips / ++parent->getVisitCount();
+            parent->getExpectedValue() = (parent->getExpectedValue() * parent->getVisitCount()
+                + botChips) / ++parent->getVisitCount();
         } else {
-            parent->getExpectedValue() = parent->getExpectedValue() * parent->getVisitCount()
-                + oppChips / ++parent->getVisitCount();
+            parent->getExpectedValue() = (parent->getExpectedValue() * parent->getVisitCount()
+                + oppChips) / ++parent->getVisitCount();
         }
         parent->backprop(botChips, oppChips);
     }
