@@ -28,6 +28,7 @@ class OpponentNode: public Node {
 						int								playerTurn,
 						Node*	                    	const parent);
         OpponentNode(const OpponentNode&);
+        OpponentNode(const Node&);
 };
 
 #endif	//OpponentNode.h

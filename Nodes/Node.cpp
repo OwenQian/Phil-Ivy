@@ -59,7 +59,12 @@ Node::Node(const Node& obj) :
             obj.game.getOppPlayer(),
             obj.game.getPlayerTurn(),
             obj.parent) {
+        visitCount = obj.visitCount;
+        expectedValue = obj.expectedValue;
+        currentRaise = obj.currentRaise;
+        isFolded = obj.isFolded;
         isAllIn = obj.isAllIn;
+        firstAction = obj.firstAction;
     }
 
 // Destructor
@@ -272,9 +277,9 @@ Action Node::monteCarlo(int maxSeconds, std::vector<int> deck) {
     time(&startTime);
     std::unique_ptr<Node> copyNode;
     if (getGame().getPlayerTurn() == 0) {
-        copyNode.reset(new ChoiceNode(*dynamic_cast<ChoiceNode*>(this)));
+        copyNode.reset(new ChoiceNode(*this));
     } else {
-        copyNode.reset(new OpponentNode(*dynamic_cast<OpponentNode*>(this)));
+        copyNode.reset(new OpponentNode(*this));
     }
     while (time(0) - startTime < maxSeconds) {
         copyNode->runSelection(deck);
@@ -296,6 +301,11 @@ Action Node::monteCarlo(int maxSeconds, std::vector<int> deck) {
 }
 
 void Node::runSelection(std::vector<int> deck) {
+    if (isFolded || (game.getState() == static_cast<int>(Stage::SHOWDOWN)) || isAllIn) {
+        backprop(game.getBotPlayer().getChips(), game.getOppPlayer().getChips());
+        return;
+    }
+
     if (!callChild) {
         call();
 		conditionalDeal(*callChild, getGame().getState(), callChild->getGame().getState(), deck, getGame().getState());
@@ -377,27 +387,22 @@ void Node::backprop(double botChips, double oppChips) {
 
 void Node::naiveUCT(std::vector<double>& selectionScores) {
     assert(selectionScores.size() == 3);
-    std::vector<double> explorationTerm;
-    explorationTerm.resize(3);
-    int childVisitSum = 0;
-    childVisitSum += this->callChild->getVisitCount();
-    childVisitSum += this->raiseChild->getVisitCount();
-    childVisitSum += this->foldChild->getVisitCount();
-
+    std::vector<double> explorationTerm(3, 0);
+    int childVisitSum = visitCount;
     // Order here is important; call, raise, fold (CRF)
     // Set the selectionScore and explorationTerm for call
     selectionScores[0] = this->callChild->getExpectedValue();
-    explorationTerm[0] = std::sqrt( std::log(double(this->callChild->getVisitCount()) )
-            / double (childVisitSum));
+    explorationTerm[0] = std::sqrt( std::log(double (childVisitSum)) 
+            / double (this->callChild->getVisitCount()) );
     // Set the selectionScore and explorationTerm for raise
     selectionScores[1] = this->raiseChild->getExpectedValue();
-    explorationTerm[1] = std::sqrt( std::log(double(this->raiseChild->getVisitCount()) )
-            / double (childVisitSum));
+    explorationTerm[1] = std::sqrt( std::log(double (childVisitSum))
+            / double(this->raiseChild->getVisitCount()) );
 
     // Set the selectionScore and explorationTerm for fold
     selectionScores[2] = this->foldChild->getExpectedValue();
-    explorationTerm[2] = std::sqrt( std::log(double(this->foldChild->getVisitCount()) )
-            / double (childVisitSum));
+    explorationTerm[2] = std::sqrt( std::log( double(childVisitSum) )
+            / double (this->foldChild->getVisitCount()) );
 
     for (size_t i = 0; i < selectionScores.size(); ++i) {
         explorationTerm[i] *= exploreConst;
