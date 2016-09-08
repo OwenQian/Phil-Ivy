@@ -29,6 +29,9 @@ ChoiceNode::ChoiceNode(int state,
 ChoiceNode::ChoiceNode(const ChoiceNode& obj) :
     Node(obj) { }
 
+ChoiceNode::ChoiceNode(const Node& obj) :
+    Node(obj) { }
+
 void ChoiceNode::fold() {
     foldChild.reset(new ChoiceNode(*this));
     foldChild->setIsFolded(true);

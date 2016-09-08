@@ -26,6 +26,7 @@ class ChoiceNode: public Node {	//inheriting from Node class
 				int								playerTurn,
 				Node*	                        const parent);
         ChoiceNode(const ChoiceNode&);
+        ChoiceNode(const Node&);
 };
 
 #endif //ChoiceNode.h

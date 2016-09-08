@@ -30,6 +30,9 @@ OpponentNode::OpponentNode(int state,
 OpponentNode::OpponentNode(const OpponentNode& obj) :
     Node(obj) { }
 
+OpponentNode::OpponentNode(const Node& obj) :
+    Node(obj) { }
+
 void OpponentNode::fold() {
     foldChild.reset(new OpponentNode(*this));
     foldChild->setIsFolded(true);

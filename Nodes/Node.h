@@ -26,6 +26,7 @@ class Node {
         std::unique_ptr<Node> foldChild;
         std::unique_ptr<Node> callChild;
         std::unique_ptr<Node> raiseChild;
+
         Node();
         Node(int, double, std::vector<int>, Player, Player, int, Node*);
         Node(const Node& obj);
