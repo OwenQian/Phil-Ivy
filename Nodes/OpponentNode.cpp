@@ -35,6 +35,7 @@ OpponentNode::OpponentNode(const Node& obj) :
 
 void OpponentNode::fold() {
     foldChild.reset(new OpponentNode(*this));
+    foldChild->setParent(this);
     foldChild->setIsFolded(true);
     foldChild->setVisitCount(0);
 }

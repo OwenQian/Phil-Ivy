@@ -34,6 +34,7 @@ ChoiceNode::ChoiceNode(const Node& obj) :
 
 void ChoiceNode::fold() {
     foldChild.reset(new ChoiceNode(*this));
+    foldChild->setParent(this);
     foldChild->setIsFolded(true);
     foldChild->setVisitCount(0);
 }
