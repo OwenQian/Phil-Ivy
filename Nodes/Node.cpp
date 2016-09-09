@@ -373,13 +373,14 @@ void Node::runSimulation(std::vector<int> deck) {
 }
 
 void Node::backprop(double botChips, double oppChips) {
+    ++visitCount;
     if (parent != nullptr) {
         if (parent->getGame().getPlayerTurn() == 0) {
             parent->getExpectedValue() = (parent->getExpectedValue() * parent->getVisitCount()
-                + botChips) / ++parent->getVisitCount();
+                + botChips) / (parent->getVisitCount() + 1);
         } else {
             parent->getExpectedValue() = (parent->getExpectedValue() * parent->getVisitCount()
-                + oppChips) / ++parent->getVisitCount();
+                + oppChips) / (parent->getVisitCount() + 1);
         }
         parent->backprop(botChips, oppChips);
     }
