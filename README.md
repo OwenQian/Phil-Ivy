@@ -97,11 +97,11 @@ We designed the game loop to work separately from the makeDecision() function. T
 
 ##### How it works
 The Monte Carlo tree search algorithm uses the following four steps
+
 1. Selection
 	* Starting from initial Node, choose which child node to explore more deeply, stop if Node is terminal
 	* Explore vs. Exploit balanced using Upper Confidence Bound in Trees formula (UCT)
 	* ![alt text](https://github.com/OwenQian/Pooker/blob/master/Pictures/naiveUCT.png "naiveUCT formula")
-
 2. Expansion
 	* Create child nodes if they don't already exist
 3. Simulation
