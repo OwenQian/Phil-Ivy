@@ -285,9 +285,16 @@ Action Node::monteCarlo(int maxSeconds, std::vector<int> deck) {
         copyNode->runSelection(deck);
     }
     std::cout << "visitCount: " << copyNode->visitCount;
+
+    std::cout << "\n\n@@callVisit: " << copyNode->callChild->visitCount;
     std::cout << "\ncallScore: " << copyNode->callChild->getExpectedValue();
+
+    std::cout << "\n\n@@raiseVisit: " << copyNode->raiseChild->visitCount;
     std::cout << "\nraiseScore: " << copyNode->raiseChild->getExpectedValue();
+
+    std::cout << "\n\n@@foldVisit: " << copyNode->foldChild->visitCount;
     std::cout << "\nfoldScore: " << copyNode->foldChild->getExpectedValue() << std::endl;
+
     double maxScore = copyNode->callChild->getExpectedValue();
     maxScore = maxScore >= copyNode->raiseChild->getExpectedValue() ? maxScore : copyNode->raiseChild->getExpectedValue();
     maxScore = maxScore >= copyNode->foldChild->getExpectedValue() ? maxScore : copyNode->foldChild->getExpectedValue();
