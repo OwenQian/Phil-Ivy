@@ -101,7 +101,8 @@ The Monte Carlo tree search algorithm uses the following four steps
 1. Selection
 	* Starting from initial Node, choose which child node to explore more deeply, stop if Node is terminal
 	* Explore vs. Exploit balanced using Upper Confidence Bound in Trees formula (UCT)
-	* ![alt text](https://github.com/OwenQian/Pooker/blob/master/Pictures/naiveUCT.png "naiveUCT formula")
+![alt text](https://github.com/OwenQian/Pooker/blob/master/Pictures/naiveUCT.png "naiveUCT formula")
+	* wi/ni is the averaged expected value, c is the exploration constant, t is the visit count of the node and ni is the visit count of the considered child node
 2. Expansion
 	* Create child nodes if they don't already exist
 3. Simulation
