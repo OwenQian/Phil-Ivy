@@ -40,7 +40,7 @@ virtual void fold() = 0;
 These functions move the game forward by creating a child node with the new game state and adding it to the tree. The functions are implemented separately in ChoiceNode(CN) and OpponentNode(ON) to allow potential future specialization, say if we wanted the bot's action functions to start the Monte Carlo
 
 ##### Tree linkage
-```
+```cpp
 Node* parent;
 std::unique_ptr<Node> foldChild;
 std::unique_ptr<Node> callChild;
@@ -77,18 +77,19 @@ The game structure classes and Nodes provide the infrastructure for the game to 
 ```cpp
 // Initializes both players with inital chips and repeatedly
 // calls playRound() while both players still have chips
-static void playGame();
+static void Node::playGame();
 
 // Handles playthrough of a single hand, plays the appropriate action
 // returned by playTurn, deals boardCards and evaluates showdowns
-static void playRound(Player& botPlayer, Player& oppPlayer);
+static void Node::playRound(Player& botPlayer, Player& oppPlayer);
 
 // Returns an int representing which action to play, action is chosen
 // with the makeDecision() function
-int playTurn(std::vector<int> deck);
+int Node::playTurn(std::vector<int> deck);
 
 // specifies method of making decision, i.e., taking user-input or
 // using Monte Carlo Tree Search
+// Implemented differently for ChoiceNode vs OpponentNode
 virtual Decision makeDecision(std::vector<int> deck) = 0;
 ```
 
