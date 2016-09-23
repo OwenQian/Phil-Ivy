@@ -34,6 +34,7 @@ ChoiceNode::ChoiceNode(const Node& obj) :
 
 void ChoiceNode::fold() {
     foldChild.reset(new ChoiceNode(*this));
+    //foldChild->getGame().setPlayerTurn(!foldChild->getGame().getPlayerTurn());
     foldChild->setParent(this);
     foldChild->setIsFolded(true);
     foldChild->setVisitCount(0);
@@ -110,11 +111,12 @@ void ChoiceNode::raise(double raiseAmount) {
 }
 
 Decision ChoiceNode::makeDecision(std::vector<int> deck) {
-    //std::cout << "Enter Action bot: Call(0), Raise(1), Fold(2)" << std::endl;
     Decision decision;
+
     //int temp;
     //std::cin >> temp;
     //decision.action = static_cast<Action>(temp);
+    
     decision.action = monteCarlo(monteCarloDuration, deck);
     std::cout << "Bot Decision: " << static_cast<int>(decision.action) << std::endl;
     if (decision.action == Action::RAISE) {

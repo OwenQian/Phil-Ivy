@@ -1,6 +1,19 @@
 # Pooker: Not so shitty Poker AI
 * Fully functional two-player No-Limit Texas Hold'em game built ground up in C++
 
+Take a look at the main function!
+```cpp
+#include "Nodes/Node.cpp"
+
+int main() {
+	Node::playGame();
+	
+	return 0;
+}
+```
+
+That's it! Each component of the code is broken up into its own class or method, making our code modular to a fault. When we were first starting out, we didn't know what kinds of functionality we might need to add, so we designed our structures to be as extensible as possible.
+
 ## Game Structure Classes
 These classes are used to record values important to a poker game. Cards were represented using unique integers.
 
@@ -40,7 +53,7 @@ virtual void fold() = 0;
 These functions move the game forward by creating a child node with the new game state and adding it to the tree. The functions are implemented separately in ChoiceNode(CN) and OpponentNode(ON) to allow potential future specialization, say if we wanted the bot's action functions to start the Monte Carlo
 
 ##### Tree linkage
-```
+```cpp
 Node* parent;
 std::unique_ptr<Node> foldChild;
 std::unique_ptr<Node> callChild;
@@ -77,18 +90,19 @@ The game structure classes and Nodes provide the infrastructure for the game to 
 ```cpp
 // Initializes both players with inital chips and repeatedly
 // calls playRound() while both players still have chips
-static void playGame();
+static void Node::playGame();
 
 // Handles playthrough of a single hand, plays the appropriate action
 // returned by playTurn, deals boardCards and evaluates showdowns
-static void playRound(Player& botPlayer, Player& oppPlayer);
+static void Node::playRound(Player& botPlayer, Player& oppPlayer);
 
 // Returns an int representing which action to play, action is chosen
 // with the makeDecision() function
-int playTurn(std::vector<int> deck);
+int Node::playTurn(std::vector<int> deck);
 
 // specifies method of making decision, i.e., taking user-input or
 // using Monte Carlo Tree Search
+// Implemented differently for ChoiceNode vs OpponentNode
 virtual Decision makeDecision(std::vector<int> deck) = 0;
 ```
 
@@ -97,11 +111,12 @@ We designed the game loop to work separately from the makeDecision() function. T
 
 ##### How it works
 The Monte Carlo tree search algorithm uses the following four steps
+
 1. Selection
 	* Starting from initial Node, choose which child node to explore more deeply, stop if Node is terminal
 	* Explore vs. Exploit balanced using Upper Confidence Bound in Trees formula (UCT)
-	* ![alt text](https://github.com/OwenQian/Pooker/blob/master/Pictures/naiveUCT.png "naiveUCT formula")
-
+![alt text](https://github.com/OwenQian/Pooker/blob/master/Pictures/naiveUCT.png "naiveUCT formula")
+	* wi/ni is the averaged expected value, c is the exploration constant, t is the visit count of the node and ni is the visit count of the considered child node
 2. Expansion
 	* Create child nodes if they don't already exist
 3. Simulation
