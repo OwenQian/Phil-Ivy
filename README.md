@@ -1,6 +1,19 @@
 # Pooker: Not so shitty Poker AI
 * Fully functional two-player No-Limit Texas Hold'em game built ground up in C++
 
+Take a look at the main function!
+```cpp
+#include "Nodes/Node.cpp"
+
+int main() {
+	Node::playGame();
+	
+	return 0;
+}
+```
+
+That's it! Each component of the code is broken up into its own class or method, making our code modular to a fault. When we were first starting out, we didn't know what kinds of functionality we might need to add, so we designed our structures to be as extensible as possible.
+
 ## Game Structure Classes
 These classes are used to record values important to a poker game. Cards were represented using unique integers.
 
