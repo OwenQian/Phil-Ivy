@@ -18,7 +18,8 @@ Node::Node() :
     parent(nullptr),
     game(0, 0.0, std::vector<int>(), Player(), Player(), 0),
     visitCount(0),
-    expectedValue(0.0),
+    botExpectedValue(0.0),
+    oppExpectedValue(0.0),
     currentRaise(0.0),
     isFolded(false),
     isAllIn(false),
@@ -42,7 +43,8 @@ Node::Node(int              state,
 			oppPlayer,
 			playerTurn),
     visitCount(0),
-    expectedValue(0.0),
+    botExpectedValue(0.0),
+    oppExpectedValue(0.0),
     currentRaise(0.0),
     isFolded(false),
     isAllIn(false), 
@@ -62,7 +64,8 @@ Node::Node(const Node& obj) :
             obj.parent)
     {
         visitCount = obj.visitCount;
-        expectedValue = obj.expectedValue;
+        botExpectedValue = obj.botExpectedValue;
+        oppExpectedValue = obj.oppExpectedValue;
         currentRaise = obj.currentRaise;
         isFolded = obj.isFolded;
         isAllIn = obj.isAllIn;
@@ -83,7 +86,8 @@ Node& Node::operator= (const Node& rhs) {
 
     game = rhs.game;
     visitCount = rhs.visitCount;
-    expectedValue = rhs.expectedValue;
+    botExpectedValue = rhs.botExpectedValue;
+    oppExpectedValue = rhs.oppExpectedValue;
     currentRaise = rhs.currentRaise;
     isFolded = rhs.isFolded;
     isAllIn = rhs.isAllIn;
@@ -295,20 +299,23 @@ Action Node::monteCarlo(int maxSeconds, std::vector<int> deck) {
     std::cout << "visitCount: " << copyNode->visitCount;
 
     std::cout << "\n\n@@callVisit: " << copyNode->callChild->visitCount;
-    std::cout << "\ncallScore: " << copyNode->callChild->getExpectedValue();
+    std::cout << "\n bot callScore: " << copyNode->callChild->getBotExpectedValue();
+    std::cout << "\n opp callScore: " << copyNode->callChild->getOppExpectedValue();
 
     std::cout << "\n\n@@raiseVisit: " << copyNode->raiseChild->visitCount;
-    std::cout << "\nraiseScore: " << copyNode->raiseChild->getExpectedValue();
+    std::cout << "\n bot raiseScore: " << copyNode->raiseChild->getBotExpectedValue();
+    std::cout << "\n opp raiseScore: " << copyNode->raiseChild->getOppExpectedValue();
 
     std::cout << "\n\n@@foldVisit: " << copyNode->foldChild->visitCount;
-    std::cout << "\nfoldScore: " << copyNode->foldChild->getExpectedValue() << std::endl;
+    std::cout << "\n bot foldScore: " << copyNode->foldChild->getBotExpectedValue();
+    std::cout << "\n opp foldScore: " << copyNode->foldChild->getOppExpectedValue() << std::endl;
 
-    double maxScore = copyNode->callChild->getExpectedValue();
-    maxScore = maxScore >= copyNode->raiseChild->getExpectedValue() ? maxScore : copyNode->raiseChild->getExpectedValue();
-    maxScore = maxScore >= copyNode->foldChild->getExpectedValue() ? maxScore : copyNode->foldChild->getExpectedValue();
-    if (maxScore == copyNode->callChild->getExpectedValue()) {
+    double maxScore = copyNode->callChild->getBotExpectedValue();
+    maxScore = maxScore >= copyNode->raiseChild->getBotExpectedValue() ? maxScore : copyNode->raiseChild->getBotExpectedValue();
+    maxScore = maxScore >= copyNode->foldChild->getBotExpectedValue() ? maxScore : copyNode->foldChild->getBotExpectedValue();
+    if (maxScore == copyNode->callChild->getBotExpectedValue()) {
         return Action::CALL;
-    } else if (maxScore == copyNode->raiseChild->getExpectedValue()) {
+    } else if (maxScore == copyNode->raiseChild->getBotExpectedValue()) {
         // Need to handle how much to raise here
         return Action::RAISE;
     } else {
@@ -336,29 +343,17 @@ void Node::runSelection(std::vector<int> deck) {
         raiseChild->runSimulation(deck);
         return;
     } else if (!foldChild) {
-        std::cout << "currentTurn pturn: " << game.getPlayerTurn() << std::endl;
         fold();
-        std::cout << "foldChild pturn: " << foldChild->game.getPlayerTurn() << std::endl;
         foldChild->runSimulation(deck);
         return;
     }
-    std::cout << "botplayer invest: " << game.getBotPlayer().getPotInvestment() << std::endl;
-
-    std::cout << "oppplayer invest: " << game.getOppPlayer().getPotInvestment() << std::endl;
 
     std::vector<double> selectionScores {0,0,0};
-    naiveUCT(selectionScores);
+    naiveUCT(selectionScores, game.getPlayerTurn());
     double bestScore = 0;
     
-    // pick highest score if bot turn, pick lowest if opp turn
-    if (game.getPlayerTurn() == 0) {
-        for (size_t i = 0; i < selectionScores.size(); ++i) {
-            bestScore = bestScore > selectionScores[i] ? bestScore : selectionScores[i];
-        }
-    } else {
-        for (size_t i = 0; i < selectionScores.size(); ++i) {
-            bestScore = bestScore < selectionScores[i] ? bestScore : selectionScores[i];
-        }
+    for (size_t i = 0; i < selectionScores.size(); ++i) {
+        bestScore = bestScore > selectionScores[i] ? bestScore : selectionScores[i];
     }
     
     if (bestScore == selectionScores[0]) {
@@ -369,7 +364,6 @@ void Node::runSelection(std::vector<int> deck) {
 		raiseChild->getGame().getBoardCards() = getGame().getBoardCards();
         raiseChild->runSelection(deck);
     } else {
-        std::cout << "select fold turn: " << game.getPlayerTurn() << std::endl;
         foldChild->runSelection(deck);
     }
 }
@@ -399,34 +393,49 @@ void Node::runSimulation(std::vector<int> deck) {
 }
 
 void Node::backprop(double botChips, double oppChips) {
-    getExpectedValue() = (getExpectedValue() * visitCount + botChips) / (visitCount + 1);
-    ++visitCount;
+        getBotExpectedValue() = (getBotExpectedValue() * visitCount + botChips) / (visitCount + 1);
+        getOppExpectedValue() = (getOppExpectedValue() * visitCount + oppChips) / (visitCount + 1);
+        ++visitCount;
 
     if (parent != nullptr) {
         parent->backprop(botChips, oppChips);
     }
 }
 
-void Node::naiveUCT(std::vector<double>& selectionScores) {
+void Node::naiveUCT(std::vector<double>& selectionScores, int playerTurn) {
     assert(selectionScores.size() == 3);
     std::vector<double> explorationTerm(3, 0);
-    int childVisitSum = visitCount;
+
+    // use bot or opp EV based on pTurn
+    std::vector<double> ambiguousPlayerEV(3, 0);
+    if (playerTurn == 0) {
+        ambiguousPlayerEV[0] = callChild->getBotExpectedValue();
+        ambiguousPlayerEV[1] = raiseChild->getBotExpectedValue();
+        ambiguousPlayerEV[2] = foldChild->getBotExpectedValue();
+    } else {
+        ambiguousPlayerEV[0] = callChild->getOppExpectedValue();
+        ambiguousPlayerEV[1] = raiseChild->getOppExpectedValue();
+        ambiguousPlayerEV[2] = foldChild->getOppExpectedValue();
+    }
+    
     // Order here is important; call, raise, fold (CRF)
     // Set the selectionScore and explorationTerm for call
-    selectionScores[0] = this->callChild->getExpectedValue();
-    explorationTerm[0] = std::sqrt( std::log(double (childVisitSum)) 
-            / double (this->callChild->getVisitCount()) );
+    selectionScores[0] = ambiguousPlayerEV[0];
+    explorationTerm[0] = std::sqrt( std::log(double (visitCount)) 
+            / ambiguousPlayerEV[0]);
+
     // Set the selectionScore and explorationTerm for raise
-    selectionScores[1] = this->raiseChild->getExpectedValue();
-    explorationTerm[1] = std::sqrt( std::log(double (childVisitSum))
-            / double(this->raiseChild->getVisitCount()) );
+    selectionScores[1] = ambiguousPlayerEV[1];
+    explorationTerm[1] = std::sqrt( std::log(double (visitCount))
+            / ambiguousPlayerEV[1]);
 
     // Set the selectionScore and explorationTerm for fold
-    selectionScores[2] = this->foldChild->getExpectedValue();
-    explorationTerm[2] = std::sqrt( std::log( double(childVisitSum) )
-            / double (this->foldChild->getVisitCount()) );
+    selectionScores[2] = ambiguousPlayerEV[2];
+    explorationTerm[2] = std::sqrt( std::log( double(visitCount) )
+            / ambiguousPlayerEV[2] );
 
     for (size_t i = 0; i < selectionScores.size(); ++i) {
+        std::cout << "exploration terms: " << explorationTerm[i] << std::endl;
         explorationTerm[i] *= exploreConst;
         selectionScores[i] += explorationTerm[i]; 
     }

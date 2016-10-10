@@ -15,7 +15,8 @@ class Node {
 
         GameObject game;
         int visitCount;
-        double expectedValue;
+        double botExpectedValue;
+        double oppExpectedValue;
 
         double currentRaise;
         bool isFolded;
@@ -38,7 +39,7 @@ class Node {
         void runSelection(std::vector<int>);
         void runSimulation(std::vector<int>);
         void backprop(double, double);
-        void naiveUCT(std::vector<double>&);
+        void naiveUCT(std::vector<double>&, int);
 
         // Action functions
         virtual void call() = 0;
@@ -61,8 +62,10 @@ class Node {
         bool getIsFirst() const { return firstAction; }
         int & getVisitCount() { return visitCount; }
         int const & getVisitCount() const { return visitCount; }
-        double & getExpectedValue() { return expectedValue; }
-        double const & getExpectedValue() const { return expectedValue; }
+        double & getBotExpectedValue() { return botExpectedValue; }
+        double & getOppExpectedValue() { return oppExpectedValue; }
+        double const & getBotExpectedValue() const { return botExpectedValue; }
+        double const & getoppExpectedValue() const { return oppExpectedValue; }
 
         // Setters
         void setCurrentRaise(double amount) { currentRaise = amount; }
@@ -71,7 +74,6 @@ class Node {
         void setIsFirst(bool a) { firstAction = a; }
         void incrementVisitCount() { ++visitCount; }
         void setVisitCount(int c) { visitCount = c; }
-        void setExpectedValue(double EV) { expectedValue = EV; }
         void setParent(Node* newParent) { parent = newParent; }
 		
 };
