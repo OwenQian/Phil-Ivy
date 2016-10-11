@@ -396,6 +396,20 @@ void Node::runSimulation(std::vector<int> deck) {
         backprop(game.getBotPlayer().getChips(), getGame().getOppPlayer().getChips());
         return;
     }
+
+    // if running simulate on a node that called all-in
+    if (getIsAllIn()) {
+        for (int i = getGame().getState(); i != static_cast<int>(Stage::SHOWDOWN); ++i) {
+            std::vector<int> tempDealt = deal(deck, i);
+            for (int j:tempDealt) {
+                game.getBoardCards().push_back(j);
+            }
+        }
+        int winner = showdown(game.getBotPlayer().getHoleCards(), game.getOppPlayer().getHoleCards(), game.getBoardCards());
+        allocateChips(winner, *this);
+        backprop(game.getBotPlayer().getChips(), getGame().getOppPlayer().getChips());
+        return;
+    }
 	
 	std::unique_ptr<Node> rootNode;
 	Node* currentNode;
@@ -412,12 +426,28 @@ void Node::runSimulation(std::vector<int> deck) {
 		prevStage = currentNode->getGame().getState();
         currentNode->call();
         currentNode = currentNode->callChild.get();
-		conditionalDeal(*currentNode, prevStage, currentNode->getGame().getState(), deck, prevStage);
+
+        if (currentNode->getIsAllIn()) {
+            for (int i = currentNode->getGame().getState(); i != static_cast<int>(Stage::SHOWDOWN); ++i) {
+                std::vector<int> tempDealt = deal(deck, i);
+                for (int j:tempDealt) {
+                    currentNode->getGame().getBoardCards().push_back(j);
+                }
+            }
+            break;
+        } else {
+            conditionalDeal(*currentNode, prevStage, currentNode->getGame().getState(), deck, prevStage);
+        }
     }
+    if (currentNode->getGame().getBoardCards().size() < 5) {
+        std::cout << "debug stop" << std::endl;
+    }
+
 	for (int i:currentNode->getGame().getBoardCards()){
 		std::cout << hexToCard(i) << " ";
 	}
 	std::cout << std::endl;
+
     int winner = showdown( 
             currentNode->getGame().getBotPlayer().getHoleCards(),
             currentNode->getGame().getOppPlayer().getHoleCards(),
