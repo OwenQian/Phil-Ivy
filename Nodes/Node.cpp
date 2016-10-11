@@ -355,7 +355,9 @@ void Node::runSelection(std::vector<int> deck) {
     for (size_t i = 0; i < selectionScores.size(); ++i) {
         bestScore = bestScore > selectionScores[i] ? bestScore : selectionScores[i];
     }
-    
+   // std::cout << "selection1: " << selectionScores[0] << std::endl;
+//	std::cout << "selection2: " << selectionScores[1] << std::endl;
+//	std::cout << "selection3: " << selectionScores[2] << std::endl;
     if (bestScore == selectionScores[0]) {
 		callChild->getGame().getBoardCards() = getGame().getBoardCards();
 		conditionalDeal(*callChild, getGame().getState(), callChild->getGame().getState(), deck, getGame().getState());
@@ -422,20 +424,20 @@ void Node::naiveUCT(std::vector<double>& selectionScores, int playerTurn) {
     // Set the selectionScore and explorationTerm for call
     selectionScores[0] = ambiguousPlayerEV[0];
     explorationTerm[0] = std::sqrt( std::log(double (visitCount)) 
-            / ambiguousPlayerEV[0]);
+            / double (callChild->visitCount));
 
     // Set the selectionScore and explorationTerm for raise
     selectionScores[1] = ambiguousPlayerEV[1];
     explorationTerm[1] = std::sqrt( std::log(double (visitCount))
-            / ambiguousPlayerEV[1]);
+            / double (raiseChild->visitCount));
 
     // Set the selectionScore and explorationTerm for fold
     selectionScores[2] = ambiguousPlayerEV[2];
     explorationTerm[2] = std::sqrt( std::log( double(visitCount) )
-            / ambiguousPlayerEV[2] );
+            / double (foldChild->visitCount) );
 
     for (size_t i = 0; i < selectionScores.size(); ++i) {
-        std::cout << "exploration terms: " << explorationTerm[i] << std::endl;
+        //std::cout << "exploration terms: " << explorationTerm[i] << std::endl;
         explorationTerm[i] *= exploreConst;
         selectionScores[i] += explorationTerm[i]; 
     }
