@@ -68,9 +68,9 @@ void init_deck(std::vector<int>& deck) {
 	}
 }
 
-void conditionalDeal(Node& thisNode, int refStage, int compareStage, std::vector<int> deck, int stage) {
+void conditionalDeal(Node& thisNode, int refStage, int compareStage, std::vector<int> &deck, int stage) {
     if (refStage != compareStage) {
-        std::vector<int> dealtCards = deal(deck, stage);
+        std::vector<int> dealtCards = deal(deck, refStage);
         for (int i: dealtCards)
             thisNode.getGame().getBoardCards().push_back(i);
     }

@@ -70,6 +70,7 @@ Node::Node(const Node& obj) :
         isFolded = obj.isFolded;
         isAllIn = obj.isAllIn;
         firstAction = obj.firstAction;
+
     }
 
 // Destructor
@@ -332,10 +333,19 @@ void Node::runSelection(std::vector<int> deck) {
         return;
     }
 
+	if (!callChild && !raiseChild && !foldChild) {
+		//std::cout << "i am lonely" << std::endl;
+	}
+	
     if (!callChild) {
         call();
 		conditionalDeal(*callChild, getGame().getState(), callChild->getGame().getState(), deck, getGame().getState());
+		
         callChild->runSimulation(deck);
+		if (!(callChild->callChild) && !(callChild->raiseChild) && !(callChild->foldChild)) {
+		//std::cout << "i am a lonely call child" << std::endl;
+	    }
+		
         return;
     } else if (!raiseChild) {
         // TODO use different raise amt?
@@ -347,7 +357,7 @@ void Node::runSelection(std::vector<int> deck) {
         foldChild->runSimulation(deck);
         return;
     }
-
+	
     std::vector<double> selectionScores {0,0,0};
     naiveUCT(selectionScores, game.getPlayerTurn());
     double bestScore = 0;
@@ -359,32 +369,85 @@ void Node::runSelection(std::vector<int> deck) {
 //	std::cout << "selection2: " << selectionScores[1] << std::endl;
 //	std::cout << "selection3: " << selectionScores[2] << std::endl;
     if (bestScore == selectionScores[0]) {
+		if(game.getPlayerTurn() == 1){
+			//std::cout << "opp called!" << std::endl;
+		}
 		callChild->getGame().getBoardCards() = getGame().getBoardCards();
 		conditionalDeal(*callChild, getGame().getState(), callChild->getGame().getState(), deck, getGame().getState());
         callChild->runSelection(deck);
     } else if (bestScore == selectionScores[1]) {
+		if(game.getPlayerTurn() == 1){
+			//std::cout << "opp raised!" << std::endl;
+		}
 		raiseChild->getGame().getBoardCards() = getGame().getBoardCards();
         raiseChild->runSelection(deck);
     } else {
+		if(game.getPlayerTurn() == 1){
+		//	std::cout << "opp folded!" << std::endl;
+		}
         foldChild->runSelection(deck);
     }
 }
 
 void Node::runSimulation(std::vector<int> deck) {
     if (getIsFolded()) {
+		std::cout << "folded" << std::endl;
         allocateChips(!game.getPlayerTurn(), *this);
         backprop(game.getBotPlayer().getChips(), getGame().getOppPlayer().getChips());
         return;
     }
 
-    Node* currentNode = this;
+    // if running simulate on a node that called all-in
+    if (getIsAllIn()) {
+        for (int i = getGame().getState(); i != static_cast<int>(Stage::SHOWDOWN); ++i) {
+            std::vector<int> tempDealt = deal(deck, i);
+            for (int j:tempDealt) {
+                game.getBoardCards().push_back(j);
+            }
+        }
+        int winner = showdown(game.getBotPlayer().getHoleCards(), game.getOppPlayer().getHoleCards(), game.getBoardCards());
+        allocateChips(winner, *this);
+        backprop(game.getBotPlayer().getChips(), getGame().getOppPlayer().getChips());
+        return;
+    }
+	
+	std::unique_ptr<Node> rootNode;
+	Node* currentNode;
+	
+    if (game.getPlayerTurn() == 0){
+		rootNode.reset(new ChoiceNode(*this));
+	} else {
+		rootNode.reset(new OpponentNode(*this));
+	}
+	
+	currentNode = rootNode.get();
 	int prevStage;
     while (currentNode->getGame().getState() != static_cast<int>(Stage::SHOWDOWN)) {
 		prevStage = currentNode->getGame().getState();
         currentNode->call();
         currentNode = currentNode->callChild.get();
-		conditionalDeal(*currentNode, prevStage, currentNode->getGame().getState(), deck, prevStage);
+
+        if (currentNode->getIsAllIn()) {
+            for (int i = currentNode->getGame().getState(); i != static_cast<int>(Stage::SHOWDOWN); ++i) {
+                std::vector<int> tempDealt = deal(deck, i);
+                for (int j:tempDealt) {
+                    currentNode->getGame().getBoardCards().push_back(j);
+                }
+            }
+            break;
+        } else {
+            conditionalDeal(*currentNode, prevStage, currentNode->getGame().getState(), deck, prevStage);
+        }
     }
+    if (currentNode->getGame().getBoardCards().size() < 5) {
+        std::cout << "debug stop" << std::endl;
+    }
+
+	for (int i:currentNode->getGame().getBoardCards()){
+		std::cout << hexToCard(i) << " ";
+	}
+	std::cout << std::endl;
+
     int winner = showdown( 
             currentNode->getGame().getBotPlayer().getHoleCards(),
             currentNode->getGame().getOppPlayer().getHoleCards(),
