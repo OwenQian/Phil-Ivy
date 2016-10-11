@@ -25,6 +25,6 @@ std::shared_ptr<OpponentNode> playTurn(std::shared_ptr<ChoiceNode>, std::vector<
 std::shared_ptr<ChoiceNode> playTurn(std::shared_ptr<OpponentNode>, std::vector<int> deck);
 
 // MCTS helper functions
-void conditionalDeal(Node& thisNode, int refStage, int compareStage, std::vector<int> deck, int stage);
+void conditionalDeal(Node& thisNode, int refStage, int compareStage, std::vector<int> &deck, int stage);
 
 #endif
