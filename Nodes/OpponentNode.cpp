@@ -50,13 +50,17 @@ void OpponentNode::call() {
 				game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment() <= currentRaise) {
 			tempAllIn = true;
 		}
+        int tempTurn = !game.getPlayerTurn();
+        if (!getIsFirst()) {
+            tempTurn = smallBlindPosition;
+        }
         if (getIsFirst() || (smallBlindPosition == 0)) {
         callChild.reset( new ChoiceNode(game.getState() + !getIsFirst(),
                     initialChips * 2 - tempPlayer.getChips() - game.getBotPlayer().getChips(),
                     game.getBoardCards(),
                     game.getBotPlayer(),
                     tempPlayer,
-                    !(game.getPlayerTurn()),
+                    tempTurn,
                     this) );
         } else {
              callChild.reset( new OpponentNode(game.getState() + !getIsFirst(),
@@ -64,7 +68,7 @@ void OpponentNode::call() {
                     game.getBoardCards(),
                     game.getBotPlayer(),
                     tempPlayer,
-                    !(game.getPlayerTurn()),
+                    tempTurn,
                     this) );
         }
         callChild->setIsAllIn(tempAllIn);
