@@ -28,3 +28,4 @@ main: $(OBJECTS)
 
 clean:
 	rm -f obj/*.o
+	rm main

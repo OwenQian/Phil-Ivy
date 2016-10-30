@@ -122,8 +122,21 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
 	init_deck(deck);
 
     // dealing player hole cards
-	botPlayer.setHoleCards(deal(deck, static_cast<int>(Stage::HOLECARDS) ));
-	oppPlayer.setHoleCards(deal(deck, static_cast<int>(Stage::HOLECARDS) ));
+    const int botCard1 = cardToHex("As"), botCard2 = cardToHex("Kh");
+    const int oppCard1 = cardToHex("Ac"), oppCard2 = cardToHex("Kd");
+    for (int j = 0; j < 4; j++) {
+        for (auto i = deck.begin(); i != deck.end(); ++i) {
+            // bot cards
+            if (*i == botCard1 || *i == botCard2 || *i == oppCard1 || *i == oppCard2) {
+                deck.erase(i);
+                break;
+            }
+        }
+    }
+	botPlayer.setHoleCards(botCard1, botCard2);
+	oppPlayer.setHoleCards(oppCard1, oppCard2);
+	//botPlayer.setHoleCards(deal(deck, static_cast<int>(Stage::HOLECARDS) ));
+	//oppPlayer.setHoleCards(deal(deck, static_cast<int>(Stage::HOLECARDS) ));
     
     std::cout << "Bot Cards: " << hexToCard(botPlayer.getHoleCards()[0]) << " " << hexToCard(botPlayer.getHoleCards()[1]);
     std::cout << "\nOpp Cards: " << hexToCard(oppPlayer.getHoleCards()[0]) << " " << hexToCard(oppPlayer.getHoleCards()[1]) << std::endl;
@@ -340,7 +353,7 @@ void Node::runSelection(std::vector<int> deck) {
     if (!callChild) {
         call();
 		conditionalDeal(*callChild, getGame().getState(), callChild->getGame().getState(), deck, getGame().getState());
-		
+		//issue with dealing exists here as well
         callChild->runSimulation(deck);
 		if (!(callChild->callChild) && !(callChild->raiseChild) && !(callChild->foldChild)) {
 		//std::cout << "i am a lonely call child" << std::endl;
@@ -391,7 +404,6 @@ void Node::runSelection(std::vector<int> deck) {
 
 void Node::runSimulation(std::vector<int> deck) {
     if (getIsFolded()) {
-		std::cout << "folded" << std::endl;
         allocateChips(!game.getPlayerTurn(), *this);
         backprop(game.getBotPlayer().getChips(), getGame().getOppPlayer().getChips());
         return;
@@ -426,22 +438,27 @@ void Node::runSimulation(std::vector<int> deck) {
 		prevStage = currentNode->getGame().getState();
         currentNode->call();
         currentNode = currentNode->callChild.get();
-
+        //std::cout << "stage: " << currentNode->getGame().getState() << std::endl;
         if (currentNode->getIsAllIn()) {
             for (int i = currentNode->getGame().getState(); i != static_cast<int>(Stage::SHOWDOWN); ++i) {
                 std::vector<int> tempDealt = deal(deck, i);
                 for (int j:tempDealt) {
-                    currentNode->getGame().getBoardCards().push_back(j);
+                    currentNode->getGame().getBoardCards().push_back(j); //used to be conditionalDeal
                 }
             }
             break;
-        } else {
-            conditionalDeal(*currentNode, prevStage, currentNode->getGame().getState(), deck, prevStage);
-        }
+        } 
+		if (prevStage != currentNode->getGame().getState()) { //used to be conditionalDeal whcih may or may not be bugged
+			std::vector<int> dealtCards = deal(deck, prevStage); //need to also check stages that are being passed in
+			for (int i: dealtCards) { // bug does not happen with all ins
+				currentNode->getGame().getBoardCards().push_back(i); // possible issue with call
+			} //conditional deal too simple to be wrong, deck not empty
+		}     //thus likely issue with state, or a faulty game node is being passed around
     }
-    if (currentNode->getGame().getBoardCards().size() < 5) {
-        std::cout << "debug stop" << std::endl;
+	if (currentNode->getGame().getBoardCards().size() < 5) {
+        std::cout << "debug stop2" << std::endl;
     }
+    
 
 	for (int i:currentNode->getGame().getBoardCards()){
 		std::cout << hexToCard(i) << " ";
