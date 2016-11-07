@@ -353,7 +353,7 @@ void Node::runSelection(std::vector<int> deck) {
     if (!callChild) {
         call();
 		conditionalDeal(*callChild, getGame().getState(), callChild->getGame().getState(), deck, getGame().getState());
-		
+		//issue with dealing exists here as well
         callChild->runSimulation(deck);
 		if (!(callChild->callChild) && !(callChild->raiseChild) && !(callChild->foldChild)) {
 		//std::cout << "i am a lonely call child" << std::endl;
@@ -438,22 +438,27 @@ void Node::runSimulation(std::vector<int> deck) {
 		prevStage = currentNode->getGame().getState();
         currentNode->call();
         currentNode = currentNode->callChild.get();
-
+        //std::cout << "stage: " << currentNode->getGame().getState() << std::endl;
         if (currentNode->getIsAllIn()) {
             for (int i = currentNode->getGame().getState(); i != static_cast<int>(Stage::SHOWDOWN); ++i) {
                 std::vector<int> tempDealt = deal(deck, i);
                 for (int j:tempDealt) {
-                    currentNode->getGame().getBoardCards().push_back(j);
+                    currentNode->getGame().getBoardCards().push_back(j); //used to be conditionalDeal
                 }
             }
             break;
-        } else {
-            conditionalDeal(*currentNode, prevStage, currentNode->getGame().getState(), deck, prevStage);
-        }
+        } 
+		if (prevStage != currentNode->getGame().getState()) { //used to be conditionalDeal whcih may or may not be bugged
+			std::vector<int> dealtCards = deal(deck, prevStage); //need to also check stages that are being passed in
+			for (int i: dealtCards) { // bug does not happen with all ins
+				currentNode->getGame().getBoardCards().push_back(i); // possible issue with call
+			} //conditional deal too simple to be wrong, deck not empty
+		}     //thus likely issue with state, or a faulty game node is being passed around
     }
-    if (currentNode->getGame().getBoardCards().size() < 5) {
-        std::cout << "debug stop" << std::endl;
+	if (currentNode->getGame().getBoardCards().size() < 5) {
+        std::cout << "debug stop2" << std::endl;
     }
+    
 
 	for (int i:currentNode->getGame().getBoardCards()){
 		std::cout << hexToCard(i) << " ";
