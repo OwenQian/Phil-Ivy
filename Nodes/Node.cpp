@@ -122,8 +122,21 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
 	init_deck(deck);
 
     // dealing player hole cards
-	botPlayer.setHoleCards(deal(deck, static_cast<int>(Stage::HOLECARDS) ));
-	oppPlayer.setHoleCards(deal(deck, static_cast<int>(Stage::HOLECARDS) ));
+    const int botCard1 = cardToHex("As"), botCard2 = cardToHex("Kh");
+    const int oppCard1 = cardToHex("Ac"), oppCard2 = cardToHex("Kd");
+    for (int j = 0; j < 4; j++) {
+        for (auto i = deck.begin(); i != deck.end(); ++i) {
+            // bot cards
+            if (*i == botCard1 || *i == botCard2 || *i == oppCard1 || *i == oppCard2) {
+                deck.erase(i);
+                break;
+            }
+        }
+    }
+	botPlayer.setHoleCards(botCard1, botCard2);
+	oppPlayer.setHoleCards(oppCard1, oppCard2);
+	//botPlayer.setHoleCards(deal(deck, static_cast<int>(Stage::HOLECARDS) ));
+	//oppPlayer.setHoleCards(deal(deck, static_cast<int>(Stage::HOLECARDS) ));
     
     std::cout << "Bot Cards: " << hexToCard(botPlayer.getHoleCards()[0]) << " " << hexToCard(botPlayer.getHoleCards()[1]);
     std::cout << "\nOpp Cards: " << hexToCard(oppPlayer.getHoleCards()[0]) << " " << hexToCard(oppPlayer.getHoleCards()[1]) << std::endl;
@@ -391,7 +404,6 @@ void Node::runSelection(std::vector<int> deck) {
 
 void Node::runSimulation(std::vector<int> deck) {
     if (getIsFolded()) {
-		std::cout << "folded" << std::endl;
         allocateChips(!game.getPlayerTurn(), *this);
         backprop(game.getBotPlayer().getChips(), getGame().getOppPlayer().getChips());
         return;
