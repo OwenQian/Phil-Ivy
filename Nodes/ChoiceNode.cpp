@@ -79,20 +79,24 @@ void ChoiceNode::call() {
 }
 
 void ChoiceNode::raise(double raiseAmount) {
+    // set to min raise
     if (raiseAmount < bigBlind || raiseAmount < 2*currentRaise) {
         raiseAmount = bigBlind > (2*currentRaise) ? bigBlind : (2*currentRaise);
     } 
+
 	// if raise all-in (or more) create AllInNode, handled by call
-	if (game.getBotPlayer().getChips() <= currentRaise ||
-				game.getOppPlayer().getChips() <= currentRaise) {
-			call();
-            if (callChild->getGame().getPlayerTurn() == 0) {
-                raiseChild.reset(new ChoiceNode(*static_cast<ChoiceNode*>(callChild.get())));
-            } else {
-                raiseChild.reset(new OpponentNode(*static_cast<OpponentNode*>(callChild.get())));
-            }
-            return;
-		}
+    if (game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment() <= currentRaise ||
+            game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment() <= currentRaise) {
+        // might be a bug here with runSelection repeatedly raising to all-in
+        call();
+        if (callChild->getGame().getPlayerTurn() == 0) {
+            raiseChild.reset(new ChoiceNode(*static_cast<ChoiceNode*>(callChild.get())));
+        } else {
+            raiseChild.reset(new OpponentNode(*static_cast<OpponentNode*>(callChild.get())));
+        }
+        return;
+    }
+
 	if (raiseAmount >= game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment() ||
 			raiseAmount >= game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment() ) {
 		std::cout << "Raising All-In" << std::endl;
