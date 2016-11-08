@@ -7,5 +7,6 @@ extern const double smallBlind;
 extern const double bigBlind;
 extern const double initialChips;
 extern int smallBlindPosition;
+extern const double epsilon;
 
 #endif

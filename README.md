@@ -1,4 +1,4 @@
-# Pooker: Not so shitty Poker AI
+# Pooker: An Increasingly Less Terrible Poker AI
 * Fully functional two-player No-Limit Texas Hold'em game built ground up in C++
 
 Take a look at the main function!

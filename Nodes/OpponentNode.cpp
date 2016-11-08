@@ -83,8 +83,8 @@ void OpponentNode::raise(double raiseAmount) {
         raiseAmount = bigBlind > (2*currentRaise) ? bigBlind : (2*currentRaise);
     } 
 	// if raise all-in (or more) create AllInNode, handled by call
-	if (game.getBotPlayer().getChips() <= currentRaise ||
-				game.getOppPlayer().getChips() <= currentRaise) {
+	if (game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment() <= currentRaise ||
+				game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment() <= currentRaise) {
         call();
         if (callChild->getGame().getPlayerTurn() == 0) {
             raiseChild.reset(new ChoiceNode(*static_cast<ChoiceNode*>(callChild.get())));

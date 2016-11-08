@@ -346,10 +346,6 @@ void Node::runSelection(std::vector<int> deck) {
         return;
     }
 
-	if (!callChild && !raiseChild && !foldChild) {
-		//std::cout << "i am lonely" << std::endl;
-	}
-	
     if (!callChild) {
         call();
 		conditionalDeal(*callChild, getGame().getState(), callChild->getGame().getState(), deck, getGame().getState());
@@ -363,6 +359,8 @@ void Node::runSelection(std::vector<int> deck) {
     } else if (!raiseChild) {
         // TODO use different raise amt?
         raise(1);
+        conditionalDeal(*raiseChild, getGame().getState(), raiseChild->getGame().getState(), deck, 0);
+        conditionalDeal(*callChild, getGame().getState(), callChild->getGame().getState(), deck, 0);
         raiseChild->runSimulation(deck);
         return;
     } else if (!foldChild) {
@@ -439,6 +437,7 @@ void Node::runSimulation(std::vector<int> deck) {
         currentNode->call();
         currentNode = currentNode->callChild.get();
         //std::cout << "stage: " << currentNode->getGame().getState() << std::endl;
+        conditionalDeal(*currentNode, prevStage, currentNode->getGame().getState(), deck, 0);
         if (currentNode->getIsAllIn()) {
             for (int i = currentNode->getGame().getState(); i != static_cast<int>(Stage::SHOWDOWN); ++i) {
                 std::vector<int> tempDealt = deal(deck, i);
@@ -448,22 +447,15 @@ void Node::runSimulation(std::vector<int> deck) {
             }
             break;
         } 
-		if (prevStage != currentNode->getGame().getState()) { //used to be conditionalDeal whcih may or may not be bugged
-			std::vector<int> dealtCards = deal(deck, prevStage); //need to also check stages that are being passed in
-			for (int i: dealtCards) { // bug does not happen with all ins
-				currentNode->getGame().getBoardCards().push_back(i); // possible issue with call
-			} //conditional deal too simple to be wrong, deck not empty
-		}     //thus likely issue with state, or a faulty game node is being passed around
     }
 	if (currentNode->getGame().getBoardCards().size() < 5) {
         std::cout << "debug stop2" << std::endl;
     }
     
 
-	for (int i:currentNode->getGame().getBoardCards()){
-		std::cout << hexToCard(i) << " ";
-	}
-	std::cout << std::endl;
+	//for (int i:currentNode->getGame().getBoardCards()){
+	//	std::cout << hexToCard(i) << " ";
+	//}
 
     int winner = showdown( 
             currentNode->getGame().getBotPlayer().getHoleCards(),
@@ -478,7 +470,11 @@ void Node::backprop(double botChips, double oppChips) {
         getBotExpectedValue() = (getBotExpectedValue() * visitCount + botChips) / (visitCount + 1);
         getOppExpectedValue() = (getOppExpectedValue() * visitCount + oppChips) / (visitCount + 1);
         ++visitCount;
-
+        if (2000 - epsilon > getBotExpectedValue() + getOppExpectedValue() || 2000 + epsilon < getBotExpectedValue() + getOppExpectedValue()){
+			std::cout << "bot expected value: " << getBotExpectedValue() << std::endl;
+			std::cout << "opp expected value: " << getOppExpectedValue() << std::endl;
+			std::cout << "DEBUG STOP" << std::endl;
+		}
     if (parent != nullptr) {
         parent->backprop(botChips, oppChips);
     }
