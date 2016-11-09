@@ -457,10 +457,9 @@ void Node::runSimulation(std::vector<int> deck) {
     }
     
 
-	for (int i:currentNode->getGame().getBoardCards()){
-		std::cout << hexToCard(i) << " ";
-	}
-	std::cout << std::endl;
+	//for (int i:currentNode->getGame().getBoardCards()){
+	//	std::cout << hexToCard(i) << " ";
+	//}
 
     int winner = showdown( 
             currentNode->getGame().getBotPlayer().getHoleCards(),
@@ -475,7 +474,11 @@ void Node::backprop(double botChips, double oppChips) {
         getBotExpectedValue() = (getBotExpectedValue() * visitCount + botChips) / (visitCount + 1);
         getOppExpectedValue() = (getOppExpectedValue() * visitCount + oppChips) / (visitCount + 1);
         ++visitCount;
-
+        if (2000 - epsilon > getBotExpectedValue() + getOppExpectedValue() || 2000 + epsilon < getBotExpectedValue() + getOppExpectedValue()){
+			std::cout << "bot expected value: " << getBotExpectedValue() << std::endl;
+			std::cout << "opp expected value: " << getOppExpectedValue() << std::endl;
+			std::cout << "DEBUG STOP" << std::endl;
+		}
     if (parent != nullptr) {
         parent->backprop(botChips, oppChips);
     }

@@ -73,5 +73,8 @@ void conditionalDeal(Node& thisNode, int refStage, int compareStage, std::vector
         std::vector<int> dealtCards = deal(deck, refStage);
         for (int i: dealtCards)
             thisNode.getGame().getBoardCards().push_back(i);
-    }
+    } else {
+		//std::cout << "comparestage: " << compareStage << std::endl;
+		//std::cout << "refstage: " << refStage << std::endl;
+	}
 }
