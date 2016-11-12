@@ -340,22 +340,23 @@ Action Node::monteCarlo(int maxSeconds, std::vector<int> deck) {
 void Node::runSelection(std::vector<int> deck) {
     if (isFolded || (game.getState() == static_cast<int>(Stage::SHOWDOWN)) || isAllIn) {
         if (game.getState() == static_cast<int>(Stage::SHOWDOWN)) {
-            std::cout << "botChips before allocate: " << getGame().getBotPlayer().getChips() << std::endl;
-            std::cout << "botChips before allocate: " <<  getGame().getOppPlayer().getChips() << std::endl;
+            int origBotChips = game.getBotPlayer().getChips();
+            int origOppChips = game.getOppPlayer().getChips();
             int winner = showdown( 
                     getGame().getBotPlayer().getHoleCards(),
                     getGame().getOppPlayer().getHoleCards(),
                     getGame().getBoardCards());
             allocateChips(winner, *this);
+            backprop(game.getBotPlayer().getChips(), game.getOppPlayer().getChips());
+            game.getBotPlayer().setChips(origBotChips);
+            game.getOppPlayer().setChips(origOppChips);
+            return;
+        } else {
+            backprop(game.getBotPlayer().getChips(), game.getOppPlayer().getChips());
+            return;
         }
-        backprop(game.getBotPlayer().getChips(), game.getOppPlayer().getChips());
-        return;
     }
 
-	if (!callChild && !raiseChild && !foldChild) {
-		//std::cout << "i am lonely" << std::endl;
-	}
-	
     if (!callChild) {
         call();
 		conditionalDeal(*callChild, getGame().getState(), callChild->getGame().getState(), deck, getGame().getState());
