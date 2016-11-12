@@ -339,9 +339,15 @@ Action Node::monteCarlo(int maxSeconds, std::vector<int> deck) {
 
 void Node::runSelection(std::vector<int> deck) {
     if (isFolded || (game.getState() == static_cast<int>(Stage::SHOWDOWN)) || isAllIn) {
-        //std::cout << "botPlayer chips : " << game.getBotPlayer().getChips() << std::endl;
-        //std::cout << "oppPlayer chips : " << game.getOppPlayer().getChips() << std::endl;
-        //std::cout << 
+        if (game.getState() == static_cast<int>(Stage::SHOWDOWN)) {
+            std::cout << "botChips before allocate: " << getGame().getBotPlayer().getChips() << std::endl;
+            std::cout << "botChips before allocate: " <<  getGame().getOppPlayer().getChips() << std::endl;
+            int winner = showdown( 
+                    getGame().getBotPlayer().getHoleCards(),
+                    getGame().getOppPlayer().getHoleCards(),
+                    getGame().getBoardCards());
+            allocateChips(winner, *this);
+        }
         backprop(game.getBotPlayer().getChips(), game.getOppPlayer().getChips());
         return;
     }
@@ -355,10 +361,6 @@ void Node::runSelection(std::vector<int> deck) {
 		conditionalDeal(*callChild, getGame().getState(), callChild->getGame().getState(), deck, getGame().getState());
 		//issue with dealing exists here as well
         callChild->runSimulation(deck);
-		if (!(callChild->callChild) && !(callChild->raiseChild) && !(callChild->foldChild)) {
-		//std::cout << "i am a lonely call child" << std::endl;
-	    }
-		
         return;
     } else if (!raiseChild) {
         // TODO use different raise amt?
@@ -380,26 +382,14 @@ void Node::runSelection(std::vector<int> deck) {
     for (size_t i = 0; i < selectionScores.size(); ++i) {
         bestScore = bestScore > selectionScores[i] ? bestScore : selectionScores[i];
     }
-   // std::cout << "selection1: " << selectionScores[0] << std::endl;
-//	std::cout << "selection2: " << selectionScores[1] << std::endl;
-//	std::cout << "selection3: " << selectionScores[2] << std::endl;
     if (bestScore == selectionScores[0]) {
-		if(game.getPlayerTurn() == 1){
-			//std::cout << "opp called!" << std::endl;
-		}
 		callChild->getGame().getBoardCards() = getGame().getBoardCards();
 		conditionalDeal(*callChild, getGame().getState(), callChild->getGame().getState(), deck, getGame().getState());
         callChild->runSelection(deck);
     } else if (bestScore == selectionScores[1]) {
-		if(game.getPlayerTurn() == 1){
-			//std::cout << "opp raised!" << std::endl;
-		}
 		raiseChild->getGame().getBoardCards() = getGame().getBoardCards();
         raiseChild->runSelection(deck);
     } else {
-		if(game.getPlayerTurn() == 1){
-		//	std::cout << "opp folded!" << std::endl;
-		}
         foldChild->runSelection(deck);
     }
 }
@@ -452,29 +442,24 @@ void Node::runSimulation(std::vector<int> deck) {
             break;
         } 
     }
-	if (currentNode->getGame().getBoardCards().size() < 5) {
-        std::cout << "debug stop2" << std::endl;
-    }
-    
-
-	//for (int i:currentNode->getGame().getBoardCards()){
-	//	std::cout << hexToCard(i) << " ";
-	//}
-
     int winner = showdown( 
             currentNode->getGame().getBotPlayer().getHoleCards(),
             currentNode->getGame().getOppPlayer().getHoleCards(),
             currentNode->getGame().getBoardCards());
+    int origBotChips = currentNode->game.getBotPlayer().getChips();
+    int origOppChips = currentNode->game.getOppPlayer().getChips();
     allocateChips(winner, *currentNode);
     currentNode->backprop(currentNode->getGame().getBotPlayer().getChips(),
             currentNode->getGame().getOppPlayer().getChips());
+    currentNode->game.getBotPlayer().setChips(origBotChips);
+    currentNode->game.getOppPlayer().setChips(origOppChips);
 }
 
 void Node::backprop(double botChips, double oppChips) {
         getBotExpectedValue() = (getBotExpectedValue() * visitCount + botChips) / (visitCount + 1);
         getOppExpectedValue() = (getOppExpectedValue() * visitCount + oppChips) / (visitCount + 1);
         ++visitCount;
-        if (2000 - epsilon > getBotExpectedValue() + getOppExpectedValue() || 2000 + epsilon < getBotExpectedValue() + getOppExpectedValue()){
+        if (initialChips*2 - epsilon > getBotExpectedValue() + getOppExpectedValue() || initialChips*2 + epsilon < getBotExpectedValue() + getOppExpectedValue()){
 			std::cout << "bot expected value: " << getBotExpectedValue() << std::endl;
 			std::cout << "opp expected value: " << getOppExpectedValue() << std::endl;
 			std::cout << "DEBUG STOP" << std::endl;
