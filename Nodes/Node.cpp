@@ -339,26 +339,28 @@ Action Node::monteCarlo(int maxSeconds, std::vector<int> deck) {
 
 void Node::runSelection(std::vector<int> deck) {
     if (isFolded || (game.getState() == static_cast<int>(Stage::SHOWDOWN)) || isAllIn) {
-        if (game.getState() == static_cast<int>(Stage::SHOWDOWN)) {
-            int origBotChips = game.getBotPlayer().getChips();
-            int origOppChips = game.getOppPlayer().getChips();
-            int winner = showdown( 
-                    getGame().getBotPlayer().getHoleCards(),
-                    getGame().getOppPlayer().getHoleCards(),
-                    getGame().getBoardCards());
-            allocateChips(winner, *this);
-            backprop(game.getBotPlayer().getChips(), game.getOppPlayer().getChips());
-            game.getBotPlayer().setChips(origBotChips);
-            game.getOppPlayer().setChips(origOppChips);
-            return;
-        } else {
-            backprop(game.getBotPlayer().getChips(), game.getOppPlayer().getChips());
-            return;
-        }
+        //if (game.getState() == static_cast<int>(Stage::SHOWDOWN)) {
+        //    int origBotChips = game.getBotPlayer().getChips();
+        //    int origOppChips = game.getOppPlayer().getChips();
+        //    int winner = showdown( 
+        //            getGame().getBotPlayer().getHoleCards(),
+        //            getGame().getOppPlayer().getHoleCards(),
+        //            getGame().getBoardCards());
+        //    allocateChips(winner, *this);
+        //    backprop(game.getBotPlayer().getChips(), game.getOppPlayer().getChips());
+        //    game.getBotPlayer().setChips(origBotChips);
+        //    game.getOppPlayer().setChips(origOppChips);
+        //    return;
+        //} else {
+        backprop(game.getBotPlayer().getChips(), game.getOppPlayer().getChips());
+        return;
     }
 
     if (!callChild) {
         call();
+        if (callChild->isAllIn) {
+            std::cout << "conditional deal call" << std::endl;
+        }
 		conditionalDeal(*callChild, getGame().getState(), callChild->getGame().getState(), deck, getGame().getState());
 		//issue with dealing exists here as well
         callChild->runSimulation(deck);
@@ -366,6 +368,9 @@ void Node::runSelection(std::vector<int> deck) {
     } else if (!raiseChild) {
         // TODO use different raise amt?
         raise(1);
+        if (raiseChild->isAllIn) {
+            std::cout << "conditional deal raise" << std::endl;
+        }
         conditionalDeal(*raiseChild, getGame().getState(), raiseChild->getGame().getState(), deck, 0);
         conditionalDeal(*callChild, getGame().getState(), callChild->getGame().getState(), deck, 0);
         raiseChild->runSimulation(deck);
@@ -386,9 +391,31 @@ void Node::runSelection(std::vector<int> deck) {
     if (bestScore == selectionScores[0]) {
 		callChild->getGame().getBoardCards() = getGame().getBoardCards();
 		conditionalDeal(*callChild, getGame().getState(), callChild->getGame().getState(), deck, getGame().getState());
+        if (callChild->isAllIn) {
+            for (int i = callChild->getGame().getState(); i != static_cast<int>(Stage::SHOWDOWN); ++i) {
+                std::vector<int> tempDealt = deal(deck, i);
+                for (int j:tempDealt) {
+                    callChild->game.getBoardCards().push_back(j);
+                }
+            }
+            int winner = showdown(callChild->game.getBotPlayer().getHoleCards(), callChild->game.getOppPlayer().getHoleCards(), callChild->game.getBoardCards());
+            allocateChips(winner, *callChild);
+        }
         callChild->runSelection(deck);
     } else if (bestScore == selectionScores[1]) {
-		raiseChild->getGame().getBoardCards() = getGame().getBoardCards();
+        raiseChild->getGame().getBoardCards() = getGame().getBoardCards();
+        //if (raiseChild->isAllIn) {
+        //    conditionalDeal(*raiseChild, getGame().getState(), raiseChild->getGame().getState(), deck, 0);
+        //    conditionalDeal(*callChild, getGame().getState(), callChild->getGame().getState(), deck, 0);
+        //    for (int i = raiseChild->getGame().getState(); i != static_cast<int>(Stage::SHOWDOWN); ++i) {
+        //        std::vector<int> tempDealt = deal(deck, i);
+        //        for (int j:tempDealt) {
+        //            raiseChild->game.getBoardCards().push_back(j);
+        //        }
+        //    }
+        //    int winner = showdown(raiseChild->game.getBotPlayer().getHoleCards(), raiseChild->game.getOppPlayer().getHoleCards(), raiseChild->game.getBoardCards());
+        //    allocateChips(winner, *raiseChild);
+        //}
         raiseChild->runSelection(deck);
     } else {
         foldChild->runSelection(deck);
