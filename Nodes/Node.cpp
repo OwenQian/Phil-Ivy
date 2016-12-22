@@ -404,8 +404,9 @@ void Node::runSelection(std::vector<int> deck) {
 		}
 		callChild->getGame().getBoardCards() = getGame().getBoardCards();
 		conditionalDeal(*callChild, getGame().getState(), callChild->getGame().getState(), deck, getGame().getState());
+        // TODO forgot minus 1?
         if (callChild->isAllIn) {
-            for (int i = callChild->getGame().getState(); i != static_cast<int>(Stage::SHOWDOWN); ++i) {
+            for (int i = callChild->getGame().getState() - 1; i != static_cast<int>(Stage::SHOWDOWN); ++i) {
                 std::vector<int> tempDealt = deal(deck, i);
                 for (int j:tempDealt) {
                     callChild->game.getBoardCards().push_back(j);
@@ -447,7 +448,8 @@ void Node::runSimulation(std::vector<int> deck) {
 
     // if running simulate on a node that called all-in
     if (getIsAllIn()) {
-        for (int i = getGame().getState(); i != static_cast<int>(Stage::SHOWDOWN); ++i) {
+        // did we forget minus 1?
+        for (int i = getGame().getState() - 1; i < static_cast<int>(Stage::SHOWDOWN); ++i) {
             std::vector<int> tempDealt = deal(deck, i);
             for (int j:tempDealt) {
                 game.getBoardCards().push_back(j);
@@ -477,7 +479,7 @@ void Node::runSimulation(std::vector<int> deck) {
         //std::cout << "stage: " << currentNode->getGame().getState() << std::endl;
         conditionalDeal(*currentNode, prevStage, currentNode->getGame().getState(), deck, 0);
         if (currentNode->getIsAllIn()) {
-            for (int i = currentNode->getGame().getState(); i != static_cast<int>(Stage::SHOWDOWN); ++i) {
+            for (int i = currentNode->getGame().getState() - 1; i != static_cast<int>(Stage::SHOWDOWN); ++i) {
                 std::vector<int> tempDealt = deal(deck, i);
                 for (int j:tempDealt) {
                     currentNode->getGame().getBoardCards().push_back(j); //used to be conditionalDeal

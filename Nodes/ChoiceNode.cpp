@@ -4,6 +4,8 @@
 
 #include "ChoiceNode.h"
 #include "OpponentNode.h"
+#include "../handEval/helper.cpp"
+#include "../Stage.h"
 #include "../Config.h"
 #include "../GameUtilities/Decision.h"
 #include "../GameUtilities/GameUtilities.h"
@@ -76,6 +78,19 @@ void ChoiceNode::call() {
     callChild->getGame().getBotPlayer().setPotInvestment( firstAction * callChild->getGame().getBotPlayer().getPotInvestment());
     callChild->getGame().getOppPlayer().setPotInvestment( firstAction * callChild->getGame().getOppPlayer().getPotInvestment());
     callChild->setIsFirst(!firstAction);
+    if (game.getState() == static_cast<int>( Stage::SHOWDOWN ) ) {
+        int winner = showdown(game.getBotPlayer().getHoleCards(), game.getOppPlayer().getHoleCards(), game.getBoardCards());
+        allocateChips(winner, *callChild);
+    } else if (isAllIn) {
+        for (int i = callChild->getGame().getState() - 1; i != static_cast<int>(Stage::SHOWDOWN); ++i) {
+            std::vector<int> tempDealt = deal(deck, i);
+            for (int j:tempDealt) {
+                callChild->game.getBoardCards().push_back(j);
+            }
+        }
+        int winner = showdown(callChild->game.getBotPlayer().getHoleCards(), callChild->game.getOppPlayer().getHoleCards(), callChild->game.getBoardCards());
+        allocateChips(winner, *callChild);
+    }
 }
 
 void ChoiceNode::raise(double raiseAmount) {
@@ -99,7 +114,7 @@ void ChoiceNode::raise(double raiseAmount) {
 
 	if (raiseAmount >= game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment() ||
 			raiseAmount >= game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment() ) {
-		std::cout << "Raising All-In" << std::endl;
+		//std::cout << "Raising All-In" << std::endl;
 
 		// set raiseAmount to lesser of chip amounts
 		raiseAmount = std::min(game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment(),

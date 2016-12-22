@@ -46,7 +46,7 @@ class Node {
         virtual void raise(double) = 0;
         virtual void fold() = 0;
 		
-		//Game functions
+		// Game functions
 		static void playGame();
 		static void playRound(Player& BotPlayer, Player& OppPlayer);
         int playTurn(std::vector<int>);

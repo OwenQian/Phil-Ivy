@@ -95,7 +95,7 @@ void OpponentNode::raise(double raiseAmount) {
 		}
 	if (raiseAmount >= game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment() ||
 			raiseAmount >= game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment() ) {
-		std::cout << "Raising All-In" << std::endl;
+		//std::cout << "Raising All-In" << std::endl;
 
 		// set raiseAmount to lesser of chip amounts
 		raiseAmount = std::min(game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment(),
