@@ -107,6 +107,7 @@ class Node {
 
         // Helper
         bool isAllInCheck(Player, Player);
+        void collectBlinds();
 };
 
 

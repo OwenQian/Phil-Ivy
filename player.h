@@ -30,6 +30,8 @@ class Player {
     void setChips(double c) { chips = c; }
     void addChips(double c) { chips += c; }
     void setPotInvestment(double pi) { potInvestment = pi; }
+
+    Player& operator=(const Player& rhs);
 };
 
 inline void Player::setHoleCards(int c1, int c2) {

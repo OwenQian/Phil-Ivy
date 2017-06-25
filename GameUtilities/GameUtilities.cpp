@@ -15,66 +15,64 @@
 #include "../Config.h"
 
 void printBoardCards(std::vector<int> boardCards) {
-    std::cout << "Board Cards: ";
-    for (auto i = boardCards.begin(); i != boardCards.end(); ++i)
-        std::cout << hexToCard(*i) << " ";
-    //std::cout << std::endl;
+  std::cout << "Board Cards: ";
+  for (auto i = boardCards.begin(); i != boardCards.end(); ++i)
+    std::cout << hexToCard(*i) << " ";
+  //std::cout << std::endl;
 }
 
 void allocateChips(int whoWon, Node &currentNode){
-	if (whoWon == 0) { //when bot player wins
-		currentNode.getGame().getBotPlayer().addChips(currentNode.getGame().getPot());
-	} else if (whoWon == 1) { // when opp player wins
-		currentNode.getGame().getOppPlayer().addChips(currentNode.getGame().getPot());
-	} else { //tie
-		currentNode.getGame().getOppPlayer().addChips(currentNode.getGame().getPot()/2);
-		currentNode.getGame().getBotPlayer().addChips(currentNode.getGame().getPot()/2);
-	}
+  if (whoWon == 0) { //when bot player wins
+    currentNode.getGame().getBotPlayer().addChips(currentNode.getGame().getPot());
+  } else if (whoWon == 1) { // when opp player wins
+    currentNode.getGame().getOppPlayer().addChips(currentNode.getGame().getPot());
+  } else { //tie
+    currentNode.getGame().getOppPlayer().addChips(currentNode.getGame().getPot()/2);
+    currentNode.getGame().getBotPlayer().addChips(currentNode.getGame().getPot()/2);
+  }
 }
 
-std::vector<int> deal(
-		std::vector<int>	&previousDeck,
-		int					state) {
-	unsigned seed =	std::chrono::system_clock::now().time_since_epoch().count();
-	std::vector<int> dealtCards;
-	std::shuffle(previousDeck.begin(), previousDeck.end(), 
-			std::default_random_engine(seed));
-	if (state == static_cast<int>(Stage::HOLECARDS) ){
-		for (int i = 0; i < 2; ++i){
-			dealtCards.push_back(previousDeck.back());
-			previousDeck.pop_back();
-		}
-	} else if (state == static_cast<int>(Stage::PREFLOP) ) {
-		for (int i = 0; i < 3; ++i) {
-			dealtCards.push_back(previousDeck.back());
-			previousDeck.pop_back();
-		}
-	} else if (state != static_cast<int>(Stage::RIVER) ) {
-		dealtCards.push_back(previousDeck.back());
-		previousDeck.pop_back();
-	}
-	return dealtCards;
+std::vector<int> deal(std::vector<int> &deck, int state) {
+  unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+  std::vector<int> dealtCards;
+  std::shuffle(deck.begin(), deck.end(),
+      std::default_random_engine(seed));
+  if (state == static_cast<int>(Stage::HOLECARDS) ){
+    for (int i = 0; i < 2; ++i){
+      dealtCards.push_back(deck.back());
+      deck.pop_back();
+    }
+  } else if (state == static_cast<int>(Stage::PREFLOP) ) {
+    for (int i = 0; i < 3; ++i) {
+      dealtCards.push_back(deck.back());
+      deck.pop_back();
+    }
+  } else if (state != static_cast<int>(Stage::RIVER) ) {
+    dealtCards.push_back(deck.back());
+    deck.pop_back();
+  }
+  return dealtCards;
 }
 
 void init_deck(std::vector<int>& deck) {
-	deck.reserve(52);
-	const char ranks[] = {'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'};
-	const char suits[] = {'s', 'h', 'd', 'c'};
-	for (char i: ranks) {
-		for (char j: suits) {
-			std::string s {i, j};
-			deck.push_back(cardToHex(s));
-		}
-	}
+  deck.reserve(52);
+  const char ranks[] = {'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'};
+  const char suits[] = {'s', 'h', 'd', 'c'};
+  for (char i: ranks) {
+    for (char j: suits) {
+      std::string s {i, j};
+      deck.push_back(cardToHex(s));
+    }
+  }
 }
 
 void conditionalDeal(Node& thisNode, int refStage, int compareStage, std::vector<int> &deck, int stage) {
-    if (refStage != compareStage) {
-        std::vector<int> dealtCards = deal(deck, refStage);
-        for (int i: dealtCards)
-            thisNode.getGame().getBoardCards().push_back(i);
-    } else {
-		//std::cout << "comparestage: " << compareStage << std::endl;
-		//std::cout << "refstage: " << refStage << std::endl;
-	}
+  if (refStage != compareStage) {
+    std::vector<int> dealtCards = deal(deck, refStage);
+    for (int i: dealtCards)
+      thisNode.getGame().getBoardCards().push_back(i);
+  } else {
+    //std::cout << "comparestage: " << compareStage << std::endl;
+    //std::cout << "refstage: " << refStage << std::endl;
+  }
 }

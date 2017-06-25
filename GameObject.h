@@ -39,6 +39,8 @@ class GameObject {
     // Setter; Note: be careful about changing boardCards
     void setBoardCards(std::vector<int> boardCards) { this->boardCards = boardCards; }
     void setPlayerTurn(int turn) { this->playerTurn = turn; }
+    void setBotPlayer(const Player& rhs) { botPlayer = rhs; }
+    void setOppPlayer(const Player& rhs) { oppPlayer = rhs; }
 };
 
 #endif //GameObject.h
