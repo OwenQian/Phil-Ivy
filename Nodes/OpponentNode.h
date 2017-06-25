@@ -10,25 +10,26 @@
 
 class ChoiceNode;
 class OpponentNode: public Node {
-    private:
-        virtual Decision makeDecision(std::vector<int> deck);
-    public:
-        virtual void call();
-        virtual void raise(double);
-        virtual void fold();
+  private:
+    virtual Decision makeDecision(std::vector<int> deck);
+  public:
+    virtual void call();
+    virtual void raise(double);
+    virtual void fold();
 
-        // Contructors
-        OpponentNode();
-		OpponentNode(	
-						int								state,
-						double							pot,
-						std::vector<int>				boardCards,
-						Player							botPlayer,
-						Player							oppPlayer,
-						int								playerTurn,
-						Node*	                    	const parent);
-        OpponentNode(const OpponentNode&);
-        OpponentNode(const Node&);
+    // Contructors
+    OpponentNode();
+    OpponentNode(
+        int               state,
+        double            pot,
+        std::vector<int>  boardCards,
+        Player            botPlayer,
+        Player            oppPlayer,
+        int               playerTurn,
+        Node*             const parent);
+    OpponentNode(const OpponentNode&);
+    OpponentNode(const Node&);
+    OpponentNode(const NodeParamObject params): Node(params) { };
 };
 
-#endif	//OpponentNode.h
+#endif  //OpponentNode.h

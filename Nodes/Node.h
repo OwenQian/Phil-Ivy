@@ -9,9 +9,24 @@
 #include "../Action.h"
 #include "../GameUtilities/Decision.h"
 
+class Node;
+
+struct NodeParamObject {
+  int state;
+  double pot;
+  std::vector<int> boardCards;
+  Player botPlayer;
+  Player oppPlayer;
+  int turn;
+  Node* parent;
+
+  NodeParamObject(int state, int pot, std::vector<int> boardCards, Player botPlayer, Player oppPlayer, int turn, Node* parent) :
+    state(state), pot(pot), boardCards(boardCards), botPlayer(botPlayer), oppPlayer(oppPlayer), turn(turn), parent(parent) {}
+};
+
 class Node {
     protected:
-        Node* parent; 
+        Node* parent;
 
         GameObject game;
         int visitCount;
@@ -29,8 +44,22 @@ class Node {
         std::unique_ptr<Node> raiseChild;
 
         Node();
-        Node(int, double, std::vector<int>, Player, Player, int, Node*);
+        Node(int               state,
+             double            pot,
+             std::vector<int>  boardCards,
+             Player            botPlayer,
+             Player            oppPlayer,
+             int               playerTurn,
+             Node*             parent,
+             int               visitCount       = 0,
+             double            botExpectedValue = 0.0,
+             double            oppExpectedValue = 0.0,
+             double            currentRaise     = 0.0,
+             bool              isFolded         = false,
+             bool              isAllIn          = false,
+             bool              firstAction      = false);
         Node(const Node& obj);
+        Node(const NodeParamObject);
         Node& operator= (const Node& rhs);
         virtual ~Node();
 
@@ -75,7 +104,10 @@ class Node {
         void incrementVisitCount() { ++visitCount; }
         void setVisitCount(int c) { visitCount = c; }
         void setParent(Node* newParent) { parent = newParent; }
-		
+
+        // Helper
+        bool isAllInCheck(Player, Player);
 };
+
 
 #endif	//Node.h
