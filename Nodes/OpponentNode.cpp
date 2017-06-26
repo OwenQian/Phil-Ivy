@@ -120,7 +120,9 @@ Decision OpponentNode::makeDecision(std::vector<int> deck) {
     int temp;
     std::cin >> temp;
     decision.action = static_cast<Action>(temp);
-    std::cout << "Opp Decision: " << static_cast<int>(decision.action) << std::endl;
+    std::cout << "Pot: " << game.getPot() << std::endl;
+    std::cout << "BotChips: " << game.getBotPlayer().getChips() << std::endl;
+    std::cout << "OppChips: " << game.getOppPlayer().getChips() << std::endl;
     if (decision.action == Action::RAISE) {
         if (game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment() <= currentRaise ||
                 game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment() <= currentRaise) {

@@ -111,6 +111,7 @@ class Node {
     void handleShowdown();
     Node* getChildNode(int);
     void updateBoard(Stage, std::vector<int>);
+    static void printCurrentStage(Stage);
 };
 
 

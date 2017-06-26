@@ -15,10 +15,10 @@
 #include "../Config.h"
 
 void printBoardCards(std::vector<int> boardCards) {
-  std::cout << "Board Cards: ";
-  for (auto i = boardCards.begin(); i != boardCards.end(); ++i)
+  std::cout << "\nBoard Cards: ";
+  for (auto i = boardCards.begin(); i != boardCards.end(); ++i) {
     std::cout << hexToCard(*i) << " ";
-  //std::cout << std::endl;
+  }
 }
 
 void allocateChips(int whoWon, Node &currentNode){

@@ -118,9 +118,9 @@ void Node::playGame(){
 
 void Node::playRound(Player& botPlayer, Player& oppPlayer){
   std::cout << "########################################";
-  std::cout << "\nSmall Blind: " << smallBlind << "\nBig Blind : " << bigBlind;
   std::cout << "\nbot player chips: " << botPlayer.getChips();
   std::cout << "\nopp player chips: " << oppPlayer.getChips() << std::endl;
+  std::cout << "smallBlindPosition: " << smallBlindPosition << std::endl;
 
   // creating the deck
   std::vector<int> deck;
@@ -128,7 +128,7 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
 
   // dealing player hole cards
   const int botCard1 = cardToHex("As"), botCard2 = cardToHex("Kh");
-  const int oppCard1 = cardToHex("Ac"), oppCard2 = cardToHex("Kd");
+  const int oppCard1 = cardToHex("Ac"), oppCard2 = cardToHex("Ts");
   botPlayer.setHoleCards(botCard1, botCard2);
   oppPlayer.setHoleCards(oppCard1, oppCard2);
   //botPlayer.setHoleCards(deal(deck, static_cast<int>(Stage::HOLECARDS)));
@@ -141,7 +141,6 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
 
   std::unique_ptr<Node> root;
   Node* currentNode;
-  std::cout << "smallblindposition: " << smallBlindPosition << std::endl;
 
   if (smallBlindPosition == 0) {
     root.reset( new ChoiceNode(currentStage, bigBlind + smallBlind, std::vector<int>(),
@@ -157,15 +156,15 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
 
   while(!currentNode->getIsAllIn() && !currentNode->getIsFolded()
       && (currentNode->getGame().getState() != Stage::SHOWDOWN)) {
+    printCurrentStage(currentStage);
     currentNode = currentNode->getChildNode(currentNode->playTurn(deck));
     if (currentNode->getGame().getState() != currentStage) {
       currentNode->setIsFirst(true);
-      ++currentStage;
-
-      currentNode->updateBoard(currentStage, deck);
+      currentNode->updateBoard(currentStage++, deck);
+      printBoardCards(currentNode->getGame().getBoardCards());
     }
   }
-  if (currentNode->getIsFolded()){
+  if (currentNode->getIsFolded()) {
     int turn = currentNode->getGame().getPlayerTurn();
     allocateChips(!turn, (*currentNode));
   }
@@ -451,10 +450,13 @@ void Node::collectBlinds() {
 }
 
 void Node::handleShowdown() {
-  int winner = showdown(getGame().getBotPlayer().getHoleCards(),
-      getGame().getOppPlayer().getHoleCards(),
-      getGame().getBoardCards());
-  allocateChips(winner, (*this));
+    int winner = showdown(getGame().getBotPlayer().getHoleCards(),
+        getGame().getOppPlayer().getHoleCards(),
+        getGame().getBoardCards());
+    allocateChips(winner, *this);
+    std::string s = !winner ? "BOT" : "OPP";
+    if (winner == 2) { s = "CHOP"; }
+    std::cout << "Result: " << s << std::endl;
 }
 
 Node* Node::getChildNode(int n) {
@@ -482,4 +484,25 @@ void Node::updateBoard(Stage stage, std::vector<int> deck) {
     newBoard.push_back(*i);
   }
   getGame().setBoardCards(newBoard);
+}
+
+void Node::printCurrentStage(Stage stage) {
+  std::string s;
+  switch (stage) {
+    case Stage::PREFLOP:
+      s = "PREFLOP";
+      break;
+    case Stage::FLOP:
+      s = "FLOP";
+      break;
+    case Stage::TURN:
+      s = "TURN";
+      break;
+    case Stage::RIVER:
+      s = "RIVER";
+        break;
+    default:
+      s = "INVALID STAGE";
+  }
+  std::cout << "\nCurrent Stage: " << s << std::endl;
 }

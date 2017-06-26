@@ -110,20 +110,24 @@ void ChoiceNode::raise(double raiseAmount) {
 }
 
 Decision ChoiceNode::makeDecision(std::vector<int> deck) {
-  Decision decision;
-
-  decision.action = monteCarlo(monteCarloDuration, deck);
-  std::cout << "Bot Decision: " << static_cast<int>(decision.action) << std::endl;
-  if (decision.action == Action::RAISE) {
-    if (game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment() <= currentRaise ||
-        game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment() <= currentRaise) {
-      decision.raiseAmount = 1;
-    } else {
-      std::cout << "Enter Raise amount" << std::endl;
-      double amount;
-      std::cin >> amount;
-      decision.raiseAmount = amount;
+    std::cout << "Enter Action bot: Call(0), Raise(1), Fold(2)" << std::endl;
+    Decision decision;
+    int temp;
+    std::cin >> temp;
+    decision.action = static_cast<Action>(temp);
+    std::cout << "Pot: " << game.getPot() << std::endl;
+    std::cout << "BotChips: " << game.getBotPlayer().getChips() << std::endl;
+    std::cout << "OppChips: " << game.getOppPlayer().getChips() << std::endl;
+    if (decision.action == Action::RAISE) {
+        if (game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment() <= currentRaise ||
+                game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment() <= currentRaise) {
+            decision.raiseAmount = 1;
+        } else {
+            std::cout << "Enter Raise amount" << std::endl;
+            double amount;
+            std::cin >> amount;
+            decision.raiseAmount = amount;
+        }
     }
-  }
-  return decision;
+    return decision;
 }
