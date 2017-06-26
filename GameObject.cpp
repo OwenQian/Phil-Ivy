@@ -1,12 +1,12 @@
 #include "GameObject.h"
 
 GameObject::GameObject() :
-  state(0),
+  state(Stage::HOLECARDS),
   pot(0.0),
   playerTurn(0) { }
 
   GameObject::GameObject(
-      int                 state,
+      Stage                 state,
       double              pot,
       std::vector<int>    boardCards,
       Player              botPlayer,

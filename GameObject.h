@@ -2,12 +2,13 @@
 #define GAME_INFO_H
 
 #include "Player.h"
+#include "Stage.h"
 
 #include <vector>
 
 class GameObject {
   private:
-    int state;
+    Stage state;
     double pot;
     std::vector<int> boardCards;
     Player botPlayer;
@@ -17,7 +18,7 @@ class GameObject {
   public:
     // Constructors
     GameObject();
-    GameObject(int              state,
+    GameObject(Stage            state,
                double           pot,
                std::vector<int> boardCards,
                Player           botPlayer,
@@ -26,7 +27,7 @@ class GameObject {
 
     // Member-accessibility functions
     // Getters
-    int getState() const { return state; }
+    Stage getState() const { return state; }
     std::vector<int>& getBoardCards() { return boardCards; }
     std::vector<int> const & getBoardCards() const { return boardCards; }
     Player& getBotPlayer() { return botPlayer; }

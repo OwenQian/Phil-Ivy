@@ -12,7 +12,8 @@
 OpponentNode::OpponentNode() :
     Node::Node() { }
 
-OpponentNode::OpponentNode(int state,
+OpponentNode::OpponentNode(
+        Stage state,
         double pot,
         std::vector<int> boardCards,
         Player botPlayer,

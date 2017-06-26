@@ -20,7 +20,7 @@ class OpponentNode: public Node {
     // Contructors
     OpponentNode();
     OpponentNode(
-        int               state,
+        Stage             state,
         double            pot,
         std::vector<int>  boardCards,
         Player            botPlayer,

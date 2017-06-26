@@ -3,6 +3,7 @@
 
 #include "Decision.h"
 #include "../Action.h"
+#include "../Stage.h"
 
 #include <vector>
 #include <memory>
@@ -12,9 +13,7 @@ class ChoiceNode;
 class OpponentNode;
 class Node;
 
-std::vector<int> deal(
-						std::vector<int>	&previousDeck,
-						int					state);
+std::vector<int> deal(std::vector<int> &previousDeck, Stage state);
 void printBoardCards(std::vector<int>);
 //initializes deck array to appropriate hex values
 void init_deck(std::vector<int>& deck);
@@ -25,6 +24,6 @@ std::shared_ptr<OpponentNode> playTurn(std::shared_ptr<ChoiceNode>, std::vector<
 std::shared_ptr<ChoiceNode> playTurn(std::shared_ptr<OpponentNode>, std::vector<int> deck);
 
 // MCTS helper functions
-void conditionalDeal(Node& thisNode, int refStage, int compareStage, std::vector<int> &deck, int stage);
+void conditionalDeal(Node& thisNode, Stage refStage, Stage compareStage, std::vector<int> &deck, Stage stage);
 
 #endif

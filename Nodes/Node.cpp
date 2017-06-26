@@ -16,7 +16,7 @@
 
 Node::Node() :
   parent(nullptr),
-  game(0, 0.0, std::vector<int>(), Player(), Player(), 0),
+  game(Stage::HOLECARDS, 0.0, std::vector<int>(), Player(), Player(), 0),
   visitCount(0),
   botExpectedValue(0.0),
   oppExpectedValue(0.0),
@@ -28,7 +28,7 @@ Node::Node() :
   callChild(nullptr),
   raiseChild(nullptr) { }
 
-  Node::Node(int               state,
+  Node::Node(Stage             state,
              double            pot,
              std::vector<int>  boardCards,
              Player            botPlayer,
@@ -137,7 +137,7 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
   std::cout << "Bot Cards: " << hexToCard(botPlayer.getHoleCards()[0]) << " " << hexToCard(botPlayer.getHoleCards()[1]);
   std::cout << "\nOpp Cards: " << hexToCard(oppPlayer.getHoleCards()[0]) << " " << hexToCard(oppPlayer.getHoleCards()[1]) << std::endl;
 
-  int currentStage = 1;       // preflop
+  Stage currentStage = Stage::PREFLOP;
 
   std::unique_ptr<Node> root;
   Node* currentNode;
@@ -154,46 +154,27 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
   root->collectBlinds();
   root->setIsFirst(true);
   currentNode = root.get();
+
   while(!currentNode->getIsAllIn() && !currentNode->getIsFolded()
-      && (currentNode->getGame().getState() != static_cast<int>(Stage::SHOWDOWN)) ){
-    switch(currentNode->playTurn(deck)) {
-      case 0:
-        currentNode = currentNode->callChild.get();
-        break;
-      case 1:
-        currentNode = currentNode->raiseChild.get();
-        break;
-      case 2:
-        currentNode = currentNode->foldChild.get();
-        break;
-    }
-    if (currentNode->getGame().getState() != currentStage){
-      std::vector<int> updateBoard = currentNode->getGame().getBoardCards();
-      std::vector<int> newCards = deal(deck, currentStage);
-      currentStage++;
-      //adding current board cards to newly dealt cards
-      assert(newCards.size() <= 3);
-      for (auto i = newCards.begin(); i != newCards.end(); ++i){
-        updateBoard.push_back(*i);
-      }
+      && (currentNode->getGame().getState() != Stage::SHOWDOWN)) {
+    currentNode = currentNode->getChildNode(currentNode->playTurn(deck));
+    if (currentNode->getGame().getState() != currentStage) {
       currentNode->setIsFirst(true);
+      ++currentStage;
+
+      currentNode->updateBoard(currentStage, deck);
     }
   }
   if (currentNode->getIsFolded()){
-    if (currentNode->getGame().getPlayerTurn() == 0) {
-      allocateChips(1, (*currentNode));
-    } else {
-      allocateChips(0, (*currentNode));
-    }
+    int turn = currentNode->getGame().getPlayerTurn();
+    allocateChips(!turn, (*currentNode));
   }
-  if (currentNode->getGame().getState() == static_cast<int>(Stage::SHOWDOWN) ){
-    int winner = showdown(currentNode->getGame().getBotPlayer().getHoleCards(),
-        currentNode->getGame().getOppPlayer().getHoleCards(),
-        currentNode->getGame().getBoardCards());
-    allocateChips(winner, (*currentNode));
+  if (currentNode->getGame().getState() == Stage::SHOWDOWN) {
+    currentNode->handleShowdown();
   }
   if (currentNode->getIsAllIn()){
-    for (int i = currentNode->getGame().getState() - 1; i < static_cast<int>(Stage::SHOWDOWN); ++i) {
+    Stage s = currentNode->getGame().getState();
+    for (Stage i = s - 1; i < Stage::SHOWDOWN; ++i) {
       std::vector<int> updateBoard = currentNode->getGame().getBoardCards();
       std::vector<int> newCards = deal(deck, i);
       //adding current board cards to newly dealt cards
@@ -283,7 +264,7 @@ Action Node::monteCarlo(int maxSeconds, std::vector<int> deck) {
 }
 
 void Node::runSelection(std::vector<int> deck) {
-  if (isFolded || (game.getState() == static_cast<int>(Stage::SHOWDOWN)) || isAllIn) {
+  if (isFolded || (game.getState() == Stage::SHOWDOWN) || isAllIn) {
     backprop(game.getBotPlayer().getChips(), game.getOppPlayer().getChips());
     return;
   }
@@ -298,10 +279,10 @@ void Node::runSelection(std::vector<int> deck) {
 
     return;
   } else if (!raiseChild) {
-    // TODO use different raise amt?
+    // TODO Use a different raise amount
     raise(1);
-    conditionalDeal(*raiseChild, getGame().getState(), raiseChild->getGame().getState(), deck, 0);
-    conditionalDeal(*callChild, getGame().getState(), callChild->getGame().getState(), deck, 0);
+    conditionalDeal(*raiseChild, getGame().getState(), raiseChild->getGame().getState(), deck, Stage::PREFLOP);
+    conditionalDeal(*callChild, getGame().getState(), callChild->getGame().getState(), deck, Stage::PREFLOP);
     raiseChild->runSimulation(deck);
     return;
   } else if (!foldChild) {
@@ -344,7 +325,7 @@ void Node::runSimulation(std::vector<int> deck) {
 
   // if running simulate on a node that called all-in
   if (getIsAllIn()) {
-    for (int i = getGame().getState(); i != static_cast<int>(Stage::SHOWDOWN); ++i) {
+    for (Stage i = getGame().getState(); i != Stage::SHOWDOWN; ++i) {
       std::vector<int> tempDealt = deal(deck, i);
       for (int j:tempDealt) {
         game.getBoardCards().push_back(j);
@@ -366,14 +347,14 @@ void Node::runSimulation(std::vector<int> deck) {
   }
 
   currentNode = rootNode.get();
-  int prevStage;
-  while (currentNode->getGame().getState() != static_cast<int>(Stage::SHOWDOWN)) {
+  Stage prevStage;
+  while (currentNode->getGame().getState() != Stage::SHOWDOWN) {
     prevStage = currentNode->getGame().getState();
     currentNode->call();
     currentNode = currentNode->callChild.get();
-    conditionalDeal(*currentNode, prevStage, currentNode->getGame().getState(), deck, 0);
+    conditionalDeal(*currentNode, prevStage, currentNode->getGame().getState(), deck, Stage::PREFLOP);
     if (currentNode->getIsAllIn()) {
-      for (int i = currentNode->getGame().getState(); i != static_cast<int>(Stage::SHOWDOWN); ++i) {
+      for (Stage i = currentNode->getGame().getState(); i != Stage::SHOWDOWN; ++i) {
         std::vector<int> tempDealt = deal(deck, i);
         for (int j:tempDealt) {
           currentNode->getGame().getBoardCards().push_back(j); //used to be conditionalDeal
@@ -467,4 +448,38 @@ void Node::collectBlinds() {
   game.setOppPlayer(oppPlayer);
 
   setCurrentRaise(bigBlindPayed);
+}
+
+void Node::handleShowdown() {
+  int winner = showdown(getGame().getBotPlayer().getHoleCards(),
+      getGame().getOppPlayer().getHoleCards(),
+      getGame().getBoardCards());
+  allocateChips(winner, (*this));
+}
+
+Node* Node::getChildNode(int n) {
+  switch(n) {
+    case 0:
+      return callChild.get();
+      break;
+    case 1:
+      return raiseChild.get();
+      break;
+    case 2:
+      return foldChild.get();
+      break;
+    default:
+      std::cout << "ERROR: Invalid ChildNode idx - getChildNode()" << std::endl;
+      return nullptr;
+  }
+}
+void Node::updateBoard(Stage stage, std::vector<int> deck) {
+  std::vector<int> newBoard = getGame().getBoardCards();
+  std::vector<int> newCards = deal(deck, stage);
+
+  assert(newCards.size() <= 3);
+  for (auto i = newCards.begin(); i != newCards.end(); ++i){
+    newBoard.push_back(*i);
+  }
+  getGame().setBoardCards(newBoard);
 }

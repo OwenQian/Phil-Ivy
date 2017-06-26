@@ -11,7 +11,8 @@
 ChoiceNode::ChoiceNode() :
   Node::Node() { }
 
-  ChoiceNode::ChoiceNode(int state,
+  ChoiceNode::ChoiceNode(
+      Stage state,
       double pot,
       std::vector<int> boardCards,
       Player botPlayer,
@@ -110,10 +111,6 @@ void ChoiceNode::raise(double raiseAmount) {
 
 Decision ChoiceNode::makeDecision(std::vector<int> deck) {
   Decision decision;
-
-  //int temp;
-  //std::cin >> temp;
-  //decision.action = static_cast<Action>(temp);
 
   decision.action = monteCarlo(monteCarloDuration, deck);
   std::cout << "Bot Decision: " << static_cast<int>(decision.action) << std::endl;

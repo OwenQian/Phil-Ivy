@@ -32,22 +32,22 @@ void allocateChips(int whoWon, Node &currentNode){
   }
 }
 
-std::vector<int> deal(std::vector<int> &deck, int state) {
+std::vector<int> deal(std::vector<int> &deck, Stage state) {
   unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
   std::vector<int> dealtCards;
   std::shuffle(deck.begin(), deck.end(),
       std::default_random_engine(seed));
-  if (state == static_cast<int>(Stage::HOLECARDS) ){
+  if (state == Stage::HOLECARDS){
     for (int i = 0; i < 2; ++i){
       dealtCards.push_back(deck.back());
       deck.pop_back();
     }
-  } else if (state == static_cast<int>(Stage::PREFLOP) ) {
+  } else if (state == Stage::PREFLOP) {
     for (int i = 0; i < 3; ++i) {
       dealtCards.push_back(deck.back());
       deck.pop_back();
     }
-  } else if (state != static_cast<int>(Stage::RIVER) ) {
+  } else if (state != Stage::RIVER) {
     dealtCards.push_back(deck.back());
     deck.pop_back();
   }
@@ -66,7 +66,7 @@ void init_deck(std::vector<int>& deck) {
   }
 }
 
-void conditionalDeal(Node& thisNode, int refStage, int compareStage, std::vector<int> &deck, int stage) {
+void conditionalDeal(Node& thisNode, Stage refStage, Stage compareStage, std::vector<int> &deck, Stage stage) {
   if (refStage != compareStage) {
     std::vector<int> dealtCards = deal(deck, refStage);
     for (int i: dealtCards)

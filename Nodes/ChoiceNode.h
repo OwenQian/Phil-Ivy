@@ -19,7 +19,7 @@ class ChoiceNode: public Node {
     // Constructor
     ChoiceNode();
     ChoiceNode(
-        int               state,
+        Stage             state,
         double            pot,
         std::vector<int>  boardCards,
         Player            botPlayer,
