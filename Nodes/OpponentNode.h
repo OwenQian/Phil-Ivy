@@ -13,10 +13,6 @@ class OpponentNode: public Node {
   private:
     virtual Decision makeDecision(std::vector<int> deck);
   public:
-    virtual void call();
-    virtual void raise(double);
-    virtual void fold();
-
     // Contructors
     OpponentNode();
     OpponentNode(

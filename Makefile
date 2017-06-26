@@ -10,6 +10,7 @@ fast_eval.cpp Decision.cpp
 
 INCLUDES = $(wildcard *.h)
 OBJDIR   = obj
+BINDIR   = bin
 
 # Prefixes each of the object files with obj/
 OBJECTS  = $(addprefix $(OBJDIR)/, Config.o Stage.o Player.o GameObject.o potInfo.o Node.o \
@@ -24,8 +25,8 @@ $(OBJDIR)/%.o: %.cpp $(INCLUDES)
 
 # Linking of files
 main: $(OBJECTS)
-	$(CXX) $(CXXFLAGS) $^ -o $@
+	$(CXX) $(CXXFLAGS) $^ -o $(BINDIR)/$@
 
 clean:
 	rm -f obj/*.o
-	rm main
+	rm -f bin/*

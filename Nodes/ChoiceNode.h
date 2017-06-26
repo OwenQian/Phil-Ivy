@@ -12,10 +12,6 @@ class ChoiceNode: public Node {
     virtual Decision makeDecision(std::vector<int> deck);
 
   public:
-    virtual void call();
-    virtual void raise(double);
-    virtual void fold();
-
     // Constructor
     ChoiceNode();
     ChoiceNode(

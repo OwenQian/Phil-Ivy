@@ -108,8 +108,6 @@ void Node::playGame(){
 
   while ((botPlayer.getChips() > 0)&& (oppPlayer.getChips() > 0)){
     playRound(botPlayer, oppPlayer);
-    std::cout << "bot player chips: " << botPlayer.getChips() << std::endl;
-    std::cout << "opp player chips: " << oppPlayer.getChips() << std::endl;
     smallBlindPosition = !smallBlindPosition;
     botPlayer.setPotInvestment(0);
     oppPlayer.setPotInvestment(0);
@@ -117,9 +115,7 @@ void Node::playGame(){
 }
 
 void Node::playRound(Player& botPlayer, Player& oppPlayer){
-  std::cout << "########################################";
-  std::cout << "\nbot player chips: " << botPlayer.getChips();
-  std::cout << "\nopp player chips: " << oppPlayer.getChips() << std::endl;
+  std::cout << "########################################\n";
   std::cout << "smallBlindPosition: " << smallBlindPosition << std::endl;
 
   // creating the deck
@@ -153,11 +149,17 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
   root->collectBlinds();
   root->setIsFirst(true);
   currentNode = root.get();
+  std::cout << "bot player chips: " << currentNode->getGame().getBotPlayer().getChips() << std::endl;
+  std::cout << "bot player chips: " << currentNode->getGame().getOppPlayer().getChips() << std::endl;
+  std::cout << "Pot: " << currentNode->getGame().getPot() << std::endl;
 
   while(!currentNode->getIsAllIn() && !currentNode->getIsFolded()
       && (currentNode->getGame().getState() != Stage::SHOWDOWN)) {
     printCurrentStage(currentStage);
     currentNode = currentNode->getChildNode(currentNode->playTurn(deck));
+    std::cout << "Pot: " << currentNode->game.getPot() << std::endl;
+    std::cout << "BotChips: " << currentNode->game.getBotPlayer().getChips() << std::endl;
+    std::cout << "OppChips: " << currentNode->game.getOppPlayer().getChips() << std::endl;
     if (currentNode->getGame().getState() != currentStage) {
       currentNode->setIsFirst(true);
       currentNode->updateBoard(currentStage++, deck);
@@ -172,26 +174,18 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
     currentNode->handleShowdown();
   }
   if (currentNode->getIsAllIn()){
-    Stage s = currentNode->getGame().getState();
-    for (Stage i = s - 1; i < Stage::SHOWDOWN; ++i) {
+    for (Stage i = currentNode->getGame().getState(); i < Stage::SHOWDOWN; ++i) {
       std::vector<int> updateBoard = currentNode->getGame().getBoardCards();
       std::vector<int> newCards = deal(deck, i);
-      //adding current board cards to newly dealt cards
       assert(newCards.size() <= 3);
       for (auto j = newCards.begin(); j != newCards.end(); ++j){
         updateBoard.push_back(*j);
       }
-      assert(updateBoard.size() <=5);
+      assert(updateBoard.size() <= 5);
       currentNode->getGame().setBoardCards(updateBoard);
     }
     printBoardCards(currentNode->getGame().getBoardCards());
-    std::cout << "botCards: " << hexToCard(currentNode->getGame().getBotPlayer().getHoleCards()[0]) << " " << hexToCard(currentNode->getGame().getBotPlayer().getHoleCards()[1]);
-    std::cout << "\noppCards: " << hexToCard(currentNode->getGame().getOppPlayer().getHoleCards()[0]) << " " << hexToCard(currentNode->getGame().getOppPlayer().getHoleCards()[1]);
-    int winner = showdown(currentNode->getGame().getBotPlayer().getHoleCards(),
-        currentNode->getGame().getOppPlayer().getHoleCards(),
-        currentNode->getGame().getBoardCards());
-    allocateChips(winner, (*currentNode));
-    std::cout << "\nWinner: " << winner << std::endl;
+    currentNode->handleShowdown();
   }
   botPlayer = currentNode->getGame().getBotPlayer();
   oppPlayer = currentNode->getGame().getOppPlayer();
@@ -379,9 +373,6 @@ void Node::backprop(double botChips, double oppChips) {
   getOppExpectedValue() = (getOppExpectedValue() * visitCount + oppChips) / (visitCount + 1);
   ++visitCount;
   if (2000 - epsilon > getBotExpectedValue() + getOppExpectedValue() || 2000 + epsilon < getBotExpectedValue() + getOppExpectedValue()){
-    //std::cout << "bot expected value: " << getBotExpectedValue() << std::endl;
-    //std::cout << "opp expected value: " << getOppExpectedValue() << std::endl;
-    //std::cout << "DEBUG STOP" << std::endl;
   }
   if (parent != nullptr) {
     parent->backprop(botChips, oppChips);
@@ -506,3 +497,77 @@ void Node::printCurrentStage(Stage stage) {
   }
   std::cout << "\nCurrent Stage: " << s << std::endl;
 }
+
+void Node::call() {
+  Player botPlayer = game.getBotPlayer();
+  Player oppPlayer = game.getOppPlayer();
+  Player* currentP = game.getPlayerTurn() ? &oppPlayer : &botPlayer;
+  Player* otherP = !game.getPlayerTurn() ? &oppPlayer : &botPlayer;
+
+  currentP->setChips(currentP->getChips() - (currentRaise - currentP->getPotInvestment()));
+  currentP->setPotInvestment(currentRaise);
+  int turn = getIsFirst() ? !game.getPlayerTurn() : smallBlindPosition;
+  NodeParamObject nodeParams(game.getState() + !getIsFirst(),
+      initialChips * 2 - currentP->getChips() - otherP->getChips(),
+      game.getBoardCards(),
+      botPlayer,
+      oppPlayer,
+      turn,
+      this);
+  if (getIsFirst() || (smallBlindPosition == 1)) {
+    callChild.reset(new OpponentNode(nodeParams));
+  } else {
+    callChild.reset(new ChoiceNode(nodeParams));
+  }
+  callChild->setIsAllIn(isAllInCheck(botPlayer, oppPlayer));
+  callChild->setCurrentRaise(firstAction * currentRaise);
+  callChild->getGame().getBotPlayer().setPotInvestment( firstAction * callChild->getGame().getBotPlayer().getPotInvestment());
+  callChild->getGame().getOppPlayer().setPotInvestment( firstAction * callChild->getGame().getOppPlayer().getPotInvestment());
+  callChild->setIsFirst(!firstAction);
+}
+
+void Node::raise(double raiseAmount) {
+  // if raise all-in (or more) create AllInNode, handled by call
+  if (game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment() <= currentRaise ||
+      game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment() <= currentRaise) {
+    // might be a bug here with runSelection repeatedly raising to all-in
+    call();
+    if (callChild->getGame().getPlayerTurn() == 0) {
+      raiseChild.reset(new ChoiceNode(*static_cast<ChoiceNode*>(callChild.get())));
+    } else {
+      raiseChild.reset(new OpponentNode(*static_cast<OpponentNode*>(callChild.get())));
+    }
+    return;
+  }
+
+  setIsFirst(false);
+
+  Player botPlayer = game.getBotPlayer();
+  Player oppPlayer = game.getOppPlayer();
+  Player* currentP = game.getPlayerTurn() ? &oppPlayer : &botPlayer;
+  double totalChips = currentP->getChips() + currentP->getPotInvestment();
+  raiseAmount = std::min(totalChips, std::max(std::max(bigBlind, raiseAmount), 2*currentRaise));
+
+  currentP->setChips(currentP->getChips() - (raiseAmount - currentP->getPotInvestment()) );
+  currentP->setPotInvestment(raiseAmount);
+  raiseChild.reset(new OpponentNode( game.getState(),
+        initialChips * 2 - currentP->getChips() - game.getOppPlayer().getChips(),
+        game.getBoardCards(),
+        botPlayer,
+        oppPlayer,
+        !(game.getPlayerTurn()),
+        this));
+  raiseChild->setCurrentRaise(raiseAmount);
+}
+
+void Node::fold() {
+  if (game.getPlayerTurn() == 0) {
+    foldChild.reset(new OpponentNode(*this));
+  } else {
+    foldChild.reset(new ChoiceNode(*this));
+  }
+  foldChild->setParent(this);
+  foldChild->setIsFolded(true);
+  foldChild->setVisitCount(0);
+}
+

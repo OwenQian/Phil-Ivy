@@ -71,9 +71,9 @@ class Node {
     void naiveUCT(std::vector<double>&, int);
 
     // Action functions
-    virtual void call() = 0;
-    virtual void raise(double) = 0;
-    virtual void fold() = 0;
+    void call();
+    void raise(double);
+    void fold();
 
     //Game functions
     static void playGame();
