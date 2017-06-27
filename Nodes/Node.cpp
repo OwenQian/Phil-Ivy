@@ -156,37 +156,16 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
   while(!currentNode->getIsAllIn() && !currentNode->getIsFolded()
       && (currentNode->getGame().getState() != Stage::SHOWDOWN)) {
     printCurrentStage(currentStage);
-    currentNode = currentNode->getChildNode(currentNode->playTurn(deck));
+    currentNode->advanceStage(currentStage, deck, currentNode->playTurn(deck));
     std::cout << "Pot: " << currentNode->game.getPot() << std::endl;
     std::cout << "BotChips: " << currentNode->game.getBotPlayer().getChips() << std::endl;
     std::cout << "OppChips: " << currentNode->game.getOppPlayer().getChips() << std::endl;
-    if (currentNode->getGame().getState() != currentStage) {
-      currentNode->setIsFirst(true);
-      currentNode->updateBoard(currentStage++, deck);
-      printBoardCards(currentNode->getGame().getBoardCards());
-    }
-  }
-  if (currentNode->getGame().getState() == Stage::SHOWDOWN) {
-    currentNode->handleShowdown();
-  }
-  if (currentNode->getIsAllIn()){
-    for (Stage i = currentNode->getGame().getState(); i < Stage::SHOWDOWN; ++i) {
-      std::vector<int> updateBoard = currentNode->getGame().getBoardCards();
-      std::vector<int> newCards = deal(deck, i);
-      assert(newCards.size() <= 3);
-      for (auto j = newCards.begin(); j != newCards.end(); ++j){
-        updateBoard.push_back(*j);
-      }
-      assert(updateBoard.size() <= 5);
-      currentNode->getGame().setBoardCards(updateBoard);
-    }
-    printBoardCards(currentNode->getGame().getBoardCards());
-    currentNode->handleShowdown();
   }
   botPlayer = currentNode->getGame().getBotPlayer();
   oppPlayer = currentNode->getGame().getOppPlayer();
 }
 
+// TODO change return type to Action
 int Node::playTurn(std::vector<int> deck) {
   assert(!isFolded);
   Decision decision = makeDecision(deck);
@@ -462,7 +441,7 @@ Node* Node::getChildNode(int n) {
       return nullptr;
   }
 }
-void Node::updateBoard(Stage stage, std::vector<int> deck) {
+void Node::updateBoard(Stage stage, std::vector<int>& deck) {
   std::vector<int> newBoard = getGame().getBoardCards();
   std::vector<int> newCards = deal(deck, stage);
 
@@ -471,6 +450,8 @@ void Node::updateBoard(Stage stage, std::vector<int> deck) {
     newBoard.push_back(*i);
   }
   getGame().setBoardCards(newBoard);
+  printBoardCards(newBoard);
+  assert(getGame().getBoardCards().size() <= 5);
 }
 
 void Node::printCurrentStage(Stage stage) {
@@ -567,3 +548,23 @@ void Node::fold() {
   allocateChips(!game.getPlayerTurn(), *foldChild.get());
 }
 
+void Node::advanceStage(Stage refStage, std::vector<int>& deck, int action) {
+  *this = *(getChildNode(action));
+  if (getGame().getState() != refStage) {
+    setIsFirst(true);
+    updateBoard(refStage, deck);
+  }
+  if (getGame().getState() == Stage::SHOWDOWN) {
+    handleShowdown();
+  }
+  if (getIsAllIn()) {
+    handleAllIn(deck);
+  }
+}
+
+void Node::handleAllIn(std::vector<int>& deck) {
+  for (Stage s = getGame().getState(); s < Stage::SHOWDOWN; ++s) {
+    updateBoard(s, deck);
+  }
+  handleShowdown();
+}
