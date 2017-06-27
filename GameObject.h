@@ -8,6 +8,7 @@
 
 class GameObject {
   private:
+    //TODO rename state to stage
     Stage state;
     double pot;
     std::vector<int> boardCards;

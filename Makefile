@@ -17,15 +17,13 @@ OBJECTS  = $(addprefix $(OBJDIR)/, Config.o Stage.o Player.o GameObject.o potInf
 		   helper.o ChoiceNode.o GameUtilities.o OpponentNode.o arrays.o \
 		   fast_eval.o Decision.o main.o )
 
-# Directories to look for headers and src files
-
 # Compilation of Object files
 $(OBJDIR)/%.o: %.cpp $(INCLUDES)
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 # Linking of files
-main: $(OBJECTS)
-	$(CXX) $(CXXFLAGS) $^ -o $(BINDIR)/$@
+$(BINDIR)/main: $(OBJECTS)
+	$(CXX) $(CXXFLAGS) $^ -o $@
 
 clean:
 	rm -f obj/*.o

@@ -110,8 +110,10 @@ class Node {
     void collectBlinds();
     void handleShowdown();
     Node* getChildNode(int);
-    void updateBoard(Stage, std::vector<int>);
+    void updateBoard(Stage, std::vector<int>&);
     static void printCurrentStage(Stage);
+    void advanceStage(Stage, std::vector<int>&, int);
+    void handleAllIn(std::vector<int>&);
 };
 
 
