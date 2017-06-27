@@ -23,6 +23,7 @@ void init_deck(std::vector<int>& deck);
 // Node helper functions
 void updateBoard(Node* node, Stage stage, std::vector<int>& deck);
 void advanceStage(Node*&, Stage&, std::vector<int>&, int);
+void collectBlinds(Node*);
 void allocateChips (int whoWon, Node &currentNode);
 void handleAllIn(Node*, std::vector<int>&);
 void handleShowdown(Node*);

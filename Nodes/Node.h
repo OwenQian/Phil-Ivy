@@ -61,7 +61,7 @@ class Node {
     Node(const Node& obj);
     Node(const NodeParamObject);
     Node& operator= (const Node& rhs);
-    virtual ~Node();
+    ~Node() {};
 
     // Monte Carlo
     Action monteCarlo(int, std::vector<int>);
@@ -107,7 +107,6 @@ class Node {
 
     // Helper
     bool isAllInCheck(Player, Player);
-    void collectBlinds();
     Node* getChildNode(int);
 };
 

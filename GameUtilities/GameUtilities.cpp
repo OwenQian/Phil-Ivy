@@ -113,6 +113,24 @@ void advanceStage(Node*& node, Stage& refStage, std::vector<int>& deck, int acti
   }
 }
 
+void collectBlinds(Node* node) {
+  Player botPlayer = node->getGame().getBotPlayer();
+  Player oppPlayer = node->getGame().getOppPlayer();
+  Player* smallBlindPlayer = smallBlindPosition ? &oppPlayer : &botPlayer;
+  double smallBlindPayed = std::min(smallBlindPlayer->getChips(), smallBlind);
+  smallBlindPlayer->setChips(smallBlindPlayer->getChips() - smallBlindPayed);
+  smallBlindPlayer->setPotInvestment(smallBlindPayed);
+
+  Player* bigBlindPlayer = !smallBlindPosition ? &oppPlayer : &botPlayer;
+  double bigBlindPayed = std::min(bigBlindPlayer->getChips(), bigBlind);
+  bigBlindPlayer->setChips(bigBlindPlayer->getChips() - bigBlindPayed);
+  bigBlindPlayer->setPotInvestment(bigBlindPayed);
+  node->getGame().setBotPlayer(botPlayer);
+  node->getGame().setOppPlayer(oppPlayer);
+
+  node->setCurrentRaise(bigBlindPayed);
+}
+
 void handleAllIn(Node* node, std::vector<int>& deck) {
   for (Stage s = node->getGame().getState(); s < Stage::SHOWDOWN; ++s) {
     updateBoard(node, s, deck);

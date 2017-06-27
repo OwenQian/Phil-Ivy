@@ -1,6 +1,4 @@
 #include <memory>
-#include <typeinfo>
-#include <utility>
 #include <cassert>
 #include <iostream>
 #include <chrono>   // Monte carlo timing
@@ -28,49 +26,49 @@ Node::Node() :
   callChild(nullptr),
   raiseChild(nullptr) { }
 
-  Node::Node(Stage             state,
-             double            pot,
-             std::vector<int>  boardCards,
-             Player            botPlayer,
-             Player            oppPlayer,
-             int               playerTurn,
-             Node*             parent,
-             int    visitCount,
-             double botExpectedValue,
-             double oppExpectedValue,
-             double currentRaise,
-             bool   isFolded,
-             bool   isAllIn,
-             bool   firstAction) :
-    parent(parent),
-    game(state, pot, boardCards, botPlayer, oppPlayer, playerTurn),
-    visitCount(visitCount),
-    botExpectedValue(botExpectedValue),
-    oppExpectedValue(oppExpectedValue),
-    currentRaise(currentRaise),
-    isFolded(isFolded),
-    isAllIn(isAllIn),
-    firstAction(firstAction),
-    foldChild(nullptr),
-    callChild(nullptr),
-    raiseChild(nullptr) { }
+Node::Node(Stage             state,
+           double            pot,
+           std::vector<int>  boardCards,
+           Player            botPlayer,
+           Player            oppPlayer,
+           int               playerTurn,
+           Node*             parent,
+           int               visitCount,
+           double            botExpectedValue,
+           double            oppExpectedValue,
+           double            currentRaise,
+           bool              isFolded,
+           bool              isAllIn,
+           bool              firstAction) :
+  parent(parent),
+  game(state, pot, boardCards, botPlayer, oppPlayer, playerTurn),
+  visitCount(visitCount),
+  botExpectedValue(botExpectedValue),
+  oppExpectedValue(oppExpectedValue),
+  currentRaise(currentRaise),
+  isFolded(isFolded),
+  isAllIn(isAllIn),
+  firstAction(firstAction),
+  foldChild(nullptr),
+  callChild(nullptr),
+  raiseChild(nullptr) { }
 
-    // Copy Constructor
-    Node::Node(const Node& obj) :
-      Node(obj.game.getState(),
-           obj.game.getPot(),
-           obj.game.getBoardCards(),
-           obj.game.getBotPlayer(),
-           obj.game.getOppPlayer(),
-           obj.game.getPlayerTurn(),
-           obj.parent,
-           obj.visitCount,
-           obj.botExpectedValue,
-           obj.oppExpectedValue,
-           obj.currentRaise,
-           obj.isFolded,
-           obj.isAllIn,
-           obj.firstAction) { }
+// Copy Constructor
+Node::Node(const Node& obj) :
+  Node(obj.game.getState(),
+       obj.game.getPot(),
+       obj.game.getBoardCards(),
+       obj.game.getBotPlayer(),
+       obj.game.getOppPlayer(),
+       obj.game.getPlayerTurn(),
+       obj.parent,
+       obj.visitCount,
+       obj.botExpectedValue,
+       obj.oppExpectedValue,
+       obj.currentRaise,
+       obj.isFolded,
+       obj.isAllIn,
+       obj.firstAction) { }
 
 Node::Node(const NodeParamObject params) :
   Node(params.state,
@@ -81,11 +79,6 @@ Node::Node(const NodeParamObject params) :
       params.turn,
       params.parent) {}
 
-// Destructor
-Node::~Node() {
-}
-
-// Assignment operaor
 Node& Node::operator= (const Node& rhs) {
   if (&rhs == this) { return *this; }
 
@@ -146,7 +139,7 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
           botPlayer, oppPlayer, smallBlindPosition, nullptr));
   }
 
-  root->collectBlinds();
+  collectBlinds(root.get());
   root->setIsFirst(true);
   currentNode = root.get();
   printChipSummaries(currentNode->getGame());
@@ -393,25 +386,6 @@ bool Node::isAllInCheck(Player p1, Player p2) {
       p2.getChips() + p2.getPotInvestment() <= currentRaise);
 }
 
-// TODO move this into GameUtilities
-void Node::collectBlinds() {
-  Player botPlayer = game.getBotPlayer();
-  Player oppPlayer = game.getOppPlayer();
-  Player* smallBlindPlayer = smallBlindPosition ? &oppPlayer : &botPlayer;
-  double smallBlindPayed = std::min(smallBlindPlayer->getChips(), smallBlind);
-  smallBlindPlayer->setChips(smallBlindPlayer->getChips() - smallBlindPayed);
-  smallBlindPlayer->setPotInvestment(smallBlindPayed);
-
-  Player* bigBlindPlayer = !smallBlindPosition ? &oppPlayer : &botPlayer;
-  double bigBlindPayed = std::min(bigBlindPlayer->getChips(), bigBlind);
-  bigBlindPlayer->setChips(bigBlindPlayer->getChips() - bigBlindPayed);
-  bigBlindPlayer->setPotInvestment(bigBlindPayed);
-  game.setBotPlayer(botPlayer);
-  game.setOppPlayer(oppPlayer);
-
-  setCurrentRaise(bigBlindPayed);
-}
-
 Node* Node::getChildNode(int n) {
   switch(n) {
     case 0:
@@ -438,8 +412,9 @@ void Node::call() {
   currentP->setChips(currentP->getChips() - (currentRaise - currentP->getPotInvestment()));
   currentP->setPotInvestment(currentRaise);
   int turn = getIsFirst() ? !game.getPlayerTurn() : smallBlindPosition;
+  double potFromInitialChips = initialChips * 2 - currentP->getChips() - otherP->getChips();
   NodeParamObject nodeParams(game.getState() + !getIsFirst(),
-      initialChips * 2 - currentP->getChips() - otherP->getChips(),
+      potFromInitialChips,
       game.getBoardCards(),
       botPlayer,
       oppPlayer,
@@ -452,8 +427,10 @@ void Node::call() {
   }
   callChild->setIsAllIn(isAllInCheck(botPlayer, oppPlayer));
   callChild->setCurrentRaise(firstAction * currentRaise);
-  callChild->getGame().getBotPlayer().setPotInvestment( firstAction * callChild->getGame().getBotPlayer().getPotInvestment());
-  callChild->getGame().getOppPlayer().setPotInvestment( firstAction * callChild->getGame().getOppPlayer().getPotInvestment());
+  // Reset pot investment if it's not the first action
+  double newPotInvestment = firstAction * callChild->getGame().getBotPlayer().getPotInvestment();
+  callChild->getGame().getBotPlayer().setPotInvestment(newPotInvestment);
+  callChild->getGame().getOppPlayer().setPotInvestment(newPotInvestment);
   callChild->setIsFirst(!firstAction);
 }
 
@@ -479,15 +456,20 @@ void Node::raise(double raiseAmount) {
 
   currentP->setChips(currentP->getChips() - (raiseAmount - currentP->getPotInvestment()));
   currentP->setPotInvestment(raiseAmount);
+  int turn = game.getPlayerTurn();
   double potFromInitialChips = initialChips * 2 - currentP->getChips() - otherP->getChips();
-  // TODO figure out why these two values don't match
-  raiseChild.reset(new OpponentNode(game.getState(),
-        potFromInitialChips,
-        game.getBoardCards(),
-        botPlayer,
-        oppPlayer,
-        !(game.getPlayerTurn()),
-        this));
+  NodeParamObject nodeParams(game.getState(),
+      potFromInitialChips,
+      game.getBoardCards(),
+      botPlayer,
+      oppPlayer,
+      !turn,
+      this);
+  if (turn == 0) {
+    raiseChild.reset(new OpponentNode(nodeParams));
+  } else {
+    raiseChild.reset(new ChoiceNode(nodeParams));
+  }
   raiseChild->setCurrentRaise(raiseAmount);
 }
 
