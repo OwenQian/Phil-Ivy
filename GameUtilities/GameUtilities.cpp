@@ -21,6 +21,27 @@ void printBoardCards(std::vector<int> boardCards) {
   }
 }
 
+void printCurrentStage(Stage stage) {
+  std::string s;
+  switch (stage) {
+    case Stage::PREFLOP:
+      s = "PREFLOP";
+      break;
+    case Stage::FLOP:
+      s = "FLOP";
+      break;
+    case Stage::TURN:
+      s = "TURN";
+      break;
+    case Stage::RIVER:
+      s = "RIVER";
+        break;
+    default:
+      s = "INVALID STAGE";
+  }
+  std::cout << "\nCurrent Stage: " << s << std::endl;
+}
+
 void allocateChips(int whoWon, Node &currentNode){
   if (whoWon == 0) { //when bot player wins
     currentNode.getGame().getBotPlayer().addChips(currentNode.getGame().getPot());
@@ -66,6 +87,49 @@ void init_deck(std::vector<int>& deck) {
   }
 }
 
+void updateBoard(Node* node, Stage stage, std::vector<int>& deck) {
+  std::vector<int> newBoard = node->getGame().getBoardCards();
+  std::vector<int> newCards = deal(deck, stage);
+
+  assert(newCards.size() <= 3);
+  for (auto i = newCards.begin(); i != newCards.end(); ++i) {
+    newBoard.push_back(*i);
+  }
+  node->getGame().setBoardCards(newBoard);
+  assert(node->getGame().getBoardCards().size() <= 5);
+}
+
+void advanceStage(Node*& node, Stage& refStage, std::vector<int>& deck, int action) {
+  node = node->getChildNode(action);
+  if (node->getGame().getState() != refStage) {
+    node->setIsFirst(true);
+    updateBoard(node, refStage++, deck);
+  }
+  if (node->getGame().getState() == Stage::SHOWDOWN) {
+    handleShowdown(node);
+  }
+  if (node->getIsAllIn()) {
+    handleAllIn(node, deck);
+  }
+}
+
+void handleAllIn(Node* node, std::vector<int>& deck) {
+  for (Stage s = node->getGame().getState(); s < Stage::SHOWDOWN; ++s) {
+    updateBoard(node, s, deck);
+  }
+  handleShowdown(node);
+}
+
+void handleShowdown(Node* node) {
+    int winner = showdown(node->getGame().getBotPlayer().getHoleCards(),
+        node->getGame().getOppPlayer().getHoleCards(),
+        node->getGame().getBoardCards());
+    allocateChips(winner, *node);
+    std::string s = !winner ? "BOT" : "OPP";
+    if (winner == 2) { s = "CHOP"; }
+    std::cout << "\nResult: " << s << std::endl;
+}
+
 void conditionalDeal(Node& thisNode, Stage refStage, Stage compareStage, std::vector<int> &deck, Stage stage) {
   if (refStage != compareStage) {
     std::vector<int> dealtCards = deal(deck, refStage);
@@ -75,4 +139,12 @@ void conditionalDeal(Node& thisNode, Stage refStage, Stage compareStage, std::ve
     //std::cout << "comparestage: " << compareStage << std::endl;
     //std::cout << "refstage: " << refStage << std::endl;
   }
+}
+
+void printChipSummaries(const GameObject& game) {
+  std::cout << "bot player chips: " << game.getBotPlayer().getChips() <<
+    ", potInvestment: " << game.getBotPlayer().getPotInvestment() << std::endl;
+  std::cout << "opp player chips: " << game.getOppPlayer().getChips() <<
+    ", potInvestment: " << game.getOppPlayer().getPotInvestment() << std::endl;
+  std::cout << "Pot: " << game.getPot() << std::endl;
 }

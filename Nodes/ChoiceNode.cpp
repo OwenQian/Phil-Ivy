@@ -40,8 +40,7 @@ Decision ChoiceNode::makeDecision(std::vector<int> deck) {
     std::cin >> temp;
     decision.action = static_cast<Action>(temp);
     if (decision.action == Action::RAISE) {
-        if (game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment() <= currentRaise ||
-                game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment() <= currentRaise) {
+        if (isAllInCheck(game.getBotPlayer(), game.getOppPlayer())) {
             decision.raiseAmount = 1;
         } else {
             std::cout << "Enter Raise amount" << std::endl;

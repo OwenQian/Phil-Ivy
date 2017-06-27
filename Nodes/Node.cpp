@@ -139,27 +139,23 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
   Node* currentNode;
 
   if (smallBlindPosition == 0) {
-    root.reset( new ChoiceNode(currentStage, bigBlind + smallBlind, std::vector<int>(),
+    root.reset(new ChoiceNode(currentStage, bigBlind + smallBlind, std::vector<int>(),
           botPlayer, oppPlayer, smallBlindPosition, nullptr));
   } else {
-    root.reset( new OpponentNode(currentStage, bigBlind + smallBlind, std::vector<int>(),
-          botPlayer, oppPlayer, smallBlindPosition, nullptr) );
+    root.reset(new OpponentNode(currentStage, bigBlind + smallBlind, std::vector<int>(),
+          botPlayer, oppPlayer, smallBlindPosition, nullptr));
   }
 
   root->collectBlinds();
   root->setIsFirst(true);
   currentNode = root.get();
-  std::cout << "bot player chips: " << currentNode->getGame().getBotPlayer().getChips() << std::endl;
-  std::cout << "bot player chips: " << currentNode->getGame().getOppPlayer().getChips() << std::endl;
-  std::cout << "Pot: " << currentNode->getGame().getPot() << std::endl;
+  printChipSummaries(currentNode->getGame());
 
   while(!currentNode->getIsAllIn() && !currentNode->getIsFolded()
       && (currentNode->getGame().getState() != Stage::SHOWDOWN)) {
     printCurrentStage(currentStage);
-    currentNode->advanceStage(currentStage, deck, currentNode->playTurn(deck));
-    std::cout << "Pot: " << currentNode->game.getPot() << std::endl;
-    std::cout << "BotChips: " << currentNode->game.getBotPlayer().getChips() << std::endl;
-    std::cout << "OppChips: " << currentNode->game.getOppPlayer().getChips() << std::endl;
+    advanceStage(currentNode, currentStage, deck, currentNode->playTurn(deck));
+    printChipSummaries(currentNode->getGame());
   }
   botPlayer = currentNode->getGame().getBotPlayer();
   oppPlayer = currentNode->getGame().getOppPlayer();
@@ -397,6 +393,7 @@ bool Node::isAllInCheck(Player p1, Player p2) {
       p2.getChips() + p2.getPotInvestment() <= currentRaise);
 }
 
+// TODO move this into GameUtilities
 void Node::collectBlinds() {
   Player botPlayer = game.getBotPlayer();
   Player oppPlayer = game.getOppPlayer();
@@ -415,16 +412,6 @@ void Node::collectBlinds() {
   setCurrentRaise(bigBlindPayed);
 }
 
-void Node::handleShowdown() {
-    int winner = showdown(getGame().getBotPlayer().getHoleCards(),
-        getGame().getOppPlayer().getHoleCards(),
-        getGame().getBoardCards());
-    allocateChips(winner, *this);
-    std::string s = !winner ? "BOT" : "OPP";
-    if (winner == 2) { s = "CHOP"; }
-    std::cout << "Result: " << s << std::endl;
-}
-
 Node* Node::getChildNode(int n) {
   switch(n) {
     case 0:
@@ -440,39 +427,6 @@ Node* Node::getChildNode(int n) {
       std::cout << "ERROR: Invalid ChildNode idx - getChildNode()" << std::endl;
       return nullptr;
   }
-}
-void Node::updateBoard(Stage stage, std::vector<int>& deck) {
-  std::vector<int> newBoard = getGame().getBoardCards();
-  std::vector<int> newCards = deal(deck, stage);
-
-  assert(newCards.size() <= 3);
-  for (auto i = newCards.begin(); i != newCards.end(); ++i){
-    newBoard.push_back(*i);
-  }
-  getGame().setBoardCards(newBoard);
-  printBoardCards(newBoard);
-  assert(getGame().getBoardCards().size() <= 5);
-}
-
-void Node::printCurrentStage(Stage stage) {
-  std::string s;
-  switch (stage) {
-    case Stage::PREFLOP:
-      s = "PREFLOP";
-      break;
-    case Stage::FLOP:
-      s = "FLOP";
-      break;
-    case Stage::TURN:
-      s = "TURN";
-      break;
-    case Stage::RIVER:
-      s = "RIVER";
-        break;
-    default:
-      s = "INVALID STAGE";
-  }
-  std::cout << "\nCurrent Stage: " << s << std::endl;
 }
 
 void Node::call() {
@@ -491,7 +445,7 @@ void Node::call() {
       oppPlayer,
       turn,
       this);
-  if (getIsFirst() || (smallBlindPosition == 1)) {
+  if (turn == 1) {
     callChild.reset(new OpponentNode(nodeParams));
   } else {
     callChild.reset(new ChoiceNode(nodeParams));
@@ -504,11 +458,9 @@ void Node::call() {
 }
 
 void Node::raise(double raiseAmount) {
-  // if raise all-in (or more) create AllInNode, handled by call
-  Player botPlayer= game.getBotPlayer();
-  Player oppPlayer= game.getOppPlayer();
+  Player botPlayer = game.getBotPlayer();
+  Player oppPlayer = game.getOppPlayer();
   if (isAllInCheck(botPlayer, oppPlayer)) {
-    // might be a bug here with runSelection repeatedly raising to all-in
     call();
     if (callChild->getGame().getPlayerTurn() == 0) {
       raiseChild.reset(new ChoiceNode(*static_cast<ChoiceNode*>(callChild.get())));
@@ -521,13 +473,16 @@ void Node::raise(double raiseAmount) {
   setIsFirst(false);
 
   Player* currentP = game.getPlayerTurn() ? &oppPlayer : &botPlayer;
+  Player* otherP = !game.getPlayerTurn() ? &oppPlayer : &botPlayer;
   double totalChips = currentP->getChips() + currentP->getPotInvestment();
   raiseAmount = std::min(totalChips, std::max(std::max(bigBlind, raiseAmount), 2*currentRaise));
 
   currentP->setChips(currentP->getChips() - (raiseAmount - currentP->getPotInvestment()));
   currentP->setPotInvestment(raiseAmount);
+  double potFromInitialChips = initialChips * 2 - currentP->getChips() - otherP->getChips();
+  // TODO figure out why these two values don't match
   raiseChild.reset(new OpponentNode(game.getState(),
-        initialChips * 2 - currentP->getChips() - game.getOppPlayer().getChips(),
+        potFromInitialChips,
         game.getBoardCards(),
         botPlayer,
         oppPlayer,
@@ -546,25 +501,4 @@ void Node::fold() {
   foldChild->setIsFolded(true);
   foldChild->setVisitCount(0);
   allocateChips(!game.getPlayerTurn(), *foldChild.get());
-}
-
-void Node::advanceStage(Stage refStage, std::vector<int>& deck, int action) {
-  *this = *(getChildNode(action));
-  if (getGame().getState() != refStage) {
-    setIsFirst(true);
-    updateBoard(refStage, deck);
-  }
-  if (getGame().getState() == Stage::SHOWDOWN) {
-    handleShowdown();
-  }
-  if (getIsAllIn()) {
-    handleAllIn(deck);
-  }
-}
-
-void Node::handleAllIn(std::vector<int>& deck) {
-  for (Stage s = getGame().getState(); s < Stage::SHOWDOWN; ++s) {
-    updateBoard(s, deck);
-  }
-  handleShowdown();
 }
