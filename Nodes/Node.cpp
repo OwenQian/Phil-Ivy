@@ -166,10 +166,6 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
       printBoardCards(currentNode->getGame().getBoardCards());
     }
   }
-  if (currentNode->getIsFolded()) {
-    int turn = currentNode->getGame().getPlayerTurn();
-    allocateChips(!turn, (*currentNode));
-  }
   if (currentNode->getGame().getState() == Stage::SHOWDOWN) {
     currentNode->handleShowdown();
   }
@@ -528,8 +524,9 @@ void Node::call() {
 
 void Node::raise(double raiseAmount) {
   // if raise all-in (or more) create AllInNode, handled by call
-  if (game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment() <= currentRaise ||
-      game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment() <= currentRaise) {
+  Player botPlayer= game.getBotPlayer();
+  Player oppPlayer= game.getOppPlayer();
+  if (isAllInCheck(botPlayer, oppPlayer)) {
     // might be a bug here with runSelection repeatedly raising to all-in
     call();
     if (callChild->getGame().getPlayerTurn() == 0) {
@@ -542,15 +539,13 @@ void Node::raise(double raiseAmount) {
 
   setIsFirst(false);
 
-  Player botPlayer = game.getBotPlayer();
-  Player oppPlayer = game.getOppPlayer();
   Player* currentP = game.getPlayerTurn() ? &oppPlayer : &botPlayer;
   double totalChips = currentP->getChips() + currentP->getPotInvestment();
   raiseAmount = std::min(totalChips, std::max(std::max(bigBlind, raiseAmount), 2*currentRaise));
 
-  currentP->setChips(currentP->getChips() - (raiseAmount - currentP->getPotInvestment()) );
+  currentP->setChips(currentP->getChips() - (raiseAmount - currentP->getPotInvestment()));
   currentP->setPotInvestment(raiseAmount);
-  raiseChild.reset(new OpponentNode( game.getState(),
+  raiseChild.reset(new OpponentNode(game.getState(),
         initialChips * 2 - currentP->getChips() - game.getOppPlayer().getChips(),
         game.getBoardCards(),
         botPlayer,
@@ -569,5 +564,6 @@ void Node::fold() {
   foldChild->setParent(this);
   foldChild->setIsFolded(true);
   foldChild->setVisitCount(0);
+  allocateChips(!game.getPlayerTurn(), *foldChild.get());
 }
 
