@@ -148,6 +148,7 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
       && (currentNode->getGame().getState() != Stage::SHOWDOWN)) {
     printCurrentStage(currentStage);
     advanceStage(currentNode, currentStage, deck, currentNode->playTurn(deck));
+    printBoardCards(currentNode->getGame().getBoardCards());
     printChipSummaries(currentNode->getGame());
   }
   botPlayer = currentNode->getGame().getBotPlayer();
@@ -411,7 +412,7 @@ void Node::call() {
 
   currentP->setChips(currentP->getChips() - (currentRaise - currentP->getPotInvestment()));
   currentP->setPotInvestment(currentRaise);
-  int turn = getIsFirst() ? !game.getPlayerTurn() : smallBlindPosition;
+  int turn = getIsFirst() ? !game.getPlayerTurn() : !smallBlindPosition;
   double potFromInitialChips = initialChips * 2 - currentP->getChips() - otherP->getChips();
   NodeParamObject nodeParams(game.getState() + !getIsFirst(),
       potFromInitialChips,
@@ -456,16 +457,16 @@ void Node::raise(double raiseAmount) {
 
   currentP->setChips(currentP->getChips() - (raiseAmount - currentP->getPotInvestment()));
   currentP->setPotInvestment(raiseAmount);
-  int turn = game.getPlayerTurn();
+  int turn = !game.getPlayerTurn();
   double potFromInitialChips = initialChips * 2 - currentP->getChips() - otherP->getChips();
   NodeParamObject nodeParams(game.getState(),
       potFromInitialChips,
       game.getBoardCards(),
       botPlayer,
       oppPlayer,
-      !turn,
+      turn,
       this);
-  if (turn == 0) {
+  if (turn == 1) {
     raiseChild.reset(new OpponentNode(nodeParams));
   } else {
     raiseChild.reset(new ChoiceNode(nodeParams));

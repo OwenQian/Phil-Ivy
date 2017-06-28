@@ -160,7 +160,7 @@ void conditionalDeal(Node& thisNode, Stage refStage, Stage compareStage, std::ve
 }
 
 void printChipSummaries(const GameObject& game) {
-  std::cout << "bot player chips: " << game.getBotPlayer().getChips() <<
+  std::cout << "\nbot player chips: " << game.getBotPlayer().getChips() <<
     ", potInvestment: " << game.getBotPlayer().getPotInvestment() << std::endl;
   std::cout << "opp player chips: " << game.getOppPlayer().getChips() <<
     ", potInvestment: " << game.getOppPlayer().getPotInvestment() << std::endl;
