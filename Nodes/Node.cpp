@@ -3,6 +3,7 @@
 #include <iostream>
 #include <chrono>   // Monte carlo timing
 #include <cmath>    // naiveUCT log and sqrt
+#include <utility>  // for std::pair
 
 #include "Node.h"
 #include "ChoiceNode.h"
@@ -116,12 +117,12 @@ void Node::playRound(Player& botPlayer, Player& oppPlayer){
   init_deck(deck);
 
   // dealing player hole cards
-  const int botCard1 = cardToHex("As"), botCard2 = cardToHex("Kh");
-  const int oppCard1 = cardToHex("Ac"), oppCard2 = cardToHex("Ts");
-  botPlayer.setHoleCards(botCard1, botCard2);
-  oppPlayer.setHoleCards(oppCard1, oppCard2);
-  //botPlayer.setHoleCards(deal(deck, static_cast<int>(Stage::HOLECARDS)));
-  //oppPlayer.setHoleCards(deal(deck, static_cast<int>(Stage::HOLECARDS)));
+  //const int botCard1 = cardToHex("As"), botCard2 = cardToHex("Kh");
+  //const int oppCard1 = cardToHex("Ac"), oppCard2 = cardToHex("Ts");
+  //botPlayer.setHoleCards(botCard1, botCard2);
+  //oppPlayer.setHoleCards(oppCard1, oppCard2);
+  botPlayer.setHoleCards(deal(deck, Stage::HOLECARDS));
+  oppPlayer.setHoleCards(deal(deck, Stage::HOLECARDS));
 
   std::cout << "Bot Cards: " << hexToCard(botPlayer.getHoleCards()[0]) << " " << hexToCard(botPlayer.getHoleCards()[1]);
   std::cout << "\nOpp Cards: " << hexToCard(oppPlayer.getHoleCards()[0]) << " " << hexToCard(oppPlayer.getHoleCards()[1]) << std::endl;
@@ -194,31 +195,8 @@ Action Node::monteCarlo(int maxSeconds, std::vector<int> deck) {
     copyNode->runSelection(deck);
   }
 
-  std::cout << "visitCount: " << copyNode->visitCount;
-
-  std::cout << "\n\n@@callVisit: " << copyNode->callChild->visitCount;
-  std::cout << "\n bot callScore: " << copyNode->callChild->getBotExpectedValue();
-  std::cout << "\n opp callScore: " << copyNode->callChild->getOppExpectedValue();
-
-  std::cout << "\n\n@@raiseVisit: " << copyNode->raiseChild->visitCount;
-  std::cout << "\n bot raiseScore: " << copyNode->raiseChild->getBotExpectedValue();
-  std::cout << "\n opp raiseScore: " << copyNode->raiseChild->getOppExpectedValue();
-
-  std::cout << "\n\n@@foldVisit: " << copyNode->foldChild->visitCount;
-  std::cout << "\n bot foldScore: " << copyNode->foldChild->getBotExpectedValue();
-  std::cout << "\n opp foldScore: " << copyNode->foldChild->getOppExpectedValue() << std::endl;
-
-  double maxScore = copyNode->callChild->getBotExpectedValue();
-  maxScore = maxScore >= copyNode->raiseChild->getBotExpectedValue() ? maxScore : copyNode->raiseChild->getBotExpectedValue();
-  maxScore = maxScore >= copyNode->foldChild->getBotExpectedValue() ? maxScore : copyNode->foldChild->getBotExpectedValue();
-  if (maxScore == copyNode->callChild->getBotExpectedValue()) {
-    return Action::CALL;
-  } else if (maxScore == copyNode->raiseChild->getBotExpectedValue()) {
-    // Need to handle how much to raise here
-    return Action::RAISE;
-  } else {
-    return Action::FOLD;
-  }
+  printMonteCarloSummary(copyNode.get());
+  return selectBestChild(copyNode.get());
 }
 
 void Node::runSelection(std::vector<int> deck) {
@@ -228,19 +206,14 @@ void Node::runSelection(std::vector<int> deck) {
   }
 
   if (!callChild) {
+    Stage currentStage = game.getState();
     call();
-    conditionalDeal(*callChild, getGame().getState(), callChild->getGame().getState(), deck, getGame().getState());
-    //issue with dealing exists here as well
+    advanceStage(this, currentStage, deck, Action::CALL);
     callChild->runSimulation(deck);
-    if (!(callChild->callChild) && !(callChild->raiseChild) && !(callChild->foldChild)) {
-    }
-
     return;
   } else if (!raiseChild) {
     // TODO Use a different raise amount
     raise(1);
-    conditionalDeal(*raiseChild, getGame().getState(), raiseChild->getGame().getState(), deck, Stage::PREFLOP);
-    conditionalDeal(*callChild, getGame().getState(), callChild->getGame().getState(), deck, Stage::PREFLOP);
     raiseChild->runSimulation(deck);
     return;
   } else if (!foldChild) {
@@ -337,8 +310,6 @@ void Node::backprop(double botChips, double oppChips) {
   getBotExpectedValue() = (getBotExpectedValue() * visitCount + botChips) / (visitCount + 1);
   getOppExpectedValue() = (getOppExpectedValue() * visitCount + oppChips) / (visitCount + 1);
   ++visitCount;
-  if (2000 - epsilon > getBotExpectedValue() + getOppExpectedValue() || 2000 + epsilon < getBotExpectedValue() + getOppExpectedValue()){
-  }
   if (parent != nullptr) {
     parent->backprop(botChips, oppChips);
   }
@@ -363,22 +334,19 @@ void Node::naiveUCT(std::vector<double>& selectionScores, int playerTurn) {
   // Order here is important; call, raise, fold (CRF)
   // Set the selectionScore and explorationTerm for call
   selectionScores[0] = ambiguousPlayerEV[0];
-  explorationTerm[0] = std::sqrt( std::log(double (visitCount)) 
-      / double (callChild->visitCount));
+  explorationTerm[0] = calculateNaiveUCT(callChild->visitCount, visitCount);
 
   // Set the selectionScore and explorationTerm for raise
   selectionScores[1] = ambiguousPlayerEV[1];
-  explorationTerm[1] = std::sqrt( std::log(double (visitCount))
-      / double (raiseChild->visitCount));
+  explorationTerm[1] = calculateNaiveUCT(raiseChild->visitCount, visitCount);
 
   // Set the selectionScore and explorationTerm for fold
   selectionScores[2] = ambiguousPlayerEV[2];
-  explorationTerm[2] = std::sqrt( std::log( double(visitCount) )
-      / double (foldChild->visitCount) );
+  explorationTerm[2] = calculateNaiveUCT(foldChild->visitCount, visitCount);
 
   for (size_t i = 0; i < selectionScores.size(); ++i) {
     explorationTerm[i] *= exploreConst;
-    selectionScores[i] += explorationTerm[i]; 
+    selectionScores[i] += explorationTerm[i];
   }
 }
 
@@ -441,9 +409,9 @@ void Node::raise(double raiseAmount) {
   if (isAllInCheck(botPlayer, oppPlayer)) {
     call();
     if (callChild->getGame().getPlayerTurn() == 0) {
-      raiseChild.reset(new ChoiceNode(*static_cast<ChoiceNode*>(callChild.get())));
+      raiseChild.reset(new ChoiceNode(*callChild.get()));
     } else {
-      raiseChild.reset(new OpponentNode(*static_cast<OpponentNode*>(callChild.get())));
+      raiseChild.reset(new OpponentNode(*callChild.get()));
     }
     return;
   }
@@ -452,8 +420,9 @@ void Node::raise(double raiseAmount) {
 
   Player* currentP = game.getPlayerTurn() ? &oppPlayer : &botPlayer;
   Player* otherP = !game.getPlayerTurn() ? &oppPlayer : &botPlayer;
-  double totalChips = currentP->getChips() + currentP->getPotInvestment();
-  raiseAmount = std::min(totalChips, std::max(std::max(bigBlind, raiseAmount), 2*currentRaise));
+  double effectiveStack = std::min((currentP->getChips() + currentP->getPotInvestment()),
+      (otherP->getChips() + otherP->getPotInvestment()));
+  raiseAmount = std::min(effectiveStack, std::max(std::max(bigBlind, raiseAmount), 2*currentRaise));
 
   currentP->setChips(currentP->getChips() - (raiseAmount - currentP->getPotInvestment()));
   currentP->setPotInvestment(raiseAmount);

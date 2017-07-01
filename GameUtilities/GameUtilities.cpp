@@ -166,3 +166,47 @@ void printChipSummaries(const GameObject& game) {
     ", potInvestment: " << game.getOppPlayer().getPotInvestment() << std::endl;
   std::cout << "Pot: " << game.getPot() << std::endl;
 }
+
+void printMonteCarloSummary(Node* copyNode) {
+  std::cout << "visitCount: " << copyNode->getVisitCount();
+
+  std::cout << "\n\n@@callVisit: " << copyNode->callChild->getVisitCount();
+  std::cout << "\n bot callScore: " << copyNode->callChild->getBotExpectedValue();
+  std::cout << "\n opp callScore: " << copyNode->callChild->getOppExpectedValue();
+
+  std::cout << "\n\n@@raiseVisit: " << copyNode->raiseChild->getVisitCount();
+  std::cout << "\n bot raiseScore: " << copyNode->raiseChild->getBotExpectedValue();
+  std::cout << "\n opp raiseScore: " << copyNode->raiseChild->getOppExpectedValue();
+
+  std::cout << "\n\n@@foldVisit: " << copyNode->foldChild->getVisitCount();
+  std::cout << "\n bot foldScore: " << copyNode->foldChild->getBotExpectedValue();
+  std::cout << "\n opp foldScore: " << copyNode->foldChild->getOppExpectedValue() << std::endl;
+}
+
+Action selectBestChild(Node* copyNode) {
+  std::pair<double, int> callEV = std::make_pair(copyNode->callChild->getBotExpectedValue(), 0);
+  std::pair<double, int> raiseEV = std::make_pair(copyNode->raiseChild->getBotExpectedValue(), 1);
+  std::pair<double, int> foldEV = std::make_pair(copyNode->foldChild->getBotExpectedValue(), 2);
+  std::vector<std::pair<double, int> >expectedValues {callEV, raiseEV, foldEV};
+  std::sort(expectedValues.begin(), expectedValues.end());
+  int selectedIdx = expectedValues[2].second;
+
+  switch (selectedIdx) {
+    case 0:
+      return Action::CALL;
+      break;
+    case 1:
+      return Action::RAISE;
+      break;
+    case 2:
+      return Action::FOLD;
+      break;
+    default:
+      std::cout << "\nINVALID SELECT IDX IN monteCarlo() and selectBestChild()" << std::endl;
+      return Action::FOLD;
+  }
+}
+
+double calculateNaiveUCT(int nodeVisit, int totalVisit) {
+    return std::sqrt(std::log(double (totalVisit) / double (nodeVisit));
+}

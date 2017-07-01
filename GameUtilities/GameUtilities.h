@@ -30,5 +30,8 @@ void handleShowdown(Node*);
 
 // MCTS helper functions
 void conditionalDeal(Node& thisNode, Stage refStage, Stage compareStage, std::vector<int> &deck, Stage stage);
+void printMonteCarloSummary(Node*);
+Action selectBestChild(Node*);
+double calculateNaiveUCT(int, int);
 
 #endif

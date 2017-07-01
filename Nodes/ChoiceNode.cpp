@@ -33,21 +33,40 @@ ChoiceNode::ChoiceNode(const ChoiceNode& obj) :
 ChoiceNode::ChoiceNode(const Node& obj) :
   Node(obj) { }
 
+//Decision ChoiceNode::makeDecision(std::vector<int> deck) {
+//    std::cout << "Enter Action bot: Call(0), Raise(1), Fold(2)" << std::endl;
+//    Decision decision;
+//    int temp;
+//    std::cin >> temp;
+//    decision.action = static_cast<Action>(temp);
+//    if (decision.action == Action::RAISE) {
+//        if (isAllInCheck(game.getBotPlayer(), game.getOppPlayer())) {
+//            decision.raiseAmount = 1;
+//        } else {
+//            std::cout << "Enter Raise amount" << std::endl;
+//            double amount;
+//            std::cin >> amount;
+//            decision.raiseAmount = amount;
+//        }
+//    }
+//    return decision;
+//}
+
 Decision ChoiceNode::makeDecision(std::vector<int> deck) {
-    std::cout << "Enter Action bot: Call(0), Raise(1), Fold(2)" << std::endl;
-    Decision decision;
-    int temp;
-    std::cin >> temp;
-    decision.action = static_cast<Action>(temp);
-    if (decision.action == Action::RAISE) {
-        if (isAllInCheck(game.getBotPlayer(), game.getOppPlayer())) {
-            decision.raiseAmount = 1;
-        } else {
-            std::cout << "Enter Raise amount" << std::endl;
-            double amount;
-            std::cin >> amount;
-            decision.raiseAmount = amount;
-        }
+  Decision decision;
+
+  decision.action = monteCarlo(monteCarloDuration, deck);
+  std::cout << "Bot Decision: " << static_cast<int>(decision.action) << std::endl;
+  if (decision.action == Action::RAISE) {
+    if (game.getBotPlayer().getChips() + game.getBotPlayer().getPotInvestment() <= currentRaise ||
+        game.getOppPlayer().getChips() + game.getOppPlayer().getPotInvestment() <= currentRaise) {
+      decision.raiseAmount = 1;
+    } else {
+      std::cout << "Enter Raise amount" << std::endl;
+      double amount;
+      std::cin >> amount;
+      decision.raiseAmount = amount;
     }
-    return decision;
+  }
+  return decision;
 }
